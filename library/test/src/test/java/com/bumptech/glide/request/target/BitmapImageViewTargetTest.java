@@ -27,7 +27,7 @@ public class BitmapImageViewTargetTest {
   }
 
   @Test
-  public void testSetsBitmapOnViewInSetResource() {
+  public void setsBitmapOnViewInSetResource() {
     Bitmap bitmap = Bitmap.createBitmap(100, 75, Bitmap.Config.RGB_565);
     target.setResource(bitmap);
     assertEquals(bitmap, ((BitmapDrawable) view.getDrawable()).getBitmap());

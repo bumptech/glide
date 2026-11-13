@@ -47,7 +47,7 @@ public class ResourceLoaderTest {
   }
 
   @Test
-  public void testCanHandleId() {
+  public void canHandleId() {
     int id = android.R.drawable.star_off;
     Uri contentUri = Uri.parse("android.resource://android/" + String.valueOf(id));
     when(uriLoader.buildLoadData(eq(contentUri), anyInt(), anyInt(), any(Options.class)))
@@ -60,7 +60,7 @@ public class ResourceLoaderTest {
   }
 
   @Test
-  public void testDoesNotThrowOnInvalidOrMissingId() {
+  public void doesNotThrowOnInvalidOrMissingId() {
     assertThat(loader.buildLoadData(1234, 0, 0, options)).isNull();
     verify(uriLoader, never())
         .buildLoadData(any(Uri.class), anyInt(), anyInt(), any(Options.class));

@@ -42,23 +42,23 @@ public class StreamGifDecoderTest {
   }
 
   @Test
-  public void testDoesNotHandleStreamIfEnabledButNotAGif() throws IOException {
+  public void doesNotHandleStreamIfEnabledButNotAGif() throws IOException {
     assertThat(decoder.handles(new ByteArrayInputStream(new byte[0]), options)).isFalse();
   }
 
   @Test
-  public void testHandlesStreamIfContainsGifHeaderAndDisabledIsNotSet() throws IOException {
+  public void handlesStreamIfContainsGifHeaderAndDisabledIsNotSet() throws IOException {
     assertThat(decoder.handles(new ByteArrayInputStream(GIF_HEADER), options)).isTrue();
   }
 
   @Test
-  public void testHandlesStreamIfContainsGifHeaderAndDisabledIsFalse() throws IOException {
+  public void handlesStreamIfContainsGifHeaderAndDisabledIsFalse() throws IOException {
     options.set(GifOptions.DISABLE_ANIMATION, false);
     assertThat(decoder.handles(new ByteArrayInputStream(GIF_HEADER), options)).isTrue();
   }
 
   @Test
-  public void testDoesNotHandleStreamIfDisabled() throws IOException {
+  public void doesNotHandleStreamIfDisabled() throws IOException {
     options.set(GifOptions.DISABLE_ANIMATION, true);
     assertThat(decoder.handles(new ByteArrayInputStream(GIF_HEADER), options)).isFalse();
   }

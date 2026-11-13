@@ -30,7 +30,7 @@ public class ViewTransitionAnimationFactoryTest {
   }
 
   @Test
-  public void testFactoryReturnsNoAnimationIfFromMemoryCache() {
+  public void factoryReturnsNoAnimationIfFromMemoryCache() {
     Transition<Object> animation = factory.build(DataSource.MEMORY_CACHE, true /*isFirstResource*/);
     assertEquals(NoTransition.get(), animation);
     verify(viewTransitionAnimationFactory, never())
@@ -38,7 +38,7 @@ public class ViewTransitionAnimationFactoryTest {
   }
 
   @Test
-  public void testFactoryReturnsNoAnimationIfNotFirstResource() {
+  public void factoryReturnsNoAnimationIfNotFirstResource() {
     Transition<Object> animation =
         factory.build(DataSource.DATA_DISK_CACHE, false /*isFirstResource*/);
     assertEquals(NoTransition.get(), animation);
@@ -47,7 +47,7 @@ public class ViewTransitionAnimationFactoryTest {
   }
 
   @Test
-  public void testFactoryReturnsActualAnimationIfNotIsFromMemoryCacheAndIsFirstResource() {
+  public void factoryReturnsActualAnimationIfNotIsFromMemoryCacheAndIsFirstResource() {
     Transition<Object> transition =
         factory.build(DataSource.DATA_DISK_CACHE, true /*isFirstResource*/);
 

@@ -95,24 +95,24 @@ public class CustomViewTargetTest {
   }
 
   @Test
-  public void testReturnsWrappedView() {
+  public void returnsWrappedView() {
     assertEquals(view, target.getView());
   }
 
   @Test
-  public void testReturnsNullFromGetRequestIfNoRequestSet() {
+  public void returnsNullFromGetRequestIfNoRequestSet() {
     assertNull(target.getRequest());
   }
 
   @Test
-  public void testCanSetAndRetrieveRequest() {
+  public void canSetAndRetrieveRequest() {
     target.setRequest(request);
 
     assertEquals(request, target.getRequest());
   }
 
   @Test
-  public void testRetrievesRequestFromPreviousTargetForView() {
+  public void retrievesRequestFromPreviousTargetForView() {
     target.setRequest(request);
 
     CustomViewTarget<View, Object> second = new TestViewTarget(view);
@@ -121,7 +121,7 @@ public class CustomViewTargetTest {
   }
 
   @Test
-  public void testSizeCallbackIsCalledSynchronouslyIfViewSizeSet() {
+  public void sizeCallbackIsCalledSynchronouslyIfViewSizeSet() {
     int dimens = 333;
     view.layout(0, 0, dimens, dimens);
 
@@ -131,7 +131,7 @@ public class CustomViewTargetTest {
   }
 
   @Test
-  public void testSizeCallbackIsCalledSynchronouslyIfLayoutParamsConcreteSizeSet() {
+  public void sizeCallbackIsCalledSynchronouslyIfLayoutParamsConcreteSizeSet() {
     int dimens = 444;
     LayoutParams layoutParams = new FrameLayout.LayoutParams(dimens, dimens);
     view.setLayoutParams(layoutParams);
@@ -224,7 +224,7 @@ public class CustomViewTargetTest {
   }
 
   @Test
-  public void testMatchParentWidthAndHeight() {
+  public void matchParentWidthAndHeight() {
     LayoutParams params =
         new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
     view.setLayoutParams(params);
@@ -240,7 +240,7 @@ public class CustomViewTargetTest {
   }
 
   @Test
-  public void testSizeCallbackIsCalledPreDrawIfNoDimensAndNoLayoutParams() {
+  public void sizeCallbackIsCalledPreDrawIfNoDimensAndNoLayoutParams() {
     target.getSize(cb);
 
     int width = 12;
@@ -254,7 +254,7 @@ public class CustomViewTargetTest {
   }
 
   @Test
-  public void testSizeCallbacksAreCalledInOrderPreDraw() {
+  public void sizeCallbacksAreCalledInOrderPreDraw() {
     SizeReadyCallback[] cbs = new SizeReadyCallback[25];
     for (int i = 0; i < cbs.length; i++) {
       cbs[i] = mock(SizeReadyCallback.class);
@@ -275,7 +275,7 @@ public class CustomViewTargetTest {
   }
 
   @Test
-  public void testDoesNotNotifyCallbackTwiceIfAddedTwice() {
+  public void doesNotNotifyCallbackTwiceIfAddedTwice() {
     target.getSize(cb);
     target.getSize(cb);
 
@@ -287,7 +287,7 @@ public class CustomViewTargetTest {
   }
 
   @Test
-  public void testDoesNotAddMultipleListenersIfMultipleCallbacksAreAdded() {
+  public void doesNotAddMultipleListenersIfMultipleCallbacksAreAdded() {
     SizeReadyCallback cb1 = mock(SizeReadyCallback.class);
     SizeReadyCallback cb2 = mock(SizeReadyCallback.class);
     target.getSize(cb1);
@@ -297,7 +297,7 @@ public class CustomViewTargetTest {
   }
 
   @Test
-  public void testDoesAddSecondListenerIfFirstListenerIsRemovedBeforeSecondRequest() {
+  public void doesAddSecondListenerIfFirstListenerIsRemovedBeforeSecondRequest() {
     SizeReadyCallback cb1 = mock(SizeReadyCallback.class);
     target.getSize(cb1);
 
@@ -317,7 +317,7 @@ public class CustomViewTargetTest {
   }
 
   @Test
-  public void testSizeCallbackIsNotCalledPreDrawIfNoDimensSetOnPreDraw() {
+  public void sizeCallbackIsNotCalledPreDrawIfNoDimensSetOnPreDraw() {
     target.getSize(cb);
     view.getViewTreeObserver().dispatchOnPreDraw();
 
@@ -333,7 +333,7 @@ public class CustomViewTargetTest {
   }
 
   @Test
-  public void testSizeCallbackIsCalledPreDrawIfNoDimensAndNoLayoutParamsButLayoutParamsSetLater() {
+  public void sizeCallbackIsCalledPreDrawIfNoDimensAndNoLayoutParamsButLayoutParamsSetLater() {
     target.getSize(cb);
 
     int width = 689;
@@ -347,7 +347,7 @@ public class CustomViewTargetTest {
   }
 
   @Test
-  public void testCallbackIsNotCalledTwiceIfPreDrawFiresTwice() {
+  public void callbackIsNotCalledTwiceIfPreDrawFiresTwice() {
     attachAndLayoutView();
     target.getSize(cb);
 
@@ -361,7 +361,7 @@ public class CustomViewTargetTest {
   }
 
   @Test
-  public void testCallbacksFromMultipleRequestsAreNotifiedOnPreDraw() {
+  public void callbacksFromMultipleRequestsAreNotifiedOnPreDraw() {
     SizeReadyCallback firstCb = mock(SizeReadyCallback.class);
     SizeReadyCallback secondCb = mock(SizeReadyCallback.class);
     target.getSize(firstCb);
@@ -380,7 +380,7 @@ public class CustomViewTargetTest {
   }
 
   @Test
-  public void testDoesNotThrowOnPreDrawIfViewTreeObserverIsDead() {
+  public void doesNotThrowOnPreDrawIfViewTreeObserverIsDead() {
     target.getSize(cb);
 
     int width = 1;
@@ -397,12 +397,12 @@ public class CustomViewTargetTest {
   }
 
   @Test(expected = NullPointerException.class)
-  public void testThrowsIfGivenNullView() {
+  public void throwsIfGivenNullView() {
     new TestViewTarget(null);
   }
 
   @Test
-  public void testDecreasesDimensionsByViewPadding() {
+  public void decreasesDimensionsByViewPadding() {
     attachAndLayoutView();
     view.setLayoutParams(new FrameLayout.LayoutParams(100, 100));
     view.setPadding(25, 25, 25, 25);

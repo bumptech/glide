@@ -3,6 +3,7 @@
   "extends": [
     "config:recommended"
   ],
+  "rebaseWhen": "conflicted",
   "semanticCommits": "disabled",
   "packageRules": [
     {

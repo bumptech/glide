@@ -39,38 +39,38 @@ public class BenchmarkDownsampler {
   @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
 
   @Test
-  public void testInputStream() throws IOException {
+  public void inputStream() throws IOException {
     runBenchmark(new StreamOpener(), new InputStreamDecoder());
   }
 
   @Test
-  public void testByteBufferOverByteArray() throws IOException {
+  public void byteBufferOverByteArray() throws IOException {
     runBenchmark(new ByteArrayBufferOpener(), new ByteBufferDecoder());
   }
 
   @Test
-  public void testByteBufferOverFile() throws IOException {
+  public void byteBufferOverFile() throws IOException {
     runBenchmark(new MemoryMappedByteBufferOpener(), new ByteBufferDecoder());
   }
 
   @Test
-  public void testParcelFileDescriptorOverFile() throws IOException {
+  public void parcelFileDescriptorOverFile() throws IOException {
     runBenchmark(new ParcelFileDescriptorOpener(), new ParcelFileDescriptorDecoder());
   }
 
   @Test
-  public void testFile() throws IOException {
+  public void file() throws IOException {
     runBenchmark(new FileOpener(), new FileDecoder());
   }
 
   @Test
-  public void testByteArray() throws IOException {
+  public void byteArray() throws IOException {
     runBenchmark(new ByteArrayOpener(), new ByteArrayDecoder());
   }
 
   // A legacy case that's since been removed.
   @Test
-  public void testInputStreamOverByteBufferOverByteArray() throws IOException {
+  public void inputStreamOverByteBufferOverByteArray() throws IOException {
     runBenchmark(new InputStreamOverByteArrayBufferOpener(), new InputStreamDecoder());
   }
 

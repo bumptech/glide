@@ -154,7 +154,7 @@ public class GlideTest {
   }
 
   @Test
-  public void testCanSetMemoryCategory() {
+  public void canSetMemoryCategory() {
     MemoryCategory memoryCategory = MemoryCategory.NORMAL;
     Glide glide = buildGlideWithFakePools();
     glide.setMemoryCategory(memoryCategory);
@@ -164,7 +164,7 @@ public class GlideTest {
   }
 
   @Test
-  public void testCanIncreaseMemoryCategory() {
+  public void canIncreaseMemoryCategory() {
     MemoryCategory memoryCategory = MemoryCategory.NORMAL;
     Glide glide = buildGlideWithFakePools();
     glide.setMemoryCategory(memoryCategory);
@@ -182,7 +182,7 @@ public class GlideTest {
   }
 
   @Test
-  public void testCanDecreaseMemoryCategory() {
+  public void canDecreaseMemoryCategory() {
     MemoryCategory memoryCategory = MemoryCategory.NORMAL;
     Glide glide = buildGlideWithFakePools();
     glide.setMemoryCategory(memoryCategory);
@@ -200,7 +200,7 @@ public class GlideTest {
   }
 
   @Test
-  public void testClearMemory() {
+  public void clearMemory() {
     Glide glide = buildGlideWithFakePools();
 
     glide.clearMemory();
@@ -210,7 +210,7 @@ public class GlideTest {
   }
 
   @Test
-  public void testTrimMemory() {
+  public void trimMemory() {
     Glide glide = buildGlideWithFakePools();
 
     final int level = 123;
@@ -232,19 +232,19 @@ public class GlideTest {
   }
 
   @Test
-  public void testFileDefaultLoaderWithInputStream() {
+  public void fileDefaultLoaderWithInputStream() {
     registerFailFactory(File.class, ParcelFileDescriptor.class);
     runTestFileDefaultLoader();
   }
 
   @Test
-  public void testFileDefaultLoaderWithFileDescriptor() {
+  public void fileDefaultLoaderWithFileDescriptor() {
     registerFailFactory(File.class, InputStream.class);
     runTestFileDefaultLoader();
   }
 
   @Test
-  public void testFileDefaultLoader() {
+  public void fileDefaultLoader() {
     runTestFileDefaultLoader();
   }
 
@@ -263,7 +263,7 @@ public class GlideTest {
 
   @SuppressWarnings("deprecation")
   @Test
-  public void testUrlDefaultLoader() throws MalformedURLException {
+  public void urlDefaultLoader() throws MalformedURLException {
     URL url = new URL("http://www.google.com");
 
     requestManager.load(url).into(target);
@@ -276,7 +276,7 @@ public class GlideTest {
   }
 
   @Test
-  public void testAsBitmapOption() {
+  public void asBitmapOption() {
     Uri uri = Uri.parse("content://something/else");
     mockUri(uri);
 
@@ -286,7 +286,7 @@ public class GlideTest {
   }
 
   @Test
-  public void testToBytesOption() {
+  public void toBytesOption() {
     Uri uri = Uri.parse("content://something/else");
     mockUri(uri);
 
@@ -296,7 +296,7 @@ public class GlideTest {
   }
 
   @Test
-  public void testLoadColorDrawable_withUnitBitmapTransformation_returnsColorDrawable() {
+  public void loadColorDrawable_withUnitBitmapTransformation_returnsColorDrawable() {
     ColorDrawable colorDrawable = new ColorDrawable(Color.RED);
     requestManager
         .load(colorDrawable)
@@ -313,7 +313,7 @@ public class GlideTest {
   }
 
   @Test
-  public void testLoadColorDrawable_withNonUnitBitmapTransformation_returnsBitmapDrawable() {
+  public void loadColorDrawable_withNonUnitBitmapTransformation_returnsBitmapDrawable() {
     ColorDrawable colorDrawable = new ColorDrawable(Color.RED);
     requestManager
         .load(colorDrawable)
@@ -332,19 +332,19 @@ public class GlideTest {
   }
 
   @Test
-  public void testUriDefaultLoaderWithInputStream() {
+  public void uriDefaultLoaderWithInputStream() {
     registerFailFactory(Uri.class, ParcelFileDescriptor.class);
     runTestUriDefaultLoader();
   }
 
   @Test
-  public void testUriDefaultLoaderWithFileDescriptor() {
+  public void uriDefaultLoaderWithFileDescriptor() {
     registerFailFactory(Uri.class, InputStream.class);
     runTestUriDefaultLoader();
   }
 
   @Test
-  public void testUriDefaultLoader() {
+  public void uriDefaultLoader() {
     runTestUriDefaultLoader();
   }
 
@@ -362,24 +362,24 @@ public class GlideTest {
   }
 
   @Test
-  public void testStringDefaultLoaderWithUrl() {
+  public void stringDefaultLoaderWithUrl() {
     runTestStringDefaultLoader("http://www.google.com");
   }
 
   @Test
-  public void testFileStringDefaultLoaderWithInputStream() {
+  public void fileStringDefaultLoaderWithInputStream() {
     registerFailFactory(String.class, ParcelFileDescriptor.class);
     runTestFileStringDefaultLoader();
   }
 
   @Test
-  public void testFileStringDefaultLoaderWithFileDescriptor() {
+  public void fileStringDefaultLoaderWithFileDescriptor() {
     registerFailFactory(String.class, ParcelFileDescriptor.class);
     runTestFileStringDefaultLoader();
   }
 
   @Test
-  public void testFileStringDefaultLoader() {
+  public void fileStringDefaultLoader() {
     runTestFileStringDefaultLoader();
   }
 
@@ -390,19 +390,19 @@ public class GlideTest {
   }
 
   @Test
-  public void testUriStringDefaultLoaderWithInputStream() {
+  public void uriStringDefaultLoaderWithInputStream() {
     registerFailFactory(String.class, ParcelFileDescriptor.class);
     runTestUriStringDefaultLoader();
   }
 
   @Test
-  public void testUriStringDefaultLoaderWithFileDescriptor() {
+  public void uriStringDefaultLoaderWithFileDescriptor() {
     registerFailFactory(String.class, InputStream.class);
     runTestUriStringDefaultLoader();
   }
 
   @Test
-  public void testUriStringDefaultLoader() {
+  public void uriStringDefaultLoader() {
     runTestUriStringDefaultLoader();
   }
 
@@ -446,19 +446,19 @@ public class GlideTest {
   }
 
   @Test
-  public void testIntegerDefaultLoaderWithInputStream() {
+  public void integerDefaultLoaderWithInputStream() {
     registerFailFactory(Integer.class, ParcelFileDescriptor.class);
     runTestIntegerDefaultLoader();
   }
 
   @Test
-  public void testIntegerDefaultLoaderWithFileDescriptor() {
+  public void integerDefaultLoaderWithFileDescriptor() {
     registerFailFactory(Integer.class, InputStream.class);
     runTestIntegerDefaultLoader();
   }
 
   @Test
-  public void testIntegerDefaultLoader() {
+  public void integerDefaultLoader() {
     runTestIntegerDefaultLoader();
   }
 
@@ -476,7 +476,7 @@ public class GlideTest {
   }
 
   @Test
-  public void testByteArrayDefaultLoader() {
+  public void byteArrayDefaultLoader() {
     byte[] bytes = new byte[10];
     requestManager.load(bytes).into(target);
     requestManager.load(bytes).into(imageView);
@@ -488,21 +488,20 @@ public class GlideTest {
   }
 
   @Test(expected = Exception.class)
-  public void testUnregisteredModelThrowsException() {
+  public void unregisteredModelThrowsException() {
     Float unregistered = 0.5f;
     requestManager.load(unregistered).into(target);
   }
 
   @Test
-  @SuppressWarnings("unchecked")
-  public void testNonDefaultModelWithRegisteredFactoryDoesNotThrow() {
+  public void nonDefaultModelWithRegisteredFactoryDoesNotThrow() {
     registerMockStreamModelLoader(Float.class);
 
     requestManager.load(0.5f).into(target);
   }
 
   @Test
-  public void testReceivesGif() {
+  public void receivesGif() {
     String fakeUri = "content://fake";
     InputStream testGifData = openGif();
     mockUri(Uri.parse(fakeUri), testGifData);
@@ -513,7 +512,7 @@ public class GlideTest {
   }
 
   @Test
-  public void testReceivesGifBytes() {
+  public void receivesGifBytes() {
     String fakeUri = "content://fake";
     InputStream testGifData = openGif();
     mockUri(Uri.parse(fakeUri), testGifData);
@@ -528,7 +527,7 @@ public class GlideTest {
   }
 
   @Test
-  public void testReceivesBitmapBytes() {
+  public void receivesBitmapBytes() {
     String fakeUri = "content://fake";
     mockUri(fakeUri);
     requestManager.as(byte[].class).apply(decodeTypeOf(Bitmap.class)).load(fakeUri).into(target);
@@ -537,7 +536,7 @@ public class GlideTest {
   }
 
   @Test
-  public void testReceivesThumbnails() {
+  public void receivesThumbnails() {
     String full = mockUri("content://full");
     String thumb = mockUri("content://thumb");
     requestManager.load(full).thumbnail(requestManager.load(thumb)).into(target);
@@ -546,7 +545,7 @@ public class GlideTest {
   }
 
   @Test
-  public void testReceivesRecursiveThumbnails() {
+  public void receivesRecursiveThumbnails() {
     requestManager
         .load(mockUri("content://first"))
         .thumbnail(
@@ -561,7 +560,7 @@ public class GlideTest {
   }
 
   @Test
-  public void testReceivesRecursiveThumbnailWithPercentage() {
+  public void receivesRecursiveThumbnailWithPercentage() {
     requestManager
         .load(mockUri("content://first"))
         .thumbnail(requestManager.load(mockUri("content://second")).thumbnail(0.5f))
@@ -570,22 +569,22 @@ public class GlideTest {
   }
 
   @Test
-  public void testNullModelInGenericImageLoadDoesNotThrow() {
+  public void nullModelInGenericImageLoadDoesNotThrow() {
     requestManager.load(NULL).into(target);
   }
 
   @Test
-  public void testNullModelInGenericVideoLoadDoesNotThrow() {
+  public void nullModelInGenericVideoLoadDoesNotThrow() {
     requestManager.load(NULL).into(target);
   }
 
   @Test
-  public void testNullModelInGenericLoadDoesNotThrow() {
+  public void nullModelInGenericLoadDoesNotThrow() {
     requestManager.load(NULL).into(target);
   }
 
   @Test
-  public void testNullModelDoesNotThrow() {
+  public void nullModelDoesNotThrow() {
     Drawable drawable = new ColorDrawable(Color.RED);
     requestManager.load(NULL).apply(errorOf(drawable)).into(target);
 
@@ -593,7 +592,7 @@ public class GlideTest {
   }
 
   @Test
-  public void testNullModelPrefersErrorDrawable() {
+  public void nullModelPrefersErrorDrawable() {
     Drawable placeholder = new ColorDrawable(Color.GREEN);
     Drawable error = new ColorDrawable(Color.RED);
 
@@ -603,7 +602,7 @@ public class GlideTest {
   }
 
   @Test
-  public void testLoadBitmap_asBitmap() {
+  public void loadBitmap_asBitmap() {
     Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     requestManager.asBitmap().load(bitmap).into(target);
 
@@ -611,7 +610,7 @@ public class GlideTest {
   }
 
   @Test
-  public void testLoadBitmap_asDrawable() {
+  public void loadBitmap_asDrawable() {
     Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     requestManager.load(bitmap).into(target);
 
@@ -622,7 +621,7 @@ public class GlideTest {
   }
 
   @Test
-  public void testLoadDrawable() {
+  public void loadDrawable() {
     Drawable drawable = new ColorDrawable(Color.RED);
     requestManager.load(drawable).into(target);
 
@@ -632,7 +631,7 @@ public class GlideTest {
   }
 
   @Test
-  public void testNullModelPrefersFallbackDrawable() {
+  public void nullModelPrefersFallbackDrawable() {
     Drawable placeholder = new ColorDrawable(Color.GREEN);
     Drawable error = new ColorDrawable(Color.RED);
     Drawable fallback = new ColorDrawable(Color.BLUE);
@@ -646,7 +645,7 @@ public class GlideTest {
   }
 
   @Test
-  public void testNullModelResolvesToUsePlaceholder() {
+  public void nullModelResolvesToUsePlaceholder() {
     Drawable placeholder = new ColorDrawable(Color.GREEN);
 
     requestManager.load(NULL).apply(placeholderOf(placeholder)).into(target);
@@ -655,7 +654,7 @@ public class GlideTest {
   }
 
   @Test
-  public void testByteData() {
+  public void byteData() {
     byte[] data = new byte[] {1, 2, 3, 4, 5, 6};
     requestManager.load(data).into(target);
   }
@@ -687,7 +686,7 @@ public class GlideTest {
   }
 
   @Test
-  public void testClone() {
+  public void cloneRequest() {
     Target<Drawable> firstTarget = mock(Target.class);
     doAnswer(new CallSizeReady(100, 100)).when(firstTarget).getSize(isA(SizeReadyCallback.class));
     Target<Drawable> secondTarget = mock(Target.class);
@@ -703,7 +702,6 @@ public class GlideTest {
         .onResourceReady(ArgumentMatchers.<Drawable>notNull(), isA(Transition.class));
   }
 
-  @SuppressWarnings("unchecked")
   private <T, Z> void registerFailFactory(Class<T> failModel, Class<Z> failResource) {
     DataFetcher<Z> failFetcher = mock(DataFetcher.class);
     doAnswer(new Util.CallDataReady<>(null))
@@ -744,7 +742,6 @@ public class GlideTest {
     return uri.toString();
   }
 
-  @SuppressWarnings("unchecked")
   private <T> void registerMockStreamModelLoader(final Class<T> modelClass) {
     ModelLoader<T, InputStream> modelLoader = mockStreamModelLoader(modelClass);
     ModelLoaderFactory<T, InputStream> modelLoaderFactory = mock(ModelLoaderFactory.class);
@@ -753,7 +750,6 @@ public class GlideTest {
     Glide.get(context).getRegistry().prepend(modelClass, InputStream.class, modelLoaderFactory);
   }
 
-  @SuppressWarnings("unchecked")
   private <T> ModelLoader<T, InputStream> mockStreamModelLoader(final Class<T> modelClass) {
     ModelLoader<T, InputStream> modelLoader = mock(ModelLoader.class);
     DataFetcher<InputStream> fetcher = mock(DataFetcher.class);

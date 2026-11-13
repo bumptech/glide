@@ -134,7 +134,7 @@ public class JournaledLruDiskCacheTest {
   }
 
   @Test
-  public void testAbortPutIfNotCommitted_handlesNullFiles() {
+  public void abortPutIfNotCommitted_handlesNullFiles() {
     String key = "key";
     cache.beginPut(key);
     cache.abortPutIfNotCommitted(key, null);
@@ -220,7 +220,7 @@ public class JournaledLruDiskCacheTest {
   }
 
   @Test(expected = IllegalMonitorStateException.class)
-  public void testAbortPutIfNotCommitted_withoutBeginPut_throws() {
+  public void abortPutIfNotCommitted_withoutBeginPut_throws() {
     cache.abortPutIfNotCommitted("fakeKey", new File(cacheDir, "fakeFile"));
   }
 

@@ -38,7 +38,7 @@ public class LocalUriFetcherTest {
   }
 
   @Test
-  public void testClosesDataOnCleanup() throws Exception {
+  public void closesDataOnCleanup() throws Exception {
     fetcher.loadData(Priority.NORMAL, callback);
     fetcher.cleanup();
 
@@ -46,14 +46,14 @@ public class LocalUriFetcherTest {
   }
 
   @Test
-  public void testDoesNotCloseNullData() throws IOException {
+  public void doesNotCloseNullData() throws IOException {
     fetcher.cleanup();
 
     verify(fetcher.closeable, never()).close();
   }
 
   @Test
-  public void testHandlesExceptionOnClose() throws Exception {
+  public void handlesExceptionOnClose() throws Exception {
     fetcher.loadData(Priority.NORMAL, callback);
 
     doThrow(new IOException("Test")).when(fetcher.closeable).close();

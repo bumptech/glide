@@ -36,13 +36,13 @@ public class StreamAssetPathFetcherTest {
   }
 
   @Test
-  public void testOpensInputStreamForPathWithAssetManager() throws Exception {
+  public void opensInputStreamForPathWithAssetManager() throws Exception {
     fetcher.loadData(Priority.NORMAL, callback);
     verify(callback).onDataReady(eq(expected));
   }
 
   @Test
-  public void testClosesOpenedInputStreamOnCleanup() throws Exception {
+  public void closesOpenedInputStreamOnCleanup() throws Exception {
     fetcher.loadData(Priority.NORMAL, callback);
     fetcher.cleanup();
 
@@ -50,13 +50,13 @@ public class StreamAssetPathFetcherTest {
   }
 
   @Test
-  public void testDoesNothingOnCleanupIfNoDataLoaded() throws IOException {
+  public void doesNothingOnCleanupIfNoDataLoaded() throws IOException {
     fetcher.cleanup();
     verify(expected, never()).close();
   }
 
   @Test
-  public void testDoesNothingOnCancel() throws Exception {
+  public void doesNothingOnCancel() throws Exception {
     fetcher.loadData(Priority.NORMAL, callback);
     fetcher.cancel();
     verify(expected, never()).close();

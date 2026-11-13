@@ -20,7 +20,7 @@ public class SizeConfigStrategyTest {
   }
 
   @Test
-  public void testKeyEquals() {
+  public void keyEquals() {
     new EqualsTester()
         .addEqualityGroup(
             new SizeConfigStrategy.Key(pool, 100, Bitmap.Config.ARGB_8888),

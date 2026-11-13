@@ -22,7 +22,7 @@ import org.robolectric.annotation.Config;
 public class GlideExecutorTest {
 
   @Test
-  public void testOnExecuteDecorator_isCalledAndCanDecorateRunnable() throws InterruptedException {
+  public void onExecuteDecorator_isCalledAndCanDecorateRunnable() throws InterruptedException {
     final CountDownLatch decoratorCalled = new CountDownLatch(1);
     final CountDownLatch decoratedRunnableExecuted = new CountDownLatch(1);
 
@@ -62,7 +62,7 @@ public class GlideExecutorTest {
   }
 
   @Test
-  public void testOnExecuteDecorator_notDecorated_decoratorNotCalled() throws InterruptedException {
+  public void onExecuteDecorator_notDecorated_decoratorNotCalled() throws InterruptedException {
     final CountDownLatch decoratorCalled = new CountDownLatch(1);
     final CountDownLatch decoratedRunnableExecuted = new CountDownLatch(1);
 
@@ -86,7 +86,7 @@ public class GlideExecutorTest {
   }
 
   @Test
-  public void testLoadsAreExecutedInOrder() throws InterruptedException {
+  public void loadsAreExecutedInOrder() throws InterruptedException {
     final List<Integer> resultPriorities = Collections.synchronizedList(new ArrayList<Integer>());
     CountDownLatch latch = new CountDownLatch(1);
     GlideExecutor executor = GlideExecutor.newDiskCacheExecutor();
@@ -118,8 +118,7 @@ public class GlideExecutorTest {
   }
 
   @Test
-  public void testNewUnlimitedSourceBuilder_executesTasksSuccessfully()
-      throws InterruptedException {
+  public void newUnlimitedSourceBuilder_executesTasksSuccessfully() throws InterruptedException {
     final CountDownLatch executed = new CountDownLatch(1);
     GlideExecutor executor = GlideExecutor.newUnlimitedSourceBuilder().build();
 
@@ -137,7 +136,7 @@ public class GlideExecutorTest {
   }
 
   @Test
-  public void testNewUnlimitedSourceBuilder_customStrategy_handlesException()
+  public void newUnlimitedSourceBuilder_customStrategy_handlesException()
       throws InterruptedException {
     final AtomicReference<Throwable> handledThrowable = new AtomicReference<>();
     final CountDownLatch latch = new CountDownLatch(1);
@@ -169,7 +168,7 @@ public class GlideExecutorTest {
   }
 
   @Test
-  public void testNewUnlimitedSourceBuilder_setThreadCount_throwsUnsupportedOperationException() {
+  public void newUnlimitedSourceBuilder_setThreadCount_throwsUnsupportedOperationException() {
     assertThrows(
         UnsupportedOperationException.class,
         () -> GlideExecutor.newUnlimitedSourceBuilder().setThreadCount(1));

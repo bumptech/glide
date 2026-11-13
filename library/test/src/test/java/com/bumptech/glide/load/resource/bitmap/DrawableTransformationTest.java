@@ -142,7 +142,7 @@ public class DrawableTransformationTest {
   }
 
   @Test
-  public void testEquals() {
+  public void equals() {
     BitmapTransformation otherBitmapTransformation = mock(BitmapTransformation.class);
     doAnswer(new Util.WriteDigest("bitmapTransformation"))
         .when(bitmapTransformation)

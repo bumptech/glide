@@ -45,7 +45,7 @@ public class TransformationUtilsTest {
   }
 
   @Test
-  public void testFitCenterWithWideBitmap() {
+  public void fitCenterWithWideBitmap() {
     final int maxSide = 500;
 
     Bitmap wide = Bitmap.createBitmap(2000, 100, Bitmap.Config.ARGB_8888);
@@ -57,7 +57,7 @@ public class TransformationUtilsTest {
   }
 
   @Test
-  public void testFitCenterWithSmallWideBitmap() {
+  public void fitCenterWithSmallWideBitmap() {
     final int maxSide = 500;
 
     Bitmap smallWide = Bitmap.createBitmap(400, 40, Bitmap.Config.ARGB_8888);
@@ -69,7 +69,7 @@ public class TransformationUtilsTest {
   }
 
   @Test
-  public void testFitCenterWithTallBitmap() {
+  public void fitCenterWithTallBitmap() {
     final int maxSide = 500;
 
     Bitmap tall = Bitmap.createBitmap(65, 3000, Bitmap.Config.ARGB_8888);
@@ -81,7 +81,7 @@ public class TransformationUtilsTest {
   }
 
   @Test
-  public void testFitCenterWithSmallTallBitmap() {
+  public void fitCenterWithSmallTallBitmap() {
     final int maxSide = 500;
 
     Bitmap smallTall = Bitmap.createBitmap(10, 400, Bitmap.Config.ARGB_8888);
@@ -93,7 +93,7 @@ public class TransformationUtilsTest {
   }
 
   @Test
-  public void testFitCenterWithSquareBitmap() {
+  public void fitCenterWithSquareBitmap() {
     final int maxSide = 500;
 
     Bitmap square = Bitmap.createBitmap(600, 600, Bitmap.Config.ARGB_8888);
@@ -104,7 +104,7 @@ public class TransformationUtilsTest {
   }
 
   @Test
-  public void testFitCenterWithTooSmallSquareBitmap() {
+  public void fitCenterWithTooSmallSquareBitmap() {
     final int maxSide = 500;
 
     Bitmap smallSquare = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
@@ -117,7 +117,7 @@ public class TransformationUtilsTest {
 
   // Test for Issue #195.
   @Test
-  public void testFitCenterUsesFloorInsteadOfRoundingForOutputBitmapSize() {
+  public void fitCenterUsesFloorInsteadOfRoundingForOutputBitmapSize() {
     Bitmap toTransform = Bitmap.createBitmap(1230, 1640, Bitmap.Config.RGB_565);
 
     Bitmap transformed = TransformationUtils.fitCenter(bitmapPool, toTransform, 1075, 1366);
@@ -127,7 +127,7 @@ public class TransformationUtilsTest {
   }
 
   @Test
-  public void testFitCenterReturnsGivenBitmapIfGivenBitmapMatchesExactly() {
+  public void fitCenterReturnsGivenBitmapIfGivenBitmapMatchesExactly() {
     Bitmap toFit = Bitmap.createBitmap(100, 200, Bitmap.Config.ARGB_4444);
     Bitmap transformed =
         TransformationUtils.fitCenter(bitmapPool, toFit, toFit.getWidth(), toFit.getHeight());
@@ -135,7 +135,7 @@ public class TransformationUtilsTest {
   }
 
   @Test
-  public void testFitCenterReturnsGivenBitmapIfGivenBitmapWidthMatchesExactly() {
+  public void fitCenterReturnsGivenBitmapIfGivenBitmapWidthMatchesExactly() {
     Bitmap toFit = Bitmap.createBitmap(100, 200, Bitmap.Config.ARGB_4444);
     Bitmap transformed =
         TransformationUtils.fitCenter(bitmapPool, toFit, toFit.getWidth(), toFit.getHeight() * 2);
@@ -143,7 +143,7 @@ public class TransformationUtilsTest {
   }
 
   @Test
-  public void testFitCenterReturnsGivenBitmapIfGivenBitmapHeightMatchesExactly() {
+  public void fitCenterReturnsGivenBitmapIfGivenBitmapHeightMatchesExactly() {
     Bitmap toFit = Bitmap.createBitmap(100, 200, Bitmap.Config.ARGB_4444);
     Bitmap transformed =
         TransformationUtils.fitCenter(bitmapPool, toFit, toFit.getWidth() * 2, toFit.getHeight());
@@ -151,7 +151,7 @@ public class TransformationUtilsTest {
   }
 
   @Test
-  public void testCenterCropReturnsGivenBitmapIfGivenBitmapExactlyMatchesGivenDimensions() {
+  public void centerCropReturnsGivenBitmapIfGivenBitmapExactlyMatchesGivenDimensions() {
     Bitmap toCrop = Bitmap.createBitmap(200, 300, Bitmap.Config.ARGB_8888);
     Bitmap transformed =
         TransformationUtils.centerCrop(bitmapPool, toCrop, toCrop.getWidth(), toCrop.getHeight());
@@ -163,7 +163,7 @@ public class TransformationUtilsTest {
 
   @Test
   @Config(sdk = Config.OLDEST_SDK)
-  public void testFitCenterHandlesBitmapsWithNullConfigs() {
+  public void fitCenterHandlesBitmapsWithNullConfigs() {
     Bitmap toFit = Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565);
     toFit.setConfig(null);
     Bitmap transformed = TransformationUtils.fitCenter(bitmapPool, toFit, 50, 50);
@@ -171,7 +171,7 @@ public class TransformationUtilsTest {
   }
 
   @Test
-  public void testCenterCropSetsOutBitmapToHaveAlphaIfInBitmapHasAlphaAndOutBitmapIsReused() {
+  public void centerCropSetsOutBitmapToHaveAlphaIfInBitmapHasAlphaAndOutBitmapIsReused() {
     Bitmap toTransform = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
 
     Bitmap toReuse = Bitmap.createBitmap(50, 50, Bitmap.Config.ARGB_8888);
@@ -191,7 +191,7 @@ public class TransformationUtilsTest {
 
   @Test
   public void
-      testCenterCropSetsOutBitmapToNotHaveAlphaIfInBitmapDoesNotHaveAlphaAndOutBitmapIsReused() {
+      centerCropSetsOutBitmapToNotHaveAlphaIfInBitmapDoesNotHaveAlphaAndOutBitmapIsReused() {
     Bitmap toTransform = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
 
     Bitmap toReuse = Bitmap.createBitmap(50, 50, Bitmap.Config.ARGB_8888);
@@ -210,7 +210,7 @@ public class TransformationUtilsTest {
   }
 
   @Test
-  public void testCenterCropSetsOutBitmapToHaveAlphaIfInBitmapHasAlpha() {
+  public void centerCropSetsOutBitmapToHaveAlphaIfInBitmapHasAlpha() {
     Bitmap toTransform = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
 
     toTransform.setHasAlpha(true);
@@ -224,7 +224,7 @@ public class TransformationUtilsTest {
 
   @Test
   @Config(sdk = Config.OLDEST_SDK)
-  public void testCenterCropHandlesBitmapsWithNullConfigs() {
+  public void centerCropHandlesBitmapsWithNullConfigs() {
     Bitmap toTransform = Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565);
     toTransform.setConfig(null);
 
@@ -234,7 +234,7 @@ public class TransformationUtilsTest {
   }
 
   @Test
-  public void testCenterCropSetsOutBitmapToNotHaveAlphaIfInBitmapDoesNotHaveAlpha() {
+  public void centerCropSetsOutBitmapToNotHaveAlphaIfInBitmapDoesNotHaveAlpha() {
     Bitmap toTransform = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
 
     toTransform.setHasAlpha(false);
@@ -247,7 +247,7 @@ public class TransformationUtilsTest {
   }
 
   @Test
-  public void testFitCenterSetsOutBitmapToHaveAlphaIfInBitmapHasAlphaAndOutBitmapIsReused() {
+  public void fitCenterSetsOutBitmapToHaveAlphaIfInBitmapHasAlphaAndOutBitmapIsReused() {
     Bitmap toTransform = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
 
     Bitmap toReuse = Bitmap.createBitmap(50, 50, Bitmap.Config.ARGB_8888);
@@ -267,8 +267,7 @@ public class TransformationUtilsTest {
   }
 
   @Test
-  public void
-      testFitCenterSetsOutBitmapToNotHaveAlphaIfInBitmapDoesNotHaveAlphaAndOutBitmapIsReused() {
+  public void fitCenterSetsOutBitmapToNotHaveAlphaIfInBitmapDoesNotHaveAlphaAndOutBitmapIsReused() {
     Bitmap toTransform = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
 
     Bitmap toReuse = Bitmap.createBitmap(50, 50, Bitmap.Config.ARGB_8888);
@@ -288,7 +287,7 @@ public class TransformationUtilsTest {
   }
 
   @Test
-  public void testFitCenterSetsOutBitmapToHaveAlphaIfInBitmapHasAlpha() {
+  public void fitCenterSetsOutBitmapToHaveAlphaIfInBitmapHasAlpha() {
     Bitmap toTransform = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
 
     toTransform.setHasAlpha(true);
@@ -301,7 +300,7 @@ public class TransformationUtilsTest {
   }
 
   @Test
-  public void testFitCenterSetsOutBitmapToNotHaveAlphaIfInBitmapDoesNotHaveAlpha() {
+  public void fitCenterSetsOutBitmapToNotHaveAlphaIfInBitmapDoesNotHaveAlpha() {
     Bitmap toTransform = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
 
     toTransform.setHasAlpha(false);
@@ -333,7 +332,7 @@ public class TransformationUtilsTest {
   }
 
   @Test
-  public void testGetExifOrientationDegrees() {
+  public void getExifOrientationDegrees() {
     assertEquals(
         0, TransformationUtils.getExifOrientationDegrees(ExifInterface.ORIENTATION_NORMAL));
     assertEquals(
@@ -352,7 +351,7 @@ public class TransformationUtilsTest {
   }
 
   @Test
-  public void testRotateImage() {
+  public void rotateImage() {
     Bitmap toRotate = Bitmap.createBitmap(2, 2, Bitmap.Config.ARGB_8888);
     toRotate.setPixel(0, 0, Color.BLUE);
     toRotate.setPixel(0, 1, Color.RED);
@@ -372,7 +371,7 @@ public class TransformationUtilsTest {
   }
 
   @Test
-  public void testRotateImageExifReturnsGivenBitmapIfRotationIsNormal() {
+  public void rotateImageExifReturnsGivenBitmapIfRotationIsNormal() {
     Bitmap toRotate = Bitmap.createBitmap(100, 200, Bitmap.Config.ARGB_4444);
     // Use assertTrue because Robolectric incorrectly implements equality for Bitmaps. We want
     // not just an identical Bitmap, but our original Bitmap object back.
@@ -382,7 +381,7 @@ public class TransformationUtilsTest {
   }
 
   @Test
-  public void testRotateImageExifReturnsGivenBitmapIfRotationIsUndefined() {
+  public void rotateImageExifReturnsGivenBitmapIfRotationIsUndefined() {
     Bitmap toRotate = Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565);
     // Use assertTrue because Robolectric incorrectly implements equality for Bitmaps. We want
     // not just an identical Bitmap, but our original Bitmap object back.
@@ -393,7 +392,7 @@ public class TransformationUtilsTest {
   }
 
   @Test
-  public void testRotateImageExifReturnsGivenBitmapIfOrientationIsInvalid() {
+  public void rotateImageExifReturnsGivenBitmapIfOrientationIsInvalid() {
     Bitmap toRotate = Bitmap.createBitmap(200, 100, Bitmap.Config.ARGB_8888);
     // Use assertTrue because Robolectric incorrectly implements equality for Bitmaps. We want
     // not just an identical Bitmap, but our original Bitmap object back.
@@ -403,7 +402,7 @@ public class TransformationUtilsTest {
 
   @Test
   @Config(sdk = Config.OLDEST_SDK)
-  public void testRotateImageExif_preservesitmapsWithNullConfigs() {
+  public void rotateImageExif_preservesitmapsWithNullConfigs() {
     Bitmap toRotate = Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565);
     toRotate.setConfig(null);
     Bitmap rotated =
@@ -428,7 +427,7 @@ public class TransformationUtilsTest {
   // TODO: Add gainmap-based tests once Robolectric has sufficient support.
 
   @Test
-  public void testInitializeMatrixSetsScaleIfFlipHorizontal() {
+  public void initializeMatrixSetsScaleIfFlipHorizontal() {
     Matrix matrix = mock(Matrix.class);
     TransformationUtils.initializeMatrixForRotation(
         ExifInterface.ORIENTATION_FLIP_HORIZONTAL, matrix);
@@ -436,7 +435,7 @@ public class TransformationUtilsTest {
   }
 
   @Test
-  public void testInitializeMatrixSetsScaleAndRotateIfFlipVertical() {
+  public void initializeMatrixSetsScaleAndRotateIfFlipVertical() {
     Matrix matrix = mock(Matrix.class);
     TransformationUtils.initializeMatrixForRotation(
         ExifInterface.ORIENTATION_FLIP_VERTICAL, matrix);
@@ -445,7 +444,7 @@ public class TransformationUtilsTest {
   }
 
   @Test
-  public void testInitializeMatrixSetsScaleAndRotateIfTranspose() {
+  public void initializeMatrixSetsScaleAndRotateIfTranspose() {
     Matrix matrix = mock(Matrix.class);
     TransformationUtils.initializeMatrixForRotation(ExifInterface.ORIENTATION_TRANSPOSE, matrix);
     verify(matrix).setRotate(90);
@@ -453,7 +452,7 @@ public class TransformationUtilsTest {
   }
 
   @Test
-  public void testInitializeMatrixSetsScaleAndRotateIfTransverse() {
+  public void initializeMatrixSetsScaleAndRotateIfTransverse() {
     Matrix matrix = mock(Matrix.class);
     TransformationUtils.initializeMatrixForRotation(ExifInterface.ORIENTATION_TRANSVERSE, matrix);
     verify(matrix).setRotate(-90);
@@ -461,7 +460,7 @@ public class TransformationUtilsTest {
   }
 
   @Test
-  public void testInitializeMatrixSetsRotateOnRotation() {
+  public void initializeMatrixSetsRotateOnRotation() {
     Matrix matrix = mock(Matrix.class);
     TransformationUtils.initializeMatrixForRotation(ExifInterface.ORIENTATION_ROTATE_90, matrix);
     verify(matrix).setRotate(90);

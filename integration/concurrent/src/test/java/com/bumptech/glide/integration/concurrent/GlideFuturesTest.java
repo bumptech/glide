@@ -48,14 +48,14 @@ public final class GlideFuturesTest {
   }
 
   @Test
-  public void testBaseLoad() throws Exception {
+  public void baseLoad() throws Exception {
     ColorDrawable expected = new ColorDrawable(Color.RED);
     ListenableFuture<Drawable> future = GlideFutures.submit(Glide.with(app).load(expected));
     assertThat(((ColorDrawable) Futures.getDone(future)).getColor()).isEqualTo(expected.getColor());
   }
 
   @Test
-  public void testErrorLoad() {
+  public void errorLoad() {
     // Load some unsupported model.
     final ListenableFuture<Bitmap> future =
         GlideFutures.submit(Glide.with(app).asBitmap().load(app));
@@ -71,7 +71,7 @@ public final class GlideFuturesTest {
   }
 
   @Test
-  public void testToString() throws Exception {
+  public void toString_containsModel() throws Exception {
     Foo model = new Foo();
     SettableFuture<Bar> bar = setupMockLoader(model);
     ListenableFuture<Baz> future = submitLoad(model);
@@ -81,7 +81,7 @@ public final class GlideFuturesTest {
   }
 
   @Test
-  public void testCancel_falseDoesNotPropagateInterrupt() throws Exception {
+  public void cancel_falseDoesNotPropagateInterrupt() throws Exception {
     Foo model = new Foo();
     SettableFuture<Bar> bar = setupMockLoader(model);
     ListenableFuture<Baz> future = submitLoad(model);

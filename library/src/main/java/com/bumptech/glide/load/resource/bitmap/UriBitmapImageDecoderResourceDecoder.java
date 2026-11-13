@@ -32,24 +32,44 @@ public final class UriBitmapImageDecoderResourceDecoder implements ResourceDecod
   private final Context context;
   private final BitmapImageDecoderResourceDecoder wrapped = new BitmapImageDecoderResourceDecoder();
 
+  private final boolean onlyRejectPositiveVideoFrames;
+
   public UriBitmapImageDecoderResourceDecoder(@NonNull Context context) {
+    this(context, /* onlyRejectPositiveVideoFrames= */ false);
+  }
+
+  /**
+   * @param onlyRejectPositiveVideoFrames {@code true} to short-circuit {@link #handles} only for
+   *     requests with a positive {@link VideoDecoder#TARGET_FRAME}, so that {@code frame(0)}
+   *     requests fall through to the MIME type check. {@code false} short-circuits for any {@link
+   *     VideoDecoder#TARGET_FRAME} other than {@link VideoDecoder#DEFAULT_FRAME}. See {@link
+   *     com.bumptech.glide.GlideBuilder#setFileDescriptorImageDecoderEnabled(boolean)}.
+   */
+  public UriBitmapImageDecoderResourceDecoder(
+      @NonNull Context context, boolean onlyRejectPositiveVideoFrames) {
     this.context = context.getApplicationContext();
+    this.onlyRejectPositiveVideoFrames = onlyRejectPositiveVideoFrames;
   }
 
   @Override
   public boolean handles(@NonNull Uri uri, @NonNull Options options) throws IOException {
-    // Videos are excluded by the MIME type check below. This is only a shortcut for explicit video
-    // frame requests (RequestOptions#frame), which are typically extension-less MediaStore URIs and
-    // would otherwise pay a Binder IPC to the provider in getMimeType() before being rejected. It
-    // cannot catch frame(DEFAULT_FRAME): Options#get returns DEFAULT_FRAME when the option is
-    // unset, so such requests are indistinguishable from plain image requests and fall through to
-    // the MIME type check.
-    Long targetFrame = options.get(VideoDecoder.TARGET_FRAME);
-    if (targetFrame != null && targetFrame != VideoDecoder.DEFAULT_FRAME) {
-      return false;
-    }
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-      return false;
+    if (onlyRejectPositiveVideoFrames) {
+      // Some callers set frame(0) on base request options for all loads, so 0 and
+      // DEFAULT_FRAME (-1) fall through to the MIME type check below, which excludes videos.
+      if (ImageDecoderSupport.hasExplicitVideoFrame(options)) {
+        return false;
+      }
+    } else {
+      // Videos are excluded by the MIME type check below. This is only a shortcut for explicit
+      // video frame requests (RequestOptions#frame), which are typically extension-less MediaStore
+      // URIs and would otherwise pay a Binder IPC to the provider in getMimeType() before being
+      // rejected. It cannot catch frame(DEFAULT_FRAME): Options#get returns DEFAULT_FRAME when the
+      // option is unset, so such requests are indistinguishable from plain image requests and fall
+      // through to the MIME type check.
+      Long targetFrame = options.get(VideoDecoder.TARGET_FRAME);
+      if (targetFrame != null && targetFrame != VideoDecoder.DEFAULT_FRAME) {
+        return false;
+      }
     }
     String scheme = uri.getScheme();
     boolean isSupportedScheme =

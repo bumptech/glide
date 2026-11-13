@@ -29,14 +29,14 @@ public class GifHeaderParserTest {
   }
 
   @Test
-  public void testReturnsHeaderWithFormatErrorIfDoesNotStartWithGifHeader() {
+  public void returnsHeaderWithFormatErrorIfDoesNotStartWithGifHeader() {
     parser.setData("wrong_header".getBytes());
     GifHeader result = parser.parseHeader();
     assertEquals(GifDecoder.STATUS_FORMAT_ERROR, result.status);
   }
 
   @Test
-  public void testCanReadValidHeaderAndLSD() {
+  public void canReadValidHeaderAndLSD() {
     final int width = 10;
     final int height = 20;
     ByteBuffer buffer =
@@ -55,7 +55,7 @@ public class GifHeaderParserTest {
   }
 
   @Test
-  public void testCanParseHeaderOfTestImageWithoutGraphicalExtension() throws IOException {
+  public void canParseHeaderOfTestImageWithoutGraphicalExtension() throws IOException {
     byte[] data =
         TestUtil.resourceToBytes(getClass(), "gif_without_graphical_control_extension.gif");
     parser.setData(data);
@@ -66,7 +66,7 @@ public class GifHeaderParserTest {
   }
 
   @Test
-  public void testCanReadNetscapeIterationCountIfNetscapeIterationCountIsZero() throws IOException {
+  public void canReadNetscapeIterationCountIfNetscapeIterationCountIsZero() throws IOException {
     byte[] data = TestUtil.resourceToBytes(getClass(), "gif_netscape_iteration_0.gif");
     parser.setData(data);
     GifHeader header = parser.parseHeader();
@@ -74,7 +74,7 @@ public class GifHeaderParserTest {
   }
 
   @Test
-  public void testCanReadNetscapeIterationCountIfNetscapeIterationCountIs_1() throws IOException {
+  public void canReadNetscapeIterationCountIfNetscapeIterationCountIs_1() throws IOException {
     byte[] data = TestUtil.resourceToBytes(getClass(), "gif_netscape_iteration_1.gif");
     parser.setData(data);
     GifHeader header = parser.parseHeader();
@@ -82,8 +82,7 @@ public class GifHeaderParserTest {
   }
 
   @Test
-  public void testCanReadNetscapeIterationCountIfNetscapeIterationCountIs_0x0F()
-      throws IOException {
+  public void canReadNetscapeIterationCountIfNetscapeIterationCountIs_0x0F() throws IOException {
     byte[] data = TestUtil.resourceToBytes(getClass(), "gif_netscape_iteration_255.gif");
     parser.setData(data);
     GifHeader header = parser.parseHeader();
@@ -91,8 +90,7 @@ public class GifHeaderParserTest {
   }
 
   @Test
-  public void testCanReadNetscapeIterationCountIfNetscapeIterationCountIs_0x10()
-      throws IOException {
+  public void canReadNetscapeIterationCountIfNetscapeIterationCountIs_0x10() throws IOException {
     byte[] data = TestUtil.resourceToBytes(getClass(), "gif_netscape_iteration_256.gif");
     parser.setData(data);
     GifHeader header = parser.parseHeader();
@@ -100,8 +98,7 @@ public class GifHeaderParserTest {
   }
 
   @Test
-  public void testCanReadNetscapeIterationCountIfNetscapeIterationCountIs_0xFF()
-      throws IOException {
+  public void canReadNetscapeIterationCountIfNetscapeIterationCountIs_0xFF() throws IOException {
     byte[] data = TestUtil.resourceToBytes(getClass(), "gif_netscape_iteration_65535.gif");
     parser.setData(data);
     GifHeader header = parser.parseHeader();
@@ -109,8 +106,7 @@ public class GifHeaderParserTest {
   }
 
   @Test
-  public void testLoopCountReturnsMinusOneWithoutNetscapeIterationCount()
-          throws IOException {
+  public void loopCountReturnsMinusOneWithoutNetscapeIterationCount() throws IOException {
     byte[] data = TestUtil.resourceToBytes(getClass(), "gif_without_netscape_iteration.gif");
     parser.setData(data);
     GifHeader header = parser.parseHeader();
@@ -118,7 +114,7 @@ public class GifHeaderParserTest {
   }
 
   @Test
-  public void testCanReadImageDescriptorWithoutGraphicalExtension() {
+  public void canReadImageDescriptorWithoutGraphicalExtension() {
     final int lzwMinCodeSize = 2;
     ByteBuffer buffer = ByteBuffer.allocate(
         GifBytesTestUtil.HEADER_LENGTH + GifBytesTestUtil.IMAGE_DESCRIPTOR_LENGTH + GifBytesTestUtil
@@ -149,7 +145,7 @@ public class GifHeaderParserTest {
   }
 
   @Test
-  public void testCanParseFrameDelay() {
+  public void canParseFrameDelay() {
     final short frameDelay = 50;
     ByteBuffer buffer = writeHeaderWithGceAndFrameDelay(frameDelay);
 
@@ -162,7 +158,7 @@ public class GifHeaderParserTest {
   }
 
   @Test
-  public void testSetsDefaultFrameDelayIfFrameDelayIsZero() {
+  public void setsDefaultFrameDelayIfFrameDelayIsZero() {
     ByteBuffer buffer = writeHeaderWithGceAndFrameDelay((short) 0);
 
     parser.setData(buffer.array());
@@ -174,7 +170,7 @@ public class GifHeaderParserTest {
   }
 
   @Test
-  public void testSetsDefaultFrameDelayIfFrameDelayIsLessThanMinimum() {
+  public void setsDefaultFrameDelayIfFrameDelayIsLessThanMinimum() {
     final short frameDelay = GifHeaderParser.MIN_FRAME_DELAY - 1;
     ByteBuffer buffer = writeHeaderWithGceAndFrameDelay(frameDelay);
 
@@ -187,7 +183,7 @@ public class GifHeaderParserTest {
   }
 
   @Test
-  public void testObeysFrameDelayIfFrameDelayIsAtMinimum() {
+  public void obeysFrameDelayIfFrameDelayIsAtMinimum() {
     final short frameDelay = GifHeaderParser.MIN_FRAME_DELAY;
     ByteBuffer buffer = writeHeaderWithGceAndFrameDelay(frameDelay);
 
@@ -200,7 +196,7 @@ public class GifHeaderParserTest {
   }
 
   @Test
-  public void testSetsFrameLocalColorTableToNullIfNoColorTable() {
+  public void setsFrameLocalColorTableToNullIfNoColorTable() {
     final int lzwMinCodeSize = 2;
     ByteBuffer buffer = ByteBuffer.allocate(
         GifBytesTestUtil.HEADER_LENGTH + GifBytesTestUtil.IMAGE_DESCRIPTOR_LENGTH + GifBytesTestUtil
@@ -219,7 +215,7 @@ public class GifHeaderParserTest {
   }
 
   @Test
-  public void testSetsFrameLocalColorTableIfHasColorTable() {
+  public void setsFrameLocalColorTableIfHasColorTable() {
     final int lzwMinCodeSize = 2;
     final int numColors = 4;
     ByteBuffer buffer = ByteBuffer.allocate(
@@ -243,7 +239,7 @@ public class GifHeaderParserTest {
   }
 
   @Test
-  public void testCanParseMultipleFrames() {
+  public void canParseMultipleFrames() {
     final int lzwMinCodeSize = 2;
     final int expectedFrames = 3;
 
@@ -266,7 +262,7 @@ public class GifHeaderParserTest {
   }
 
   @Test
-  public void testIsAnimatedMultipleFrames() {
+  public void isAnimatedMultipleFrames() {
     final int lzwMinCodeSize = 2;
     final int numFrames = 3;
 
@@ -288,7 +284,7 @@ public class GifHeaderParserTest {
   }
 
   @Test
-  public void testIsNotAnimatedOneFrame() {
+  public void isNotAnimatedOneFrame() {
     final int lzwMinCodeSize = 2;
 
     final int frameSize =
@@ -309,7 +305,7 @@ public class GifHeaderParserTest {
 
 
   @Test(expected = IllegalStateException.class)
-  public void testThrowsIfParseHeaderCalledBeforeSetData() {
+  public void throwsIfParseHeaderCalledBeforeSetData() {
     GifHeaderParser parser = new GifHeaderParser();
     parser.parseHeader();
   }

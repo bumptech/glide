@@ -26,7 +26,7 @@ public class GifDrawableResourceTest {
   }
 
   @Test
-  public void testReturnsSizeFromDrawable() {
+  public void returnsSizeFromDrawable() {
     final int size = 2134;
     when(drawable.getSize()).thenReturn(size);
 
@@ -34,7 +34,7 @@ public class GifDrawableResourceTest {
   }
 
   @Test
-  public void testStopsAndThenRecyclesDrawableWhenRecycled() {
+  public void stopsAndThenRecyclesDrawableWhenRecycled() {
     resource.recycle();
 
     InOrder inOrder = inOrder(drawable);

@@ -39,7 +39,7 @@ public class ThumbFetcherTest {
   }
 
   @Test
-  public void testReturnsInputStreamFromThumbnailOpener() throws Exception {
+  public void returnsInputStreamFromThumbnailOpener() throws Exception {
     when(opener.open(eq(uri))).thenReturn(expected);
 
     fetcher.loadData(Priority.LOW, callback);
@@ -47,7 +47,7 @@ public class ThumbFetcherTest {
   }
 
   @Test
-  public void testClosesInputStreamFromThumbnailOpenerOnCleanup() throws Exception {
+  public void closesInputStreamFromThumbnailOpenerOnCleanup() throws Exception {
     when(opener.open(eq(uri))).thenReturn(expected);
 
     fetcher.loadData(Priority.HIGH, callback);
@@ -57,7 +57,7 @@ public class ThumbFetcherTest {
   }
 
   @Test
-  public void testDoesNotThrowIfCleanupWithNullInputStream() {
+  public void doesNotThrowIfCleanupWithNullInputStream() {
     fetcher.cleanup();
   }
 }

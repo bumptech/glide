@@ -53,7 +53,7 @@ public final class GlideExperimentsTest {
   }
 
   @Test
-  public void testTrimMemoryOnUiHidden_experimentEnabled_setsMemoryCategory() {
+  public void trimMemoryOnUiHidden_experimentEnabled_setsMemoryCategory() {
     Glide glide = createGlide(/* enableTrimMemoryOnUiHidden= */ true, MemoryCategory.ZERO);
 
     glide.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN);
@@ -63,7 +63,7 @@ public final class GlideExperimentsTest {
   }
 
   @Test
-  public void testTrimMemoryOnUiHidden_experimentDisabled_doesNotSetMemoryCategory() {
+  public void trimMemoryOnUiHidden_experimentDisabled_doesNotSetMemoryCategory() {
     Glide glide = createGlide(/* enableTrimMemoryOnUiHidden= */ false, MemoryCategory.ZERO);
 
     glide.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN);
@@ -73,7 +73,7 @@ public final class GlideExperimentsTest {
   }
 
   @Test
-  public void testTrimMemoryBackground_experimentDisabled_setsMemoryCategory() {
+  public void trimMemoryBackground_experimentDisabled_setsMemoryCategory() {
     Glide glide = createGlide(/* enableTrimMemoryOnUiHidden= */ false, MemoryCategory.ZERO);
 
     glide.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_BACKGROUND);
@@ -83,7 +83,7 @@ public final class GlideExperimentsTest {
   }
 
   @Test
-  public void testTrimMemoryBackground_experimentEnabled_setsMemoryCategory() {
+  public void trimMemoryBackground_experimentEnabled_setsMemoryCategory() {
     Glide glide = createGlide(/* enableTrimMemoryOnUiHidden= */ true, MemoryCategory.ZERO);
 
     glide.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_BACKGROUND);
@@ -93,7 +93,7 @@ public final class GlideExperimentsTest {
   }
 
   @Test
-  public void testTrimMemoryRunningCritical_experimentEnabled_doesNotChangeMultiplier() {
+  public void trimMemoryRunningCritical_experimentEnabled_doesNotChangeMultiplier() {
     Glide glide = createGlide(/* enableTrimMemoryOnUiHidden= */ true, MemoryCategory.ZERO);
 
     glide.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL);
@@ -103,7 +103,7 @@ public final class GlideExperimentsTest {
   }
 
   @Test
-  public void testTrimMemoryOnUiHidden_withoutMemoryCategory_doesNotChangeMultiplier() {
+  public void trimMemoryOnUiHidden_withoutMemoryCategory_doesNotChangeMultiplier() {
     Glide glide =
         createGlide(/* enableTrimMemoryOnUiHidden= */ true, /* memoryCategoryInBackground= */ null);
 
@@ -114,7 +114,7 @@ public final class GlideExperimentsTest {
   }
 
   @Test
-  public void testTrimMemoryOnUiHidden_foregroundRestoresMemoryCategory() {
+  public void trimMemoryOnUiHidden_foregroundRestoresMemoryCategory() {
     Glide glide = createGlide(/* enableTrimMemoryOnUiHidden= */ true, MemoryCategory.LOW);
 
     glide.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN);
@@ -129,7 +129,7 @@ public final class GlideExperimentsTest {
   }
 
   @Test
-  public void testBypassResourceDiskCacheForHardwareBitmaps_experimentEnabled_isRecorded() {
+  public void bypassResourceDiskCacheForHardwareBitmaps_experimentEnabled_isRecorded() {
     Glide.tearDown();
     GlideExecutor executor = MockGlideExecutor.newMainThreadExecutor();
     GlideBuilder builder =
@@ -149,7 +149,7 @@ public final class GlideExperimentsTest {
   }
 
   @Test
-  public void testRespectExifOrientationInImageDecoder_experimentEnabled_isRecorded() {
+  public void respectExifOrientationInImageDecoder_experimentEnabled_isRecorded() {
     Glide.tearDown();
     GlideExecutor executor = MockGlideExecutor.newMainThreadExecutor();
     GlideBuilder builder =
@@ -169,7 +169,7 @@ public final class GlideExperimentsTest {
   }
 
   @Test
-  public void testUseBitmapFactoryForInputStreamsWithImageDecoder_experimentEnabled_isRecorded() {
+  public void useBitmapFactoryForInputStreamsWithImageDecoder_experimentEnabled_isRecorded() {
     Glide.tearDown();
     GlideExecutor executor = MockGlideExecutor.newMainThreadExecutor();
     GlideBuilder builder =

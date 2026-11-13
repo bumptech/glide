@@ -31,7 +31,7 @@ public class ExifOrientationStreamTest {
   }
 
   @Test
-  public void testIncludesGivenExifOrientation() throws IOException {
+  public void includesGivenExifOrientation() throws IOException {
     for (int i = 0; i < 8; i++) {
       for (int j = 0; j < 8; j++) {
         InputStream toWrap = openOrientationExample(true /*isLandscape*/, j + 1);

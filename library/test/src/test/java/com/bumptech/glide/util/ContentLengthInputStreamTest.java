@@ -29,7 +29,7 @@ public class ContentLengthInputStreamTest {
   }
 
   @Test
-  public void testAvailable_withZeroReadsAndValidContentLength_returnsContentLength()
+  public void available_withZeroReadsAndValidContentLength_returnsContentLength()
       throws IOException {
     int value = 123356;
     InputStream is = ContentLengthInputStream.obtain(wrapped, String.valueOf(value));
@@ -38,7 +38,7 @@ public class ContentLengthInputStreamTest {
   }
 
   @Test
-  public void testAvailable_withNullContentLength_returnsWrappedAvailable() throws IOException {
+  public void available_withNullContentLength_returnsWrappedAvailable() throws IOException {
     InputStream is = ContentLengthInputStream.obtain(wrapped, null /*contentLengthHeader*/);
     int expected = 1234;
     when(wrapped.available()).thenReturn(expected);
@@ -47,7 +47,7 @@ public class ContentLengthInputStreamTest {
   }
 
   @Test
-  public void testAvailable_withInvalidContentLength_returnsWrappedAvailable() throws IOException {
+  public void available_withInvalidContentLength_returnsWrappedAvailable() throws IOException {
     InputStream is = ContentLengthInputStream.obtain(wrapped, "invalid_length");
     int expected = 567;
     when(wrapped.available()).thenReturn(expected);
@@ -56,7 +56,7 @@ public class ContentLengthInputStreamTest {
   }
 
   @Test
-  public void testAvailable_withRead_returnsContentLengthOffsetByRead() throws IOException {
+  public void available_withRead_returnsContentLengthOffsetByRead() throws IOException {
     int contentLength = 999;
     InputStream is = ContentLengthInputStream.obtain(wrapped, String.valueOf(contentLength));
     when(wrapped.read()).thenReturn(1);
@@ -66,7 +66,7 @@ public class ContentLengthInputStreamTest {
   }
 
   @Test
-  public void testAvailable_handlesReadValueOfZero() throws IOException {
+  public void available_handlesReadValueOfZero() throws IOException {
     int contentLength = 999;
     InputStream is = ContentLengthInputStream.obtain(wrapped, String.valueOf(contentLength));
     when(wrapped.read()).thenReturn(0);
@@ -76,7 +76,7 @@ public class ContentLengthInputStreamTest {
   }
 
   @Test
-  public void testAvailable_withReadBytes_returnsContentLengthOffsetByNumberOfBytes()
+  public void available_withReadBytes_returnsContentLengthOffsetByNumberOfBytes()
       throws IOException {
     int contentLength = 678;
     InputStream is = ContentLengthInputStream.obtain(wrapped, String.valueOf(contentLength));
@@ -88,7 +88,7 @@ public class ContentLengthInputStreamTest {
   }
 
   @Test
-  public void testRead_whenReturnsLessThanZeroWithoutReadingAllContent_throwsIOException()
+  public void read_whenReturnsLessThanZeroWithoutReadingAllContent_throwsIOException()
       throws IOException {
     int contentLength = 1;
     InputStream is = ContentLengthInputStream.obtain(wrapped, String.valueOf(contentLength));
@@ -104,7 +104,7 @@ public class ContentLengthInputStreamTest {
   }
 
   @Test
-  public void testReadBytes_whenReturnsLessThanZeroWithoutReadingAllContent_throwsIOException()
+  public void readBytes_whenReturnsLessThanZeroWithoutReadingAllContent_throwsIOException()
       throws IOException {
     int contentLength = 2;
     InputStream is = ContentLengthInputStream.obtain(wrapped, String.valueOf(contentLength));
@@ -120,7 +120,7 @@ public class ContentLengthInputStreamTest {
   }
 
   @Test
-  public void testRead_whenReturnsLessThanZeroWithInvalidLength_doesNotThrow() throws IOException {
+  public void read_whenReturnsLessThanZeroWithInvalidLength_doesNotThrow() throws IOException {
     InputStream is = ContentLengthInputStream.obtain(wrapped, "invalid_length");
     when(wrapped.read()).thenReturn(-1);
     //noinspection ResultOfMethodCallIgnored
@@ -128,8 +128,7 @@ public class ContentLengthInputStreamTest {
   }
 
   @Test
-  public void testReadBytes_whenReturnsLessThanZeroWithInvalidLength_doesNotThrow()
-      throws IOException {
+  public void readBytes_whenReturnsLessThanZeroWithInvalidLength_doesNotThrow() throws IOException {
     InputStream is = ContentLengthInputStream.obtain(wrapped, "invalid_length");
     when(wrapped.read(any(byte[].class), anyInt(), anyInt())).thenReturn(-1);
     //noinspection ResultOfMethodCallIgnored
@@ -137,7 +136,7 @@ public class ContentLengthInputStreamTest {
   }
 
   @Test
-  public void testRead_readWithZeroes_doesNotThrow() throws IOException {
+  public void read_readWithZeroes_doesNotThrow() throws IOException {
     ByteArrayInputStream inner = new ByteArrayInputStream(new byte[] {0, 0, 0});
     InputStream is = ContentLengthInputStream.obtain(inner, 3);
 
@@ -148,7 +147,7 @@ public class ContentLengthInputStreamTest {
   }
 
   @Test
-  public void testRead_readWithHighValues_doesNotThrow() throws IOException {
+  public void read_readWithHighValues_doesNotThrow() throws IOException {
     ByteArrayInputStream inner =
         new ByteArrayInputStream(new byte[] {(byte) 0xF0, (byte) 0xA0, (byte) 0xFF});
     InputStream is = ContentLengthInputStream.obtain(inner, 3);

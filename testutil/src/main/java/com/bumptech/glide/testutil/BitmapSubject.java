@@ -15,7 +15,7 @@ import com.google.common.truth.Subject;
 import com.google.common.truth.Truth;
 
 /** Truth assertions for comparing {@link Bitmap}s. */
-@SuppressWarnings({"WeakerAccess", "unused", "rawtypes", "unchecked"})
+@SuppressWarnings({"WeakerAccess", "unused"})
 public final class BitmapSubject extends Subject {
 
   private static final Subject.Factory<BitmapSubject, Bitmap> FACTORY =

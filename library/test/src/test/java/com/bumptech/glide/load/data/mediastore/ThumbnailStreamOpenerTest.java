@@ -49,19 +49,19 @@ public class ThumbnailStreamOpenerTest {
   }
 
   @Test
-  public void testReturnsNullIfCursorIsNull() throws FileNotFoundException {
+  public void returnsNullIfCursorIsNull() throws FileNotFoundException {
     when(harness.query.query(eq(harness.uri))).thenReturn(null);
     assertNull(harness.get().open(harness.uri));
   }
 
   @Test
-  public void testReturnsNullIfCursorIsEmpty() throws FileNotFoundException {
+  public void returnsNullIfCursorIsEmpty() throws FileNotFoundException {
     when(harness.query.query(eq(harness.uri))).thenReturn(new MatrixCursor(new String[1]));
     assertNull(harness.get().open(harness.uri));
   }
 
   @Test
-  public void testReturnsNullIfCursorHasEmptyPath() throws FileNotFoundException {
+  public void returnsNullIfCursorHasEmptyPath() throws FileNotFoundException {
     MatrixCursor cursor = new MatrixCursor(new String[1]);
     cursor.addRow(new Object[] {""});
     when(harness.query.query(eq(harness.uri))).thenReturn(cursor);
@@ -69,27 +69,27 @@ public class ThumbnailStreamOpenerTest {
   }
 
   @Test
-  public void testReturnsNullIfFileDoesNotExist() throws FileNotFoundException {
+  public void returnsNullIfFileDoesNotExist() throws FileNotFoundException {
     when(harness.service.get(anyString())).thenReturn(harness.file);
     when(harness.service.exists(eq(harness.file))).thenReturn(false);
     assertNull(harness.get().open(harness.uri));
   }
 
   @Test
-  public void testReturnNullIfFileLengthIsZero() throws FileNotFoundException {
+  public void returnNullIfFileLengthIsZero() throws FileNotFoundException {
     when(harness.service.get(anyString())).thenReturn(harness.file);
     when(harness.service.length(eq(harness.file))).thenReturn(0L);
     assertNull(harness.get().open(harness.uri));
   }
 
   @Test
-  public void testClosesCursor() throws FileNotFoundException {
+  public void closesCursor() throws FileNotFoundException {
     harness.get().open(harness.uri);
     assertTrue(harness.cursor.isClosed());
   }
 
   @Test
-  public void testReturnsOpenedInputStreamWhenFileFound() throws FileNotFoundException {
+  public void returnsOpenedInputStreamWhenFileFound() throws FileNotFoundException {
     InputStream expected = new ByteArrayInputStream(new byte[0]);
     Shadows.shadowOf(ApplicationProvider.getApplicationContext().getContentResolver())
         .registerInputStream(harness.uri, expected);
@@ -103,7 +103,7 @@ public class ThumbnailStreamOpenerTest {
   }
 
   @Test
-  public void testVideoQueryReturnsVideoCursor() {
+  public void videoQueryReturnsVideoCursor() {
     Uri queryUri = MediaStore.Video.Thumbnails.EXTERNAL_CONTENT_URI;
     ThumbFetcher.VideoThumbnailQuery query =
         new ThumbFetcher.VideoThumbnailQuery(getContentResolver());
@@ -114,7 +114,7 @@ public class ThumbnailStreamOpenerTest {
   }
 
   @Test
-  public void testImageQueryReturnsImageCursor() {
+  public void imageQueryReturnsImageCursor() {
     Uri queryUri = MediaStore.Images.Thumbnails.EXTERNAL_CONTENT_URI;
     ThumbFetcher.ImageThumbnailQuery query =
         new ThumbFetcher.ImageThumbnailQuery(getContentResolver());

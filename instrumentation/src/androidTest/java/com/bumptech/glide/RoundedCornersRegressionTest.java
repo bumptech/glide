@@ -49,7 +49,7 @@ public class RoundedCornersRegressionTest {
   }
 
   @Test
-  public void testRoundedCorners() throws ExecutionException, InterruptedException {
+  public void roundedCorners() throws ExecutionException, InterruptedException {
     bitmapRegressionTester.test(
         GlideApp.with(context)
             .asBitmap()
@@ -58,7 +58,7 @@ public class RoundedCornersRegressionTest {
   }
 
   @Test
-  public void testRoundedCorners_usePool() throws ExecutionException, InterruptedException {
+  public void roundedCorners_usePool() throws ExecutionException, InterruptedException {
     canonicalBitmap = canonicalBitmap.scale(0.1f);
 
     Bitmap redRect =
@@ -82,7 +82,7 @@ public class RoundedCornersRegressionTest {
   }
 
   @Test
-  public void testRoundedCorners_overRounded() throws ExecutionException, InterruptedException {
+  public void roundedCorners_overRounded() throws ExecutionException, InterruptedException {
     bitmapRegressionTester.test(
         GlideApp.with(context)
             .asBitmap()

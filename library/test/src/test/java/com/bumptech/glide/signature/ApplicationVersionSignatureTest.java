@@ -38,13 +38,13 @@ public class ApplicationVersionSignatureTest {
   }
 
   @Test
-  public void testCanGetKeyForSignature() {
+  public void canGetKeyForSignature() {
     Key key = ApplicationVersionSignature.obtain(context);
     assertNotNull(key);
   }
 
   @Test
-  public void testKeyForSignatureIsTheSameAcrossCallsInTheSamePackage()
+  public void keyForSignatureIsTheSameAcrossCallsInTheSamePackage()
       throws NoSuchAlgorithmException, UnsupportedEncodingException {
     keyTester
         .addEquivalenceGroup(
@@ -58,7 +58,7 @@ public class ApplicationVersionSignatureTest {
   }
 
   @Test
-  public void testUnresolvablePackageInfo() throws NameNotFoundException {
+  public void unresolvablePackageInfo() throws NameNotFoundException {
     Context context = mock(Context.class, Answers.RETURNS_DEEP_STUBS);
     String packageName = "my.package";
     when(context.getPackageName()).thenReturn(packageName);
@@ -71,7 +71,7 @@ public class ApplicationVersionSignatureTest {
   }
 
   @Test
-  public void testMissingPackageInfo() throws NameNotFoundException {
+  public void missingPackageInfo() throws NameNotFoundException {
     Context context = mock(Context.class, Answers.RETURNS_DEEP_STUBS);
     String packageName = "my.package";
     when(context.getPackageName()).thenReturn(packageName);

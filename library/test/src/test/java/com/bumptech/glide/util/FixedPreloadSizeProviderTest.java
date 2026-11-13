@@ -15,7 +15,7 @@ public class FixedPreloadSizeProviderTest {
   // containsExactly doesn't need a return value check.
   @SuppressWarnings("ResultOfMethodCallIgnored")
   @Test
-  public void testReturnsGivenSize() {
+  public void returnsGivenSize() {
     int width = 500;
     int height = 1234;
     FixedPreloadSizeProvider<Object> provider = new FixedPreloadSizeProvider<>(width, height);

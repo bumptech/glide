@@ -15,7 +15,6 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.view.Display;
 import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
@@ -28,7 +27,6 @@ import androidx.annotation.Nullable;
 import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.transition.Transition;
-import com.bumptech.glide.tests.Util;
 import com.bumptech.glide.util.Preconditions;
 import java.util.HashSet;
 import java.util.List;
@@ -64,12 +62,10 @@ public class ViewTargetTest {
   private PreDrawShadowViewTreeObserver shadowObserver;
   @Mock private SizeReadyCallback cb;
   @Mock private Request request;
-  private int sdkVersion;
   private AttachStateTarget attachStateTarget;
 
   @Before
   public void setUp() {
-    sdkVersion = Build.VERSION.SDK_INT;
     MockitoAnnotations.initMocks(this);
     view = new View(ApplicationProvider.getApplicationContext());
     target = new TestViewTarget(view);
@@ -81,29 +77,28 @@ public class ViewTargetTest {
 
   @After
   public void tearDown() {
-    Util.setSdkVersionInt(sdkVersion);
     ViewTarget.SizeDeterminer.maxDisplayLength = null;
   }
 
   @Test
-  public void testReturnsWrappedView() {
+  public void returnsWrappedView() {
     assertEquals(view, target.getView());
   }
 
   @Test
-  public void testReturnsNullFromGetRequestIfNoRequestSet() {
+  public void returnsNullFromGetRequestIfNoRequestSet() {
     assertNull(target.getRequest());
   }
 
   @Test
-  public void testCanSetAndRetrieveRequest() {
+  public void canSetAndRetrieveRequest() {
     target.setRequest(request);
 
     assertEquals(request, target.getRequest());
   }
 
   @Test
-  public void testRetrievesRequestFromPreviousTargetForView() {
+  public void retrievesRequestFromPreviousTargetForView() {
     target.setRequest(request);
 
     ViewTarget<View, Object> second = new TestViewTarget(view);
@@ -112,7 +107,7 @@ public class ViewTargetTest {
   }
 
   @Test
-  public void testSizeCallbackIsCalledSynchronouslyIfViewSizeSet() {
+  public void sizeCallbackIsCalledSynchronouslyIfViewSizeSet() {
     int dimens = 333;
     shadowView.setWidth(dimens).setHeight(dimens).setIsLaidOut(true);
 
@@ -122,7 +117,7 @@ public class ViewTargetTest {
   }
 
   @Test
-  public void testSizeCallbackIsCalledSynchronouslyIfLayoutParamsConcreteSizeSet() {
+  public void sizeCallbackIsCalledSynchronouslyIfLayoutParamsConcreteSizeSet() {
     int dimens = 444;
     LayoutParams layoutParams = new LayoutParams(dimens, dimens);
     view.setLayoutParams(layoutParams);
@@ -213,7 +208,7 @@ public class ViewTargetTest {
   }
 
   @Test
-  public void testMatchParentWidthAndHeight() {
+  public void matchParentWidthAndHeight() {
     LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
     view.setLayoutParams(params);
 
@@ -230,7 +225,7 @@ public class ViewTargetTest {
   }
 
   @Test
-  public void testSizeCallbackIsCalledPreDrawIfNoDimensAndNoLayoutParams() {
+  public void sizeCallbackIsCalledPreDrawIfNoDimensAndNoLayoutParams() {
     target.getSize(cb);
 
     int width = 12;
@@ -242,7 +237,7 @@ public class ViewTargetTest {
   }
 
   @Test
-  public void testSizeCallbacksAreCalledInOrderPreDraw() {
+  public void sizeCallbacksAreCalledInOrderPreDraw() {
     SizeReadyCallback[] cbs = new SizeReadyCallback[25];
     for (int i = 0; i < cbs.length; i++) {
       cbs[i] = mock(SizeReadyCallback.class);
@@ -261,7 +256,7 @@ public class ViewTargetTest {
   }
 
   @Test
-  public void testDoesNotNotifyCallbackTwiceIfAddedTwice() {
+  public void doesNotNotifyCallbackTwiceIfAddedTwice() {
     target.getSize(cb);
     target.getSize(cb);
 
@@ -273,7 +268,7 @@ public class ViewTargetTest {
   }
 
   @Test
-  public void testDoesNotAddMultipleListenersIfMultipleCallbacksAreAdded() {
+  public void doesNotAddMultipleListenersIfMultipleCallbacksAreAdded() {
     SizeReadyCallback cb1 = mock(SizeReadyCallback.class);
     SizeReadyCallback cb2 = mock(SizeReadyCallback.class);
     target.getSize(cb1);
@@ -282,7 +277,7 @@ public class ViewTargetTest {
   }
 
   @Test
-  public void testDoesAddSecondListenerIfFirstListenerIsRemovedBeforeSecondRequest() {
+  public void doesAddSecondListenerIfFirstListenerIsRemovedBeforeSecondRequest() {
     SizeReadyCallback cb1 = mock(SizeReadyCallback.class);
     target.getSize(cb1);
 
@@ -303,7 +298,7 @@ public class ViewTargetTest {
   }
 
   @Test
-  public void testSizeCallbackIsNotCalledPreDrawIfNoDimensSetOnPreDraw() {
+  public void sizeCallbackIsNotCalledPreDrawIfNoDimensSetOnPreDraw() {
     target.getSize(cb);
     shadowObserver.fireOnPreDrawListeners();
 
@@ -312,7 +307,7 @@ public class ViewTargetTest {
   }
 
   @Test
-  public void testSizeCallbackIsCalledPreDrawIfNoDimensAndNoLayoutParamsButLayoutParamsSetLater() {
+  public void sizeCallbackIsCalledPreDrawIfNoDimensAndNoLayoutParamsButLayoutParamsSetLater() {
     target.getSize(cb);
 
     int width = 689;
@@ -326,7 +321,7 @@ public class ViewTargetTest {
   }
 
   @Test
-  public void testCallbackIsNotCalledTwiceIfPreDrawFiresTwice() {
+  public void callbackIsNotCalledTwiceIfPreDrawFiresTwice() {
     target.getSize(cb);
 
     LayoutParams layoutParams = new LayoutParams(1234, 4123);
@@ -339,7 +334,7 @@ public class ViewTargetTest {
   }
 
   @Test
-  public void testCallbacksFromMultipleRequestsAreNotifiedOnPreDraw() {
+  public void callbacksFromMultipleRequestsAreNotifiedOnPreDraw() {
     SizeReadyCallback firstCb = mock(SizeReadyCallback.class);
     SizeReadyCallback secondCb = mock(SizeReadyCallback.class);
     target.getSize(firstCb);
@@ -358,7 +353,7 @@ public class ViewTargetTest {
   }
 
   @Test
-  public void testDoesNotThrowOnPreDrawIfViewTreeObserverIsDead() {
+  public void doesNotThrowOnPreDrawIfViewTreeObserverIsDead() {
     target.getSize(cb);
 
     int width = 1;
@@ -373,12 +368,12 @@ public class ViewTargetTest {
   }
 
   @Test(expected = NullPointerException.class)
-  public void testThrowsIfGivenNullView() {
+  public void throwsIfGivenNullView() {
     new TestViewTarget(null);
   }
 
   @Test
-  public void testDecreasesDimensionsByViewPadding() {
+  public void decreasesDimensionsByViewPadding() {
     view.setLayoutParams(new LayoutParams(100, 100));
     view.setPadding(25, 25, 25, 25);
     shadowView.setIsLaidOut(true);
@@ -415,16 +410,6 @@ public class ViewTargetTest {
         .setWidth(100)
         .setHeight(100)
         .setIsLaidOut(false);
-    target.getSize(cb);
-
-    verify(cb).onSizeReady(100, 100);
-  }
-
-  @Test
-  public void getSize_withValidWidthAndHeight_preV19_layoutRequested_callsSizeReady() {
-    Util.setSdkVersionInt(18);
-    shadowView.setWidth(100).setHeight(100).requestLayout();
-
     target.getSize(cb);
 
     verify(cb).onSizeReady(100, 100);

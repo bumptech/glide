@@ -34,7 +34,7 @@ public class UrlUriLoaderTest {
   }
 
   @Test
-  public void testHandlesHttpUris() throws MalformedURLException {
+  public void handlesHttpUris() throws MalformedURLException {
     Uri httpUri = Uri.parse("http://www.google.com");
     loader.buildLoadData(httpUri, IMAGE_SIDE, IMAGE_SIDE, OPTIONS);
 
@@ -45,7 +45,7 @@ public class UrlUriLoaderTest {
   }
 
   @Test
-  public void testHandlesHttpsUris() throws MalformedURLException {
+  public void handlesHttpsUris() throws MalformedURLException {
     Uri httpsUri = Uri.parse("https://www.google.com");
     loader.buildLoadData(httpsUri, IMAGE_SIDE, IMAGE_SIDE, OPTIONS);
 
@@ -57,7 +57,7 @@ public class UrlUriLoaderTest {
 
   // Test for https://github.com/bumptech/glide/issues/71.
   @Test
-  public void testHandlesMostlyInvalidHttpUris() {
+  public void handlesMostlyInvalidHttpUris() {
     Uri mostlyInvalidHttpUri =
         Uri.parse(
             "http://myserver_url.com:80http://myserver_url.com/webapp/images/no_image.png"

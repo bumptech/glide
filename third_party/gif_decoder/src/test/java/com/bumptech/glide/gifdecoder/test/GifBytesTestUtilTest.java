@@ -15,7 +15,7 @@ import org.junit.runners.JUnit4;
 public class GifBytesTestUtilTest {
 
   @Test
-  public void testWriteHeaderAndLsdWithoutGct() {
+  public void writeHeaderAndLsdWithoutGct() {
     ByteBuffer buffer = ByteBuffer.allocate(GifBytesTestUtil.HEADER_LENGTH);
     GifBytesTestUtil.writeHeaderAndLsd(buffer, 8, 16, false, 0);
 
@@ -26,7 +26,7 @@ public class GifBytesTestUtilTest {
   }
 
   @Test
-  public void testWriteHeaderAndLsdWithGct() {
+  public void writeHeaderAndLsdWithGct() {
     ByteBuffer buffer = ByteBuffer.allocate(GifBytesTestUtil.HEADER_LENGTH);
     GifBytesTestUtil.writeHeaderAndLsd(buffer, 8, 16, true, 4);
 
@@ -38,7 +38,7 @@ public class GifBytesTestUtilTest {
   }
 
   @Test
-  public void testWriteImageDescriptorWithoutColorTable() {
+  public void writeImageDescriptorWithoutColorTable() {
     ByteBuffer buffer = ByteBuffer.allocate(GifBytesTestUtil.IMAGE_DESCRIPTOR_LENGTH);
     GifBytesTestUtil.writeImageDescriptor(buffer, 10, 9, 8, 7, false, 0);
 
@@ -60,7 +60,7 @@ public class GifBytesTestUtilTest {
   }
 
   @Test
-  public void testWriteImageDescriptorWithColorTable() {
+  public void writeImageDescriptorWithColorTable() {
     ByteBuffer buffer = ByteBuffer.allocate(GifBytesTestUtil.IMAGE_DESCRIPTOR_LENGTH);
     GifBytesTestUtil.writeImageDescriptor(buffer, 10, 9, 8, 7, true, 4);
 
@@ -86,7 +86,7 @@ public class GifBytesTestUtilTest {
   }
 
   @Test
-  public void testWriteColorTable() {
+  public void writeColorTable() {
     final int numColors = 4;
     ByteBuffer buffer = ByteBuffer.allocate(GifBytesTestUtil.getColorTableLength(numColors));
     GifBytesTestUtil.writeColorTable(buffer, numColors);
@@ -106,7 +106,7 @@ public class GifBytesTestUtilTest {
   }
 
   @Test
-  public void testWriteFakeImageData() {
+  public void writeFakeImageData() {
     ByteBuffer buffer = ByteBuffer.allocate(4);
     GifBytesTestUtil.writeFakeImageData(buffer, 2);
 
@@ -116,7 +116,7 @@ public class GifBytesTestUtilTest {
   }
 
   @Test
-  public void testWritesGraphicsControlExtension() {
+  public void writesGraphicsControlExtension() {
     short delay = 20;
     ByteBuffer buffer = ByteBuffer.allocate(GifBytesTestUtil.GRAPHICS_CONTROL_EXTENSION_LENGTH);
     byte[] expected = new byte[] {

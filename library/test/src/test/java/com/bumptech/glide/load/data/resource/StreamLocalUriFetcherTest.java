@@ -46,7 +46,7 @@ public class StreamLocalUriFetcherTest {
   }
 
   @Test
-  public void testLoadResource_returnsInputStream() throws Exception {
+  public void loadResource_returnsInputStream() throws Exception {
     Context context = ApplicationProvider.getApplicationContext();
     Uri uri = Uri.parse("file://nothing");
 
@@ -61,7 +61,7 @@ public class StreamLocalUriFetcherTest {
   }
 
   @Test
-  public void testLoadResource_mediaUri_returnsFileDescriptor() throws Exception {
+  public void loadResource_mediaUri_returnsFileDescriptor() throws Exception {
     Context context = ApplicationProvider.getApplicationContext();
     Uri uri = Uri.parse("content://media");
 
@@ -87,7 +87,7 @@ public class StreamLocalUriFetcherTest {
   }
 
   @Test
-  public void testLoadResource_withNullInputStream_callsLoadFailed() {
+  public void loadResource_withNullInputStream_callsLoadFailed() {
     Context context = ApplicationProvider.getApplicationContext();
     Uri uri = Uri.parse("file://nothing");
 

@@ -27,7 +27,7 @@ public class GifDecoderTest {
   }
 
   @Test
-  public void testCorrectPixelsDecoded() throws IOException {
+  public void correctPixelsDecoded() throws IOException {
     byte[] data = TestUtil.resourceToBytes(getClass(), "white_black_row.gif");
     GifHeaderParser headerParser = new GifHeaderParser();
     headerParser.setData(data);
@@ -42,7 +42,7 @@ public class GifDecoderTest {
   }
 
   @Test
-  public void testCanDecodeFramesFromTestGif() throws IOException {
+  public void canDecodeFramesFromTestGif() throws IOException {
     byte[] data = TestUtil.resourceToBytes(getClass(), "partial_gif_decode.gif");
     GifHeaderParser headerParser = new GifHeaderParser();
     headerParser.setData(data);
@@ -56,7 +56,7 @@ public class GifDecoderTest {
   }
 
   @Test
-  public void testFrameIndexStartsAtNegativeOne() {
+  public void frameIndexStartsAtNegativeOne() {
     GifHeader gifheader = new GifHeader();
     gifheader.frameCount = 4;
     byte[] data = new byte[0];
@@ -66,7 +66,7 @@ public class GifDecoderTest {
   }
 
   @Test
-  public void testTotalIterationCountIsOneIfNetscapeLoopCountDoesntExist() {
+  public void totalIterationCountIsOneIfNetscapeLoopCountDoesntExist() {
     GifHeader gifheader = new GifHeader();
     gifheader.loopCount = GifHeader.NETSCAPE_LOOP_COUNT_DOES_NOT_EXIST;
     byte[] data = new byte[0];
@@ -76,7 +76,7 @@ public class GifDecoderTest {
   }
 
   @Test
-  public void testTotalIterationCountIsForeverIfNetscapeLoopCountIsForever() {
+  public void totalIterationCountIsForeverIfNetscapeLoopCountIsForever() {
     GifHeader gifheader = new GifHeader();
     gifheader.loopCount = GifHeader.NETSCAPE_LOOP_COUNT_FOREVER;
     byte[] data = new byte[0];
@@ -86,7 +86,7 @@ public class GifDecoderTest {
   }
 
   @Test
-  public void testTotalIterationCountIsTwoIfNetscapeLoopCountIsOne() {
+  public void totalIterationCountIsTwoIfNetscapeLoopCountIsOne() {
     GifHeader gifheader = new GifHeader();
     gifheader.loopCount = 1;
     byte[] data = new byte[0];
@@ -96,7 +96,7 @@ public class GifDecoderTest {
   }
 
   @Test
-  public void testAdvanceIncrementsFrameIndex() {
+  public void advanceIncrementsFrameIndex() {
     GifHeader gifheader = new GifHeader();
     gifheader.frameCount = 4;
     byte[] data = new byte[0];
@@ -107,7 +107,7 @@ public class GifDecoderTest {
   }
 
   @Test
-  public void testAdvanceWrapsIndexBackToZero() {
+  public void advanceWrapsIndexBackToZero() {
     GifHeader gifheader = new GifHeader();
     gifheader.frameCount = 2;
     byte[] data = new byte[0];
@@ -120,7 +120,7 @@ public class GifDecoderTest {
   }
 
   @Test
-  public void testSettingDataResetsFramePointer() {
+  public void settingDataResetsFramePointer() {
     GifHeader gifheader = new GifHeader();
     gifheader.frameCount = 4;
     byte[] data = new byte[0];
@@ -135,7 +135,7 @@ public class GifDecoderTest {
   }
 
   @Test
-  public void testFirstFrameMustClearBeforeDrawingWhenLastFrameIsDisposalBackground()
+  public void firstFrameMustClearBeforeDrawingWhenLastFrameIsDisposalBackground()
       throws IOException {
     byte[] data = TestUtil.resourceToBytes(getClass(), "transparent_disposal_background.gif");
     GifHeaderParser headerParser = new GifHeaderParser();
@@ -153,7 +153,7 @@ public class GifDecoderTest {
   }
 
   @Test
-  public void testFirstFrameMustClearBeforeDrawingWhenLastFrameIsDisposalNone() throws IOException {
+  public void firstFrameMustClearBeforeDrawingWhenLastFrameIsDisposalNone() throws IOException {
     byte[] data = TestUtil.resourceToBytes(getClass(), "transparent_disposal_none.gif");
     GifHeaderParser headerParser = new GifHeaderParser();
     headerParser.setData(data);

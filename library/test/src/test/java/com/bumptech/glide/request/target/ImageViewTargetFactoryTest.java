@@ -29,7 +29,7 @@ public class ImageViewTargetFactoryTest {
   }
 
   @Test
-  public void testReturnsTargetForBitmaps() {
+  public void returnsTargetForBitmaps() {
     Bitmap bitmap = Bitmap.createBitmap(50, 50, Bitmap.Config.ARGB_8888);
     Target<Bitmap> target = factory.buildTarget(view, Bitmap.class);
     target.onResourceReady(bitmap, null);
@@ -37,7 +37,7 @@ public class ImageViewTargetFactoryTest {
   }
 
   @Test
-  public void testReturnsTargetForBitmapDrawables() {
+  public void returnsTargetForBitmapDrawables() {
     BitmapDrawable drawable =
         new BitmapDrawable(
             ApplicationProvider.getApplicationContext().getResources(),
@@ -49,14 +49,14 @@ public class ImageViewTargetFactoryTest {
   }
 
   @Test
-  public void testReturnsTargetForDrawables() {
+  public void returnsTargetForDrawables() {
     Target<Drawable> target = factory.buildTarget(view, Drawable.class);
     target.onResourceReady(new ColorDrawable(Color.RED), null);
     assertThat(target).isInstanceOf(DrawableImageViewTarget.class);
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void testThrowsForUnknownType() {
+  public void throwsForUnknownType() {
     factory.buildTarget(view, Object.class);
   }
 }

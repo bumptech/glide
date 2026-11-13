@@ -13,7 +13,7 @@ import org.junit.runners.JUnit4;
 public class UnitTranscoderTest {
 
   @Test
-  public void testReturnsTheGivenResource() {
+  public void returnsTheGivenResource() {
     Resource<Object> resource = mockResource();
     ResourceTranscoder<Object, Object> unitTranscoder = UnitTranscoder.get();
 

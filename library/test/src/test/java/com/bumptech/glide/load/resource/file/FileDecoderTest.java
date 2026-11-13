@@ -25,7 +25,7 @@ public class FileDecoderTest {
   }
 
   @Test
-  public void testReturnsGivenFileAsResource() throws IOException {
+  public void returnsGivenFileAsResource() throws IOException {
     File expected = new File("testFile");
     Resource<File> decoded = Preconditions.checkNotNull(decoder.decode(expected, 1, 1, options));
 

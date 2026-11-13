@@ -12,7 +12,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.bumptech.glide.load.Key;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,7 +25,7 @@ import org.robolectric.annotation.Config;
 public class EngineResourceTest {
   private EngineResource<Object> engineResource;
   @Mock private EngineResource.ResourceListener listener;
-  @Mock private Key cacheKey;
+  @Mock private EngineKey cacheKey;
   @Mock private Resource<Object> resource;
 
   @Before
@@ -38,7 +37,7 @@ public class EngineResourceTest {
   }
 
   @Test
-  public void testCanAcquireAndRelease() {
+  public void canAcquireAndRelease() {
     engineResource.acquire();
     engineResource.release();
 
@@ -46,7 +45,7 @@ public class EngineResourceTest {
   }
 
   @Test
-  public void testCanAcquireMultipleTimesAndRelease() {
+  public void canAcquireMultipleTimesAndRelease() {
     engineResource.acquire();
     engineResource.acquire();
     engineResource.release();
@@ -56,21 +55,21 @@ public class EngineResourceTest {
   }
 
   @Test
-  public void testDelegatesGetToWrappedResource() {
+  public void delegatesGetToWrappedResource() {
     Object expected = new Object();
     when(resource.get()).thenReturn(expected);
     assertEquals(expected, engineResource.get());
   }
 
   @Test
-  public void testDelegatesGetSizeToWrappedResource() {
+  public void delegatesGetSizeToWrappedResource() {
     int expectedSize = 1234;
     when(resource.getSize()).thenReturn(expectedSize);
     assertEquals(expectedSize, engineResource.getSize());
   }
 
   @Test
-  public void testRecyclesWrappedResourceWhenRecycled() {
+  public void recyclesWrappedResourceWhenRecycled() {
     engineResource.acquire();
     engineResource.release();
     engineResource.recycle();
@@ -78,30 +77,30 @@ public class EngineResourceTest {
   }
 
   @Test(expected = IllegalStateException.class)
-  public void testThrowsIfRecycledTwice() {
+  public void throwsIfRecycledTwice() {
     engineResource.recycle();
     engineResource.recycle();
   }
 
   @Test(expected = IllegalStateException.class)
-  public void testThrowsIfReleasedBeforeAcquired() {
+  public void throwsIfReleasedBeforeAcquired() {
     engineResource.release();
   }
 
   @Test(expected = IllegalStateException.class)
-  public void testThrowsIfRecycledWhileAcquired() {
+  public void throwsIfRecycledWhileAcquired() {
     engineResource.acquire();
     engineResource.recycle();
   }
 
   @Test(expected = IllegalStateException.class)
-  public void testThrowsIfAcquiredAfterRecycled() {
+  public void throwsIfAcquiredAfterRecycled() {
     engineResource.recycle();
     engineResource.acquire();
   }
 
   @Test
-  public void testThrowsIfAcquiredOnBackgroundThread() throws InterruptedException {
+  public void throwsIfAcquiredOnBackgroundThread() throws InterruptedException {
     Thread otherThread =
         new Thread(
             new Runnable() {
@@ -120,7 +119,7 @@ public class EngineResourceTest {
   }
 
   @Test
-  public void testThrowsIfReleasedOnBackgroundThread() throws InterruptedException {
+  public void throwsIfReleasedOnBackgroundThread() throws InterruptedException {
     engineResource.acquire();
     Thread otherThread =
         new Thread(
@@ -140,14 +139,14 @@ public class EngineResourceTest {
   }
 
   @Test(expected = IllegalStateException.class)
-  public void testThrowsIfReleasedMoreThanAcquired() {
+  public void throwsIfReleasedMoreThanAcquired() {
     engineResource.acquire();
     engineResource.release();
     engineResource.release();
   }
 
   @Test(expected = NullPointerException.class)
-  public void testThrowsIfWrappedResourceIsNull() {
+  public void throwsIfWrappedResourceIsNull() {
     new EngineResource<>(
         /* toWrap= */ null,
         /* isMemoryCacheable= */ false,
@@ -157,7 +156,7 @@ public class EngineResourceTest {
   }
 
   @Test
-  public void testCanSetAndGetIsCacheable() {
+  public void canSetAndGetIsCacheable() {
     engineResource =
         new EngineResource<>(
             mockResource(),
@@ -184,7 +183,7 @@ public class EngineResourceTest {
             resource, /* isMemoryCacheable= */ true, /* isRecyclable= */ false, cacheKey, listener);
     engineResource.recycle();
 
-    verify(listener, never()).onResourceReleased(any(Key.class), any(EngineResource.class));
+    verify(listener, never()).onResourceReleased(any(EngineKey.class), any(EngineResource.class));
     verify(resource, never()).recycle();
   }
 }

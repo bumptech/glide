@@ -5,8 +5,6 @@ import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
-import android.os.Build.VERSION_CODES;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.bumptech.glide.Priority;
@@ -58,10 +56,7 @@ public final class DirectResourceLoader<DataT> implements ModelLoader<Integer, D
   public LoadData<DataT> buildLoadData(
       @NonNull Integer resourceId, int width, int height, @NonNull Options options) {
     Theme theme = options.get(ResourceDrawableDecoder.THEME);
-    Resources resources =
-        Build.VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP && theme != null
-            ? theme.getResources()
-            : context.getResources();
+    Resources resources = theme != null ? theme.getResources() : context.getResources();
     return new LoadData<>(
         // TODO(judds): We try to apply AndroidResourceSignature for caching in RequestBuilder.
         //  Arguably we should mix in that information here instead.

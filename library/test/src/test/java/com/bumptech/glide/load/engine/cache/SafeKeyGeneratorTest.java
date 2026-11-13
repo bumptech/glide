@@ -27,7 +27,7 @@ public class SafeKeyGeneratorTest {
   }
 
   @Test
-  public void testKeysAreValidForDiskCache() {
+  public void keysAreValidForDiskCache() {
     final Pattern diskCacheRegex = Pattern.compile("[a-z0-9_-]{64}");
     for (int i = 0; i < 1000; i++) {
       String key = getRandomKeyFromGenerator();

@@ -62,7 +62,7 @@ public class DefaultImageHeaderParserTest {
   }
 
   @Test
-  public void testCanParsePngType() throws IOException {
+  public void canParsePngType() throws IOException {
     // PNG magic number from: http://en.wikipedia.org/wiki/Portable_Network_Graphics.
     byte[] data = new byte[] {(byte) 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a};
     runTest(
@@ -84,7 +84,7 @@ public class DefaultImageHeaderParserTest {
   }
 
   @Test
-  public void testCanParsePngWithAlpha() throws IOException {
+  public void canParsePngWithAlpha() throws IOException {
     for (int i = 3; i <= 6; i++) {
       byte[] pngHeaderWithIhdrChunk = generatePngHeaderWithIhdr(i);
       runTest(
@@ -108,7 +108,7 @@ public class DefaultImageHeaderParserTest {
   }
 
   @Test
-  public void testCanParsePngWithoutAlpha() throws IOException {
+  public void canParsePngWithoutAlpha() throws IOException {
     for (int i = 0; i < 3; i++) {
       byte[] pngHeaderWithIhdrChunk = generatePngHeaderWithIhdr(i);
       runTest(
@@ -132,7 +132,7 @@ public class DefaultImageHeaderParserTest {
   }
 
   @Test
-  public void testCanParseJpegType() throws IOException {
+  public void canParseJpegType() throws IOException {
     byte[] data = new byte[] {(byte) 0xFF, (byte) 0xD8};
     runTest(
         data,
@@ -153,7 +153,7 @@ public class DefaultImageHeaderParserTest {
   }
 
   @Test
-  public void testCanParseGifType() throws IOException {
+  public void canParseGifType() throws IOException {
     byte[] data = new byte[] {'G', 'I', 'F'};
     runTest(
         data,
@@ -174,7 +174,7 @@ public class DefaultImageHeaderParserTest {
   }
 
   @Test
-  public void testCanParseLosslessWebpWithAlpha() throws IOException {
+  public void canParseLosslessWebpWithAlpha() throws IOException {
     byte[] data =
         new byte[] {
           0x52,
@@ -229,7 +229,7 @@ public class DefaultImageHeaderParserTest {
   }
 
   @Test
-  public void testCanParseLosslessWebpWithoutAlpha() throws IOException {
+  public void canParseLosslessWebpWithoutAlpha() throws IOException {
     byte[] data =
         new byte[] {
           0x52,
@@ -284,7 +284,7 @@ public class DefaultImageHeaderParserTest {
   }
 
   @Test
-  public void testCanParseExtendedWebpWithAlpha() throws IOException {
+  public void canParseExtendedWebpWithAlpha() throws IOException {
     byte[] data =
         new byte[] {
           0x52,
@@ -339,7 +339,7 @@ public class DefaultImageHeaderParserTest {
   }
 
   @Test
-  public void testCanParseExtendedWebpWithoutAlpha() throws IOException {
+  public void canParseExtendedWebpWithoutAlpha() throws IOException {
     byte[] data =
         new byte[] {
           0x52,
@@ -394,7 +394,7 @@ public class DefaultImageHeaderParserTest {
   }
 
   @Test
-  public void testCanParseExtendedWebpWithoutAlphaAndWithAnimation() throws IOException {
+  public void canParseExtendedWebpWithoutAlphaAndWithAnimation() throws IOException {
     byte[] data =
         new byte[] {
           0x52,
@@ -449,7 +449,7 @@ public class DefaultImageHeaderParserTest {
   }
 
   @Test
-  public void testCanParseExtendedWebpWithAlphaAndAnimation() throws IOException {
+  public void canParseExtendedWebpWithAlphaAndAnimation() throws IOException {
     byte[] data =
         new byte[] {
           0x52,
@@ -504,7 +504,7 @@ public class DefaultImageHeaderParserTest {
   }
 
   @Test
-  public void testCanParseRealAnimatedWebpFile() throws IOException {
+  public void canParseRealAnimatedWebpFile() throws IOException {
     byte[] data =
         ByteStreams.toByteArray(TestResourceUtil.openResource(getClass(), "animated_webp.webp"));
     runTest(
@@ -526,7 +526,7 @@ public class DefaultImageHeaderParserTest {
   }
 
   @Test
-  public void testCanParseAvifMajorBrand() throws IOException {
+  public void canParseAvifMajorBrand() throws IOException {
     byte[] data =
         new byte[] {
           // Box Size.
@@ -600,7 +600,7 @@ public class DefaultImageHeaderParserTest {
   }
 
   @Test
-  public void testCanParseAvifMinorBrand() throws IOException {
+  public void canParseAvifMinorBrand() throws IOException {
     byte[] data =
         new byte[] {
           // Box Size.
@@ -677,7 +677,7 @@ public class DefaultImageHeaderParserTest {
   }
 
   @Test
-  public void testCanParseAvifAndAvisBrandsAsAnimatedAvif() throws IOException {
+  public void canParseAvifAndAvisBrandsAsAnimatedAvif() throws IOException {
     byte[] data =
         new byte[] {
           // Box Size.
@@ -753,7 +753,7 @@ public class DefaultImageHeaderParserTest {
   }
 
   @Test
-  public void testCannotParseAvifMoreThanFiveMinorBrands() throws IOException {
+  public void cannotParseAvifMoreThanFiveMinorBrands() throws IOException {
     byte[] data =
         new byte[] {
           // Box Size.
@@ -822,7 +822,7 @@ public class DefaultImageHeaderParserTest {
   }
 
   @Test
-  public void testCanParseRealAnimatedAvifFile() throws IOException {
+  public void canParseRealAnimatedAvifFile() throws IOException {
     byte[] data =
         ByteStreams.toByteArray(TestResourceUtil.openResource(getClass(), "animated_avif.avif"));
     runTest(
@@ -844,7 +844,7 @@ public class DefaultImageHeaderParserTest {
   }
 
   @Test
-  public void testCanParseHeifMajorBrand() throws IOException {
+  public void canParseHeifMajorBrand() throws IOException {
     byte[] data =
         new byte[] {
           // Box Size.
@@ -900,7 +900,7 @@ public class DefaultImageHeaderParserTest {
   }
 
   @Test
-  public void testCanParseHeifMinorBrand() throws IOException {
+  public void canParseHeifMinorBrand() throws IOException {
     byte[] data =
         new byte[] {
           // Box Size.
@@ -956,7 +956,7 @@ public class DefaultImageHeaderParserTest {
   }
 
   @Test
-  public void testReturnsUnknownTypeForUnknownImageHeaders() throws IOException {
+  public void returnsUnknownTypeForUnknownImageHeaders() throws IOException {
     byte[] data = new byte[] {0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
     runTest(
         data,
@@ -978,7 +978,7 @@ public class DefaultImageHeaderParserTest {
 
   // Test for #286.
   @Test
-  public void testHandlesParsingOrientationWithMinimalExifSegment() throws IOException {
+  public void handlesParsingOrientationWithMinimalExifSegment() throws IOException {
     byte[] data =
         ByteStreams.toByteArray(TestResourceUtil.openResource(getClass(), "short_exif_sample.jpg"));
     runTest(
@@ -1000,7 +1000,7 @@ public class DefaultImageHeaderParserTest {
   }
 
   @Test
-  public void testReturnsUnknownForEmptyData() throws IOException {
+  public void returnsUnknownForEmptyData() throws IOException {
     runTest(
         new byte[0],
         new ParserTestCase() {
@@ -1021,7 +1021,7 @@ public class DefaultImageHeaderParserTest {
 
   // Test for #387.
   @Test
-  public void testHandlesPartialReads() throws IOException {
+  public void handlesPartialReads() throws IOException {
     InputStream is = TestResourceUtil.openResource(getClass(), "issue387_rotated_jpeg.jpg");
     DefaultImageHeaderParser parser = new DefaultImageHeaderParser();
     assertThat(parser.getOrientation(new PartialReadInputStream(is), byteArrayPool)).isEqualTo(6);
@@ -1029,14 +1029,14 @@ public class DefaultImageHeaderParserTest {
 
   // Test for #387.
   @Test
-  public void testHandlesPartialSkips() throws IOException {
+  public void handlesPartialSkips() throws IOException {
     InputStream is = TestResourceUtil.openResource(getClass(), "issue387_rotated_jpeg.jpg");
     DefaultImageHeaderParser parser = new DefaultImageHeaderParser();
     assertThat(parser.getOrientation(new PartialSkipInputStream(is), byteArrayPool)).isEqualTo(6);
   }
 
   @Test
-  public void testHandlesSometimesZeroSkips() throws IOException {
+  public void handlesSometimesZeroSkips() throws IOException {
     InputStream is =
         new ByteArrayInputStream(
             new byte[] {(byte) 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a});

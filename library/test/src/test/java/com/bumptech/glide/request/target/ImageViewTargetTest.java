@@ -48,42 +48,42 @@ public class ImageViewTargetTest {
   }
 
   @Test
-  public void testReturnsCurrentDrawable() {
+  public void returnsCurrentDrawable() {
     view.setImageDrawable(drawable);
 
     assertEquals(drawable, target.getCurrentDrawable());
   }
 
   @Test
-  public void testSetsDrawableSetsDrawableOnView() {
+  public void setsDrawableSetsDrawableOnView() {
     target.setDrawable(drawable);
 
     assertEquals(drawable, view.getDrawable());
   }
 
   @Test
-  public void testSetsDrawableOnLoadStarted() {
+  public void setsDrawableOnLoadStarted() {
     target.onLoadStarted(drawable);
 
     assertEquals(drawable, view.getDrawable());
   }
 
   @Test
-  public void testSetDrawableOnLoadFailed() {
+  public void setDrawableOnLoadFailed() {
     target.onLoadFailed(drawable);
 
     assertEquals(drawable, view.getDrawable());
   }
 
   @Test
-  public void testSetsDrawableOnLoadCleared() {
+  public void setsDrawableOnLoadCleared() {
     target.onLoadCleared(drawable);
 
     assertEquals(drawable, view.getDrawable());
   }
 
   @Test
-  public void testSetsDrawableOnViewInOnResourceReadyWhenAnimationReturnsFalse() {
+  public void setsDrawableOnViewInOnResourceReadyWhenAnimationReturnsFalse() {
     @SuppressWarnings("unchecked")
     Transition<Drawable> animation = mock(Transition.class);
     when(animation.transition(any(Drawable.class), eq(target))).thenReturn(false);
@@ -94,7 +94,7 @@ public class ImageViewTargetTest {
   }
 
   @Test
-  public void testDoesNotSetDrawableOnViewInOnResourceReadyWhenAnimationReturnsTrue() {
+  public void doesNotSetDrawableOnViewInOnResourceReadyWhenAnimationReturnsTrue() {
     Drawable resource = new ColorDrawable(Color.RED);
     @SuppressWarnings("unchecked")
     Transition<Drawable> animation = mock(Transition.class);
@@ -105,7 +105,7 @@ public class ImageViewTargetTest {
   }
 
   @Test
-  public void testProvidesCurrentPlaceholderToAnimationIfPresent() {
+  public void providesCurrentPlaceholderToAnimationIfPresent() {
     Drawable placeholder = new ColorDrawable(Color.BLACK);
     view.setImageDrawable(placeholder);
 

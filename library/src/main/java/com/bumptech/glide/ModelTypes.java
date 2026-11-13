@@ -50,6 +50,5 @@ interface ModelTypes<T> {
 
   @NonNull
   @CheckResult
-  @SuppressWarnings("unchecked")
   T load(@Nullable Object model);
 }

@@ -46,7 +46,7 @@ public class ResourceRecyclerTest {
   }
 
   @Test
-  public void testDoesNotRecycleChildResourceSynchronously() {
+  public void doesNotRecycleChildResourceSynchronously() {
     Resource<?> parent = mockResource();
     final Resource<?> child = mockResource();
     doAnswer(

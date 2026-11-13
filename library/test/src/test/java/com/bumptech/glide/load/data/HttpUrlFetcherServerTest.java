@@ -66,7 +66,7 @@ public class HttpUrlFetcherServerTest {
   }
 
   @Test
-  public void testReturnsInputStreamOnStatusOk() throws Exception {
+  public void returnsInputStreamOnStatusOk() throws Exception {
     String expected = "fakedata";
     mockWebServer.enqueue(new MockResponse().setBody(expected).setResponseCode(200));
     HttpUrlFetcher fetcher = getFetcher();
@@ -77,7 +77,7 @@ public class HttpUrlFetcherServerTest {
   }
 
   @Test
-  public void testHandlesRedirect301s() throws Exception {
+  public void handlesRedirect301s() throws Exception {
     String expected = "fakedata";
     mockWebServer.enqueue(
         new MockResponse()
@@ -92,7 +92,7 @@ public class HttpUrlFetcherServerTest {
   }
 
   @Test
-  public void testHandlesRedirect302s() throws Exception {
+  public void handlesRedirect302s() throws Exception {
     String expected = "fakedata";
     mockWebServer.enqueue(
         new MockResponse()
@@ -107,7 +107,7 @@ public class HttpUrlFetcherServerTest {
   }
 
   @Test
-  public void testHandlesRelativeRedirects() throws Exception {
+  public void handlesRelativeRedirects() throws Exception {
     String expected = "fakedata";
     mockWebServer.enqueue(
         new MockResponse().setResponseCode(301).setHeader("Location", "/redirect"));
@@ -124,7 +124,7 @@ public class HttpUrlFetcherServerTest {
   }
 
   @Test
-  public void testHandlesUpToFiveRedirects() throws Exception {
+  public void handlesUpToFiveRedirects() throws Exception {
     int numRedirects = 4;
     String expected = "redirectedData";
     String redirectBase = "/redirect";
@@ -151,7 +151,7 @@ public class HttpUrlFetcherServerTest {
   }
 
   @Test
-  public void testFailsOnRedirectLoops() throws Exception {
+  public void failsOnRedirectLoops() throws Exception {
     mockWebServer.enqueue(
         new MockResponse()
             .setResponseCode(301)
@@ -167,7 +167,7 @@ public class HttpUrlFetcherServerTest {
   }
 
   @Test
-  public void testFailsIfRedirectLocationIsNotPresent() throws Exception {
+  public void failsIfRedirectLocationIsNotPresent() throws Exception {
     mockWebServer.enqueue(new MockResponse().setResponseCode(301));
 
     getFetcher().loadData(Priority.NORMAL, callback);
@@ -176,7 +176,7 @@ public class HttpUrlFetcherServerTest {
   }
 
   @Test
-  public void testFailsIfRedirectLocationIsPresentAndEmpty() throws Exception {
+  public void failsIfRedirectLocationIsPresentAndEmpty() throws Exception {
     mockWebServer.enqueue(new MockResponse().setResponseCode(301).setHeader("Location", ""));
 
     getFetcher().loadData(Priority.NORMAL, callback);
@@ -185,7 +185,7 @@ public class HttpUrlFetcherServerTest {
   }
 
   @Test
-  public void testFailsIfStatusCodeIsNegativeOne() throws Exception {
+  public void failsIfStatusCodeIsNegativeOne() throws Exception {
     mockWebServer.enqueue(new MockResponse().setResponseCode(-1));
     getFetcher().loadData(Priority.LOW, callback);
 
@@ -193,7 +193,7 @@ public class HttpUrlFetcherServerTest {
   }
 
   @Test
-  public void testFailsAfterTooManyRedirects() throws Exception {
+  public void failsAfterTooManyRedirects() throws Exception {
     for (int i = 0; i < 10; i++) {
       mockWebServer.enqueue(
           new MockResponse()
@@ -206,7 +206,7 @@ public class HttpUrlFetcherServerTest {
   }
 
   @Test
-  public void testFailsIfStatusCodeIs500() throws Exception {
+  public void failsIfStatusCodeIs500() throws Exception {
     mockWebServer.enqueue(new MockResponse().setResponseCode(500));
     getFetcher().loadData(Priority.NORMAL, callback);
 
@@ -214,7 +214,7 @@ public class HttpUrlFetcherServerTest {
   }
 
   @Test
-  public void testFailsIfStatusCodeIs400() throws Exception {
+  public void failsIfStatusCodeIs400() throws Exception {
     mockWebServer.enqueue(new MockResponse().setResponseCode(400));
     getFetcher().loadData(Priority.LOW, callback);
 
@@ -222,7 +222,7 @@ public class HttpUrlFetcherServerTest {
   }
 
   @Test
-  public void testSetsReadTimeout() throws Exception {
+  public void setsReadTimeout() throws Exception {
     MockWebServer tempWebServer = new MockWebServer();
     tempWebServer.enqueue(
         new MockResponse().setBody("test").throttleBody(1, TIMEOUT_TIME_MS, TimeUnit.MILLISECONDS));
@@ -240,7 +240,7 @@ public class HttpUrlFetcherServerTest {
   }
 
   @Test
-  public void testAppliesHeadersInGlideUrl() throws Exception {
+  public void appliesHeadersInGlideUrl() throws Exception {
     mockWebServer.enqueue(new MockResponse().setResponseCode(200));
     String headerField = "field";
     String headerValue = "value";

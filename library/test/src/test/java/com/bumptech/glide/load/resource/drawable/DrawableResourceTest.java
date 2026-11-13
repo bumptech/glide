@@ -46,14 +46,14 @@ public class DrawableResourceTest {
   }
 
   @Test
-  public void testDoesNotReturnOriginalDrawableOnGet() {
+  public void doesNotReturnOriginalDrawableOnGet() {
     when(drawable.getConstantState()).thenReturn(mock(Drawable.ConstantState.class));
     assertNotEquals(drawable, resource.get());
   }
 
   @SuppressWarnings("TruthIncompatibleType")
   @Test
-  public void testReturnsNewDrawableOnGet() {
+  public void returnsNewDrawableOnGet() {
     GifDrawable expected = mock(GifDrawable.class);
     Drawable.ConstantState constantState = mock(Drawable.ConstantState.class);
     when(constantState.newDrawable()).thenReturn(expected);
@@ -74,7 +74,7 @@ public class DrawableResourceTest {
   }
 
   @Test(expected = NullPointerException.class)
-  public void testThrowsIfDrawableIsNull() {
+  public void throwsIfDrawableIsNull() {
     new DrawableResource<TestDrawable>(null) {
       @NonNull
       @Override

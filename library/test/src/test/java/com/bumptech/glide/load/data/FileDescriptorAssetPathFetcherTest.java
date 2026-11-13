@@ -37,13 +37,13 @@ public class FileDescriptorAssetPathFetcherTest {
   }
 
   @Test
-  public void testOpensInputStreamForPathWithAssetManager() throws Exception {
+  public void opensInputStreamForPathWithAssetManager() throws Exception {
     fetcher.loadData(Priority.NORMAL, callback);
     verify(callback).onDataReady(eq(assetFileDescriptor));
   }
 
   @Test
-  public void testClosesOpenedInputStreamOnCleanup() throws Exception {
+  public void closesOpenedInputStreamOnCleanup() throws Exception {
     fetcher.loadData(Priority.NORMAL, callback);
     fetcher.cleanup();
 
@@ -51,13 +51,13 @@ public class FileDescriptorAssetPathFetcherTest {
   }
 
   @Test
-  public void testDoesNothingOnCleanupIfNoDataLoaded() throws IOException {
+  public void doesNothingOnCleanupIfNoDataLoaded() throws IOException {
     fetcher.cleanup();
     verify(assetFileDescriptor, never()).close();
   }
 
   @Test
-  public void testDoesNothingOnCancel() throws Exception {
+  public void doesNothingOnCancel() throws Exception {
     fetcher.loadData(Priority.NORMAL, callback);
     fetcher.cancel();
     verify(assetFileDescriptor, never()).close();

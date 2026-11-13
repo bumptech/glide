@@ -8,6 +8,7 @@ import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 import com.bumptech.glide.util.Synthetic;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -322,7 +323,7 @@ public final class GlideExecutor implements ExecutorService {
   public static int calculateBestThreadCount() {
     if (bestThreadCount == 0) {
       bestThreadCount =
-          Math.min(MAXIMUM_AUTOMATIC_THREAD_COUNT, RuntimeCompat.availableProcessors());
+          Math.min(MAXIMUM_AUTOMATIC_THREAD_COUNT, Runtime.getRuntime().availableProcessors());
     }
     return bestThreadCount;
   }
@@ -478,12 +479,14 @@ public final class GlideExecutor implements ExecutorService {
      *
      * <p>Use {@link #NO_THREAD_TIMEOUT} to remove a previously set timeout.
      */
+    @CanIgnoreReturnValue
     public Builder setThreadTimeoutMillis(long threadTimeoutMillis) {
       this.threadTimeoutMillis = threadTimeoutMillis;
       return this;
     }
 
     /** Sets the maximum number of threads to use. */
+    @CanIgnoreReturnValue
     public Builder setThreadCount(@IntRange(from = 1) int threadCount) {
       if (isUnlimited) {
         throw new UnsupportedOperationException(
@@ -505,6 +508,7 @@ public final class GlideExecutor implements ExecutorService {
      *     version.
      */
     @Deprecated
+    @CanIgnoreReturnValue
     public Builder setThreadFactory(@NonNull ThreadFactory threadFactory) {
       this.threadFactory = threadFactory;
       return this;
@@ -514,6 +518,7 @@ public final class GlideExecutor implements ExecutorService {
      * Sets the {@link UncaughtThrowableStrategy} to use for unexpected exceptions thrown by tasks
      * on {@link GlideExecutor}s built by this {@code Builder}.
      */
+    @CanIgnoreReturnValue
     public Builder setUncaughtThrowableStrategy(@NonNull UncaughtThrowableStrategy strategy) {
       this.uncaughtThrowableStrategy = strategy;
       return this;
@@ -523,6 +528,7 @@ public final class GlideExecutor implements ExecutorService {
      * Sets the prefix to use for each thread name created by any {@link GlideExecutor}s built by
      * this {@code Builder}.
      */
+    @CanIgnoreReturnValue
     public Builder setName(String name) {
       this.name = name;
       return this;
@@ -533,6 +539,7 @@ public final class GlideExecutor implements ExecutorService {
      *
      * <p>This is an experimental method that may be removed without warning in a future version.
      */
+    @CanIgnoreReturnValue
     public Builder experimentalSetOnExecuteDecorator(
         Function<? super Runnable, ? extends Runnable> onExecuteDecorator) {
       this.onExecuteDecorator = onExecuteDecorator;

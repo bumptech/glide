@@ -297,7 +297,7 @@ public class RequestTrackerTest {
   }
 
   @Test
-  public void testReturnsTrueFromIsPausedWhenPaused() {
+  public void returnsTrueFromIsPausedWhenPaused() {
     tracker.pauseRequests();
     assertTrue(tracker.isPaused());
   }
@@ -324,13 +324,13 @@ public class RequestTrackerTest {
   }
 
   @Test
-  public void testReturnsFalseFromIsPausedWhenResumed() {
+  public void returnsFalseFromIsPausedWhenResumed() {
     tracker.resumeRequests();
     assertFalse(tracker.isPaused());
   }
 
   @Test
-  public void testPauseAllRequests_returnsTrueFromIsPaused() {
+  public void pauseAllRequests_returnsTrueFromIsPaused() {
     tracker.pauseAllRequests();
     assertTrue(tracker.isPaused());
   }

@@ -38,7 +38,7 @@ public class LruCacheTest {
   }
 
   @Test
-  public void testCanAddAndRetrieveItem() {
+  public void canAddAndRetrieveItem() {
     String key = getKey();
     Object object = new Object();
 
@@ -48,7 +48,7 @@ public class LruCacheTest {
   }
 
   @Test
-  public void testCanPutNullItemWithoutChangingSize() {
+  public void canPutNullItemWithoutChangingSize() {
     String key = getKey();
     cache.put(key, null);
 
@@ -60,7 +60,7 @@ public class LruCacheTest {
   }
 
   @Test
-  public void testReplacingNonNullItemWithNullItemDecreasesSize() {
+  public void replacingNonNullItemWithNullItemDecreasesSize() {
     String key = getKey();
     Object initialValue = new Object();
     cache.put(key, initialValue);
@@ -74,7 +74,7 @@ public class LruCacheTest {
   }
 
   @Test
-  public void testReplacingNullItemWIthNullItemIncreasesSize() {
+  public void replacingNullItemWIthNullItemIncreasesSize() {
     String key = getKey();
     cache.put(key, null);
     cache.put(key, new Object());
@@ -87,7 +87,7 @@ public class LruCacheTest {
   }
 
   @Test
-  public void testReplacingNonNullItemWithNonNullItemUpdatesSize() {
+  public void replacingNonNullItemWithNonNullItemUpdatesSize() {
     String key = getKey();
     Object initialValue = new Object();
     cache.put(key, initialValue);
@@ -102,19 +102,19 @@ public class LruCacheTest {
   }
 
   @Test
-  public void testCacheContainsAddedBitmap() {
+  public void cacheContainsAddedBitmap() {
     final String key = getKey();
     cache.put(key, new Object());
     assertTrue(cache.contains(key));
   }
 
   @Test
-  public void testEmptyCacheDoesNotContainKey() {
+  public void emptyCacheDoesNotContainKey() {
     assertFalse(cache.contains(getKey()));
   }
 
   @Test
-  public void testItIsSizeLimited() {
+  public void itIsSizeLimited() {
     for (int i = 0; i < SIZE; i++) {
       cache.put(getKey(), new Object());
     }
@@ -124,7 +124,7 @@ public class LruCacheTest {
   }
 
   @Test
-  public void testLeastRecentlyAddKeyEvictedFirstIfGetsAreEqual() {
+  public void leastRecentlyAddKeyEvictedFirstIfGetsAreEqual() {
     Object first = new Object();
     cache.put(getKey(), first);
     for (int i = 0; i < SIZE; i++) {
@@ -136,7 +136,7 @@ public class LruCacheTest {
   }
 
   @Test
-  public void testLeastRecentlyUsedKeyEvictedFirst() {
+  public void leastRecentlyUsedKeyEvictedFirst() {
     String mostRecentlyUsedKey = getKey();
     Object mostRecentlyUsedObject = new Object();
     String leastRecentlyUsedKey = getKey();
@@ -155,7 +155,7 @@ public class LruCacheTest {
   }
 
   @Test
-  public void testItemLargerThanCacheIsImmediatelyEvicted() {
+  public void itemLargerThanCacheIsImmediatelyEvicted() {
     Object tooLarge = new Object();
     when(listener.getSize(eq(tooLarge))).thenReturn(SIZE + 1);
     cache.put(getKey(), tooLarge);
@@ -164,7 +164,7 @@ public class LruCacheTest {
   }
 
   @Test
-  public void testItemLargerThanCacheDoesNotCauseAdditionalEvictions() {
+  public void itemLargerThanCacheDoesNotCauseAdditionalEvictions() {
     cache.put(getKey(), new Object());
 
     Object tooLarge = new Object();
@@ -176,7 +176,7 @@ public class LruCacheTest {
   }
 
   @Test
-  public void testClearMemoryRemovesAllItems() {
+  public void clearMemoryRemovesAllItems() {
     String first = getKey();
     String second = getKey();
     cache.put(first, new Object());
@@ -189,7 +189,7 @@ public class LruCacheTest {
   }
 
   @Test
-  public void testCanPutSameItemMultipleTimes() {
+  public void canPutSameItemMultipleTimes() {
     String key = getKey();
     Object value = new Object();
     for (int i = 0; i < SIZE * 2; i++) {
@@ -228,7 +228,7 @@ public class LruCacheTest {
   }
 
   @Test
-  public void testCanIncreaseSizeDynamically() {
+  public void canIncreaseSizeDynamically() {
     int sizeMultiplier = 2;
     cache.setSizeMultiplier(sizeMultiplier);
     for (int i = 0; i < SIZE * sizeMultiplier; i++) {
@@ -239,7 +239,7 @@ public class LruCacheTest {
   }
 
   @Test
-  public void testCanDecreaseSizeDynamically() {
+  public void canDecreaseSizeDynamically() {
     for (int i = 0; i < SIZE; i++) {
       cache.put(getKey(), new Object());
     }
@@ -253,7 +253,7 @@ public class LruCacheTest {
   }
 
   @Test
-  public void testCanResetSizeDynamically() {
+  public void canResetSizeDynamically() {
     int sizeMultiplier = 2;
     cache.setSizeMultiplier(sizeMultiplier);
     for (int i = 0; i < SIZE * sizeMultiplier; i++) {
@@ -266,12 +266,12 @@ public class LruCacheTest {
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void testThrowsIfMultiplierLessThanZero() {
+  public void throwsIfMultiplierLessThanZero() {
     cache.setSizeMultiplier(-1);
   }
 
   @Test
-  public void testCanHandleZeroAsMultiplier() {
+  public void canHandleZeroAsMultiplier() {
     for (int i = 0; i < SIZE; i++) {
       cache.put(getKey(), new Object());
     }
@@ -281,7 +281,7 @@ public class LruCacheTest {
   }
 
   @Test
-  public void testCanRemoveKeys() {
+  public void canRemoveKeys() {
     String key = getKey();
     Object value = new Object();
     cache.put(key, value);
@@ -292,7 +292,7 @@ public class LruCacheTest {
   }
 
   @Test
-  public void testDecreasesSizeWhenRemovesKey() {
+  public void decreasesSizeWhenRemovesKey() {
     String key = getKey();
     Object value = new Object();
     cache.put(key, value);
@@ -306,7 +306,7 @@ public class LruCacheTest {
   }
 
   @Test
-  public void testDoesNotCallListenerWhenRemovesKey() {
+  public void doesNotCallListenerWhenRemovesKey() {
     String key = getKey();
     cache.put(key, new Object());
     cache.remove(key);
@@ -315,7 +315,7 @@ public class LruCacheTest {
   }
 
   @Test
-  public void testGetMaxSizeReturnsCurrentMaxSizeOfCache() {
+  public void getMaxSizeReturnsCurrentMaxSizeOfCache() {
     assertEquals(SIZE, cache.getMaxSize());
   }
 
@@ -372,7 +372,7 @@ public class LruCacheTest {
   }
 
   @Test
-  public void testGetMaxSizeChangesIfMaxSizeChanges() {
+  public void getMaxSizeChangesIfMaxSizeChanges() {
     int multiplier = 2;
     cache.setSizeMultiplier(multiplier);
 
@@ -385,7 +385,7 @@ public class LruCacheTest {
   }
 
   @Test
-  public void testGetCurrentSizeIncreasesAsSizeIncreases() {
+  public void getCurrentSizeIncreasesAsSizeIncreases() {
     cache.put(getKey(), new Object());
     assertEquals(1, cache.getCurrentSize());
     cache.put(getKey(), new Object());
@@ -393,7 +393,7 @@ public class LruCacheTest {
   }
 
   @Test
-  public void testGetCurrentSizeDoesNotChangeWhenSizeMultiplierChangesIfNoItemsAreEvicted() {
+  public void getCurrentSizeDoesNotChangeWhenSizeMultiplierChangesIfNoItemsAreEvicted() {
     cache.put(getKey(), new Object());
     assertEquals(1, cache.getCurrentSize());
     cache.setSizeMultiplier(2);
@@ -401,7 +401,7 @@ public class LruCacheTest {
   }
 
   @Test
-  public void testGetCurrentSizeChangesIfItemsAreEvictedWhenSizeMultiplierChanges() {
+  public void getCurrentSizeChangesIfItemsAreEvictedWhenSizeMultiplierChanges() {
     for (int i = 0; i < SIZE; i++) {
       cache.put(getKey(), new Object());
     }

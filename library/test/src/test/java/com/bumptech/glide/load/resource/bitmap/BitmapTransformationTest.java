@@ -47,7 +47,7 @@ public class BitmapTransformationTest {
   }
 
   @Test
-  public void testReturnsGivenResourceWhenBitmapNotTransformed() {
+  public void returnsGivenResourceWhenBitmapNotTransformed() {
     BitmapTransformation transformation =
         new BitmapTransformation() {
           @Override
@@ -65,7 +65,7 @@ public class BitmapTransformationTest {
   }
 
   @Test
-  public void testReturnsNewResourceWhenBitmapTransformed() {
+  public void returnsNewResourceWhenBitmapTransformed() {
     final Bitmap transformed = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_4444);
     BitmapTransformation transformation =
         new BitmapTransformation() {
@@ -84,7 +84,7 @@ public class BitmapTransformationTest {
   }
 
   @Test
-  public void testPassesGivenArgumentsToTransform() {
+  public void passesGivenArgumentsToTransform() {
     final int expectedWidth = 13;
     final int expectedHeight = 148;
     final Resource<Bitmap> resource = mockResource(223, 4123);
@@ -108,7 +108,7 @@ public class BitmapTransformationTest {
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void testThrowsIfGivenInvalidWidth() {
+  public void throwsIfGivenInvalidWidth() {
     BitmapTransformation transformation =
         new BitmapTransformation() {
 
@@ -128,7 +128,7 @@ public class BitmapTransformationTest {
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void testThrowsIfGivenInvalidHeight() {
+  public void throwsIfGivenInvalidHeight() {
     BitmapTransformation transformation =
         new BitmapTransformation() {
 
@@ -148,7 +148,7 @@ public class BitmapTransformationTest {
   }
 
   @Test
-  public void testReturnsNullIfTransformReturnsNull() {
+  public void returnsNullIfTransformReturnsNull() {
     BitmapTransformation transform =
         new BitmapTransformation() {
 
@@ -167,7 +167,7 @@ public class BitmapTransformationTest {
   }
 
   @Test
-  public void testCallsTransformWithGivenBitmapWidthIfWidthIsSizeOriginal() {
+  public void callsTransformWithGivenBitmapWidthIfWidthIsSizeOriginal() {
     SizeTrackingTransform transform = new SizeTrackingTransform();
 
     int expectedWidth = 200;
@@ -178,7 +178,7 @@ public class BitmapTransformationTest {
   }
 
   @Test
-  public void testCallsTransformWithGivenBitmapHeightIfHeightIsSizeOriginal() {
+  public void callsTransformWithGivenBitmapHeightIfHeightIsSizeOriginal() {
     SizeTrackingTransform transform = new SizeTrackingTransform();
 
     int expectedHeight = 500;

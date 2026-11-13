@@ -13,27 +13,27 @@ import org.junit.runners.JUnit4;
 public class SimpleTargetTest {
 
   @Test(expected = IllegalArgumentException.class)
-  public void testThrowsOnGetSizeIfGivenWidthIsLessThanZero() {
+  public void throwsOnGetSizeIfGivenWidthIsLessThanZero() {
     getTarget(-1, 1).getSize(mock(SizeReadyCallback.class));
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void testThrowsOnGetSizeIfGivenWidthIsEqualToZero() {
+  public void throwsOnGetSizeIfGivenWidthIsEqualToZero() {
     getTarget(0, 1).getSize(mock(SizeReadyCallback.class));
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void testThrowsOnGetSizeIfGivenHeightIsLessThanZero() {
+  public void throwsOnGetSizeIfGivenHeightIsLessThanZero() {
     getTarget(1, -1).getSize(mock(SizeReadyCallback.class));
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void testThrowsOnGetSizeIfGivenHeightIsEqualToZero() {
+  public void throwsOnGetSizeIfGivenHeightIsEqualToZero() {
     getTarget(1, 0).getSize(mock(SizeReadyCallback.class));
   }
 
   @Test
-  public void testCanBeConstructedWithoutDimensions() {
+  public void canBeConstructedWithoutDimensions() {
     new SimpleTarget<Object>() {
       @Override
       public void onResourceReady(
@@ -44,12 +44,12 @@ public class SimpleTargetTest {
   }
 
   @Test
-  public void testConstructorDoesNotThrowWithSizeOriginal() {
+  public void constructorDoesNotThrowWithSizeOriginal() {
     getTarget(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL);
   }
 
   @Test
-  public void testGetSizeDoesNotThrowWithSizeOriginal() {
+  public void getSizeDoesNotThrowWithSizeOriginal() {
     getTarget(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL).getSize(mock(SizeReadyCallback.class));
   }
 

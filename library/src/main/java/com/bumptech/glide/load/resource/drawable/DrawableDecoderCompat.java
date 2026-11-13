@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.graphics.drawable.Drawable;
-import android.os.Build.VERSION;
-import android.os.Build.VERSION_CODES;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.Nullable;
 import androidx.appcompat.content.res.AppCompatResources;
@@ -68,7 +66,7 @@ public final class DrawableDecoderCompat {
   private static Drawable loadDrawableV7(
       Context context, @DrawableRes int id, @Nullable Theme theme) {
     Context resourceContext;
-    if (theme != null && VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
+    if (theme != null) {
       ContextThemeWrapper contextThemeWrapper = new ContextThemeWrapper(context, theme);
       contextThemeWrapper.applyOverrideConfiguration(theme.getResources().getConfiguration());
       resourceContext = contextThemeWrapper;

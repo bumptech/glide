@@ -3,7 +3,7 @@ avif = "1.1.1.14d8e3c4"
 gson = "2.8.2"
 pmd = "6.0.0"
 dagger = "2.60.1"
-compose = "1.5.1"
+compose = "1.12.1"
 kotlin = "2.4.20"
 mockito = "5.3.1"
 retrofit = "2.3.0"
@@ -59,6 +59,7 @@ robolectric = "4.16.1"
 rx-android = "1.2.1"
 rx-java = "1.3.8"
 svg = "1.2.1"
+test-parameter-injector = "1.22"
 truth = "1.4.5"
 violations = "1.8"
 volley = "1.2.1"
@@ -113,6 +114,7 @@ robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "
 rx-android = { group = "io.reactivex", name = "rxandroid", version.ref = "rx-android" }
 rx-java = { group = "io.reactivex", name = "rxjava", version.ref = "rx-java" }
 svg = { group = "com.caverock", name = "androidsvg", version.ref = "svg" }
+test-parameter-injector = { group = "com.google.testparameterinjector", name = "test-parameter-injector", version.ref = "test-parameter-injector" }
 truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
 violations = { group = "se.bjurr.violations", name = "violations-gradle-plugin", version.ref = "violations" }
 volley = { group = "com.android.volley", name = "volley", version.ref = "volley" }

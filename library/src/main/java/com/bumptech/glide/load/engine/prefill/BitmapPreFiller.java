@@ -28,7 +28,6 @@ public final class BitmapPreFiller {
     this.defaultFormat = defaultFormat;
   }
 
-  @SuppressWarnings("deprecation")
   public void preFill(PreFillType.Builder... bitmapAttributeBuilders) {
     if (current != null) {
       current.cancel();

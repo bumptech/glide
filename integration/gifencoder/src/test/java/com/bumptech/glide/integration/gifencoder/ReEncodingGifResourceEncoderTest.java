@@ -100,25 +100,24 @@ public class ReEncodingGifResourceEncoderTest {
   }
 
   @Test
-  public void testEncodeStrategy_withEncodeTransformationTrue_returnsTransformed() {
+  public void encodeStrategy_withEncodeTransformationTrue_returnsTransformed() {
     assertThat(encoder.getEncodeStrategy(options)).isEqualTo(EncodeStrategy.TRANSFORMED);
   }
 
   @Test
-  public void testEncodeStrategy_withEncodeTransformationUnSet_returnsSource() {
+  public void encodeStrategy_withEncodeTransformationUnSet_returnsSource() {
     options.set(ReEncodingGifResourceEncoder.ENCODE_TRANSFORMATION, null);
     assertThat(encoder.getEncodeStrategy(options)).isEqualTo(EncodeStrategy.SOURCE);
   }
 
   @Test
-  public void testEncodeStrategy_withEncodeTransformationFalse_returnsSource() {
+  public void encodeStrategy_withEncodeTransformationFalse_returnsSource() {
     options.set(ReEncodingGifResourceEncoder.ENCODE_TRANSFORMATION, false);
     assertThat(encoder.getEncodeStrategy(options)).isEqualTo(EncodeStrategy.SOURCE);
   }
 
   @Test
-  public void testEncode_withEncodeTransformationFalse_writesSourceDataToStream()
-      throws IOException {
+  public void encode_withEncodeTransformationFalse_writesSourceDataToStream() throws IOException {
     options.set(ReEncodingGifResourceEncoder.ENCODE_TRANSFORMATION, false);
     String expected = "testString";
     byte[] data = expected.getBytes("UTF-8");
@@ -129,8 +128,7 @@ public class ReEncodingGifResourceEncoderTest {
   }
 
   @Test
-  public void testEncode_WithEncodeTransformationFalse_whenOsThrows_returnsFalse()
-      throws IOException {
+  public void encode_WithEncodeTransformationFalse_whenOsThrows_returnsFalse() throws IOException {
     options.set(ReEncodingGifResourceEncoder.ENCODE_TRANSFORMATION, false);
     byte[] data = "testString".getBytes("UTF-8");
     when(gifDrawable.getBuffer()).thenReturn(ByteBuffer.wrap(data));
@@ -141,13 +139,13 @@ public class ReEncodingGifResourceEncoderTest {
   }
 
   @Test
-  public void testReturnsFalseIfEncoderFailsToStart() {
+  public void returnsFalseIfEncoderFailsToStart() {
     when(gifEncoder.start(any(OutputStream.class))).thenReturn(false);
     assertFalse(encoder.encode(resource, file, options));
   }
 
   @Test
-  public void testSetsDataOnParserBeforeParsingHeader() {
+  public void setsDataOnParserBeforeParsingHeader() {
     ByteBuffer data = ByteBuffer.allocate(1);
     when(gifDrawable.getBuffer()).thenReturn(data);
 
@@ -163,7 +161,7 @@ public class ReEncodingGifResourceEncoderTest {
   }
 
   @Test
-  public void testAdvancesDecoderBeforeAttemptingToGetFirstFrame() {
+  public void advancesDecoderBeforeAttemptingToGetFirstFrame() {
     when(gifEncoder.start(any(OutputStream.class))).thenReturn(true);
     when(decoder.getFrameCount()).thenReturn(1);
     when(decoder.getNextFrame()).thenReturn(Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888));
@@ -176,7 +174,7 @@ public class ReEncodingGifResourceEncoderTest {
   }
 
   @Test
-  public void testSetsDelayOnEncoderAfterAddingFrame() {
+  public void setsDelayOnEncoderAfterAddingFrame() {
     when(gifEncoder.start(any(OutputStream.class))).thenReturn(true);
     when(gifEncoder.addFrame(anyBitmapOrNull())).thenReturn(true);
 
@@ -197,7 +195,7 @@ public class ReEncodingGifResourceEncoderTest {
   }
 
   @Test
-  public void testWritesSingleFrameToEncoderAndReturnsTrueIfEncoderFinishes() {
+  public void writesSingleFrameToEncoderAndReturnsTrueIfEncoderFinishes() {
     Bitmap frame = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     when(frameResource.get()).thenReturn(frame);
 
@@ -213,7 +211,7 @@ public class ReEncodingGifResourceEncoderTest {
   }
 
   @Test
-  public void testReturnsFalseIfAddingFrameFails() {
+  public void returnsFalseIfAddingFrameFails() {
     when(decoder.getFrameCount()).thenReturn(1);
     when(decoder.getNextFrame()).thenReturn(Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888));
 
@@ -224,7 +222,7 @@ public class ReEncodingGifResourceEncoderTest {
   }
 
   @Test
-  public void testReturnsFalseIfFinishingFails() {
+  public void returnsFalseIfFinishingFails() {
     when(gifEncoder.start(any(OutputStream.class))).thenReturn(true);
     when(gifEncoder.finish()).thenReturn(false);
 
@@ -232,7 +230,7 @@ public class ReEncodingGifResourceEncoderTest {
   }
 
   @Test
-  public void testWritesTransformedBitmaps() {
+  public void writesTransformedBitmaps() {
     final Bitmap frame = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     when(decoder.getFrameCount()).thenReturn(1);
     when(decoder.getNextFrame()).thenReturn(frame);
@@ -257,7 +255,7 @@ public class ReEncodingGifResourceEncoderTest {
   }
 
   @Test
-  public void testRecyclesFrameResourceBeforeWritingIfTransformedResourceIsDifferent() {
+  public void recyclesFrameResourceBeforeWritingIfTransformedResourceIsDifferent() {
     when(decoder.getFrameCount()).thenReturn(1);
     when(frameTransformation.transform(anyContext(), eq(frameResource), anyInt(), anyInt()))
         .thenReturn(transformedResource);
@@ -274,7 +272,7 @@ public class ReEncodingGifResourceEncoderTest {
   }
 
   @Test
-  public void testRecyclesTransformedResourceAfterWritingIfTransformedResourceIsDifferent() {
+  public void recyclesTransformedResourceAfterWritingIfTransformedResourceIsDifferent() {
     when(decoder.getFrameCount()).thenReturn(1);
     Bitmap expected = Bitmap.createBitmap(100, 200, Bitmap.Config.RGB_565);
     when(transformedResource.get()).thenReturn(expected);
@@ -291,7 +289,7 @@ public class ReEncodingGifResourceEncoderTest {
   }
 
   @Test
-  public void testRecyclesFrameResourceAfterWritingIfFrameResourceIsNotTransformed() {
+  public void recyclesFrameResourceAfterWritingIfFrameResourceIsNotTransformed() {
     when(decoder.getFrameCount()).thenReturn(1);
     when(frameTransformation.transform(anyContext(), eq(frameResource), anyInt(), anyInt()))
         .thenReturn(frameResource);
@@ -308,7 +306,7 @@ public class ReEncodingGifResourceEncoderTest {
   }
 
   @Test
-  public void testWritesBytesDirectlyToDiskIfTransformationIsUnitTransformation() {
+  public void writesBytesDirectlyToDiskIfTransformationIsUnitTransformation() {
     when(gifDrawable.getFrameTransformation()).thenReturn(UnitTransformation.<Bitmap>get());
     String expected = "expected";
     when(gifDrawable.getBuffer()).thenReturn(ByteBuffer.wrap(expected.getBytes()));

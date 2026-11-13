@@ -96,11 +96,8 @@ public class RequestManagerLifecycleTest {
   @Test
   public void get_withActivityOnDestroy_afterJellyBeanAndbeforeQ_doesNotCrash() {
     // Activity#isDestroyed's behavior seems to have changed in Q. On <Q, isDestroyed returns true
-    // during onDestroy, triggering an assertion in Glide. < Jelly bean, isDestroyed is not
-    // available as a method.
-    assumeTrue(
-        Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN
-            && Build.VERSION.SDK_INT < Build.VERSION_CODES.Q);
+    // during onDestroy, triggering an assertion in Glide.
+    assumeTrue(Build.VERSION.SDK_INT < Build.VERSION_CODES.Q);
     AtomicReference<Exception> thrownException = new AtomicReference<>();
     scenario.moveToState(State.CREATED);
 
@@ -138,13 +135,12 @@ public class RequestManagerLifecycleTest {
 
   @Test
   public void get_withFragment_whenFragmentIsAddedAndVisible_beforeStart_startsRequestManager() {
-    withActivityFragmentAndChildFragment(
-        activity -> {
-          Fragment fragment = getFragment(activity);
+    withActivityFragmentAndChildFragment(activity -> {
+      Fragment fragment = getFragment(activity);
 
-          assertThat(fragment.isVisible()).isTrue();
-          assertThat(Glide.with(fragment).isPaused()).isFalse();
-        });
+      assertThat(fragment.isVisible()).isTrue();
+      assertThat(Glide.with(fragment).isPaused()).isFalse();
+    });
   }
 
   @Test
@@ -153,296 +149,272 @@ public class RequestManagerLifecycleTest {
     // but not yet started state, only either before onCreateView or after onResume.
     final Fragment fragment = new EmptyContainerFragment();
     scenario.moveToState(State.RESUMED);
-    scenario.onActivity(
-        activity -> {
-          activity
-              .getSupportFragmentManager()
-              .beginTransaction()
-              .add(R.id.container, fragment)
-              .commitNowAllowingStateLoss();
-          // If we call with() for the first time after the fragment is paused but while it's still
-          // visible, then we'll default the request manager to started. So we call with() once here
-          // to make sure the request manager is created before the stop event below.
-          Glide.with(fragment);
-        });
+    scenario.onActivity(activity -> {
+      activity
+          .getSupportFragmentManager()
+          .beginTransaction()
+          .add(R.id.container, fragment)
+          .commitNowAllowingStateLoss();
+      // If we call with() for the first time after the fragment is paused but while it's still
+      // visible, then we'll default the request manager to started. So we call with() once here
+      // to make sure the request manager is created before the stop event below.
+      Glide.with(fragment);
+    });
 
     scenario.moveToState(State.CREATED);
-    scenario.onActivity(
-        activity -> {
-          assertThat(fragment.isVisible()).isTrue();
-          assertThat(Glide.with(fragment).isPaused()).isTrue();
-        });
+    scenario.onActivity(activity -> {
+      assertThat(fragment.isVisible()).isTrue();
+      assertThat(Glide.with(fragment).isPaused()).isTrue();
+    });
   }
 
   @Test
   public void get_twice_withSameFragment_returnsSameRequestManager() {
-    withActivityFragmentAndChildFragment(
-        activity -> {
-          Fragment fragment = getFragment(activity);
-          assertThat(Glide.with(fragment)).isEqualTo(Glide.with(fragment));
-        });
+    withActivityFragmentAndChildFragment(activity -> {
+      Fragment fragment = getFragment(activity);
+      assertThat(Glide.with(fragment)).isEqualTo(Glide.with(fragment));
+    });
   }
 
   @Test
   public void pauseRequestsRecursive_onActivity_pausesFragment() {
-    withActivityFragmentAndChildFragment(
-        activity -> {
-          Fragment fragment = getFragment(activity);
+    withActivityFragmentAndChildFragment(activity -> {
+      Fragment fragment = getFragment(activity);
 
-          Glide.with(activity).pauseAllRequestsRecursive();
-          assertThat(Glide.with(fragment).isPaused()).isTrue();
-        });
+      Glide.with(activity).pauseAllRequestsRecursive();
+      assertThat(Glide.with(fragment).isPaused()).isTrue();
+    });
   }
 
   @Test
   public void resumeRequestsRecursive_onActivity_resumesFragment() {
-    withActivityFragmentAndChildFragment(
-        activity -> {
-          Fragment fragment = getFragment(activity);
+    withActivityFragmentAndChildFragment(activity -> {
+      Fragment fragment = getFragment(activity);
 
-          Glide.with(activity).pauseAllRequestsRecursive();
-          Glide.with(activity).resumeRequestsRecursive();
+      Glide.with(activity).pauseAllRequestsRecursive();
+      Glide.with(activity).resumeRequestsRecursive();
 
-          assertThat(Glide.with(fragment).isPaused()).isFalse();
-        });
+      assertThat(Glide.with(fragment).isPaused()).isFalse();
+    });
   }
 
   @Test
   public void pauseRequestsRecursive_onActivity_pausesChildOfChildFragment() {
-    withActivityFragmentAndChildFragment(
-        activity -> {
-          Fragment childFragment = getChildFragment(activity);
+    withActivityFragmentAndChildFragment(activity -> {
+      Fragment childFragment = getChildFragment(activity);
 
-          Glide.with(activity).pauseAllRequestsRecursive();
+      Glide.with(activity).pauseAllRequestsRecursive();
 
-          assertThat(Glide.with(childFragment).isPaused()).isTrue();
-        });
+      assertThat(Glide.with(childFragment).isPaused()).isTrue();
+    });
   }
 
   @Test
   public void resumeRequestsRecursive_onActivity_resumesChildOfChildFragment() {
-    withActivityFragmentAndChildFragment(
-        activity -> {
-          Fragment childFragment = getChildFragment(activity);
+    withActivityFragmentAndChildFragment(activity -> {
+      Fragment childFragment = getChildFragment(activity);
 
-          Glide.with(activity).pauseAllRequestsRecursive();
-          Glide.with(activity).resumeRequestsRecursive();
+      Glide.with(activity).pauseAllRequestsRecursive();
+      Glide.with(activity).resumeRequestsRecursive();
 
-          assertThat(Glide.with(childFragment).isPaused()).isFalse();
-        });
+      assertThat(Glide.with(childFragment).isPaused()).isFalse();
+    });
   }
 
   @Test
   public void pauseRequestsRecursive_onChildFragmentOfActivity_doesNotPauseActivity() {
-    withActivityFragmentAndChildFragment(
-        activity -> {
-          Fragment fragment = getFragment(activity);
+    withActivityFragmentAndChildFragment(activity -> {
+      Fragment fragment = getFragment(activity);
 
-          Glide.with(fragment).pauseAllRequestsRecursive();
+      Glide.with(fragment).pauseAllRequestsRecursive();
 
-          assertThat(Glide.with(fragment).isPaused()).isTrue();
-          assertThat(Glide.with(activity).isPaused()).isFalse();
-        });
+      assertThat(Glide.with(fragment).isPaused()).isTrue();
+      assertThat(Glide.with(activity).isPaused()).isFalse();
+    });
   }
 
   @Test
   public void pauseRequestsRecursive_onChildFragmentOfActivity_pausesChildOfChildFragment() {
-    withActivityFragmentAndChildFragment(
-        activity -> {
-          Fragment parentFragment = getFragment(activity);
-          Fragment childFragment = getChildFragment(activity);
+    withActivityFragmentAndChildFragment(activity -> {
+      Fragment parentFragment = getFragment(activity);
+      Fragment childFragment = getChildFragment(activity);
 
-          Glide.with(parentFragment).pauseAllRequestsRecursive();
+      Glide.with(parentFragment).pauseAllRequestsRecursive();
 
-          assertThat(Glide.with(childFragment).isPaused()).isTrue();
-        });
+      assertThat(Glide.with(childFragment).isPaused()).isTrue();
+    });
   }
 
   @Test
   public void resumeRequestsRecursive_onChildFragmentOfActivity_resumesChildOfChildFragment() {
-    withActivityFragmentAndChildFragment(
-        activity -> {
-          Fragment parentFragment = getFragment(activity);
-          Fragment childFragment = getChildFragment(activity);
+    withActivityFragmentAndChildFragment(activity -> {
+      Fragment parentFragment = getFragment(activity);
+      Fragment childFragment = getChildFragment(activity);
 
-          Glide.with(parentFragment).pauseAllRequestsRecursive();
-          Glide.with(parentFragment).resumeRequestsRecursive();
+      Glide.with(parentFragment).pauseAllRequestsRecursive();
+      Glide.with(parentFragment).resumeRequestsRecursive();
 
-          assertThat(Glide.with(childFragment).isPaused()).isFalse();
-        });
+      assertThat(Glide.with(childFragment).isPaused()).isFalse();
+    });
   }
 
   @Test
   public void pauseRequests_onActivity_pausesRequestManager() {
     scenario.moveToState(State.RESUMED);
-    scenario.onActivity(
-        activity -> {
-          Glide.with(activity).pauseAllRequests();
-          assertThat(Glide.with(activity).isPaused()).isTrue();
-        });
+    scenario.onActivity(activity -> {
+      Glide.with(activity).pauseAllRequests();
+      assertThat(Glide.with(activity).isPaused()).isTrue();
+    });
   }
 
   @Test
   public void resumeRequests_onActivity_pausesRequestManager() {
     scenario.moveToState(State.RESUMED);
-    scenario.onActivity(
-        activity -> {
-          Glide.with(activity).pauseAllRequests();
-          Glide.with(activity).resumeRequests();
-          assertThat(Glide.with(activity).isPaused()).isFalse();
-        });
+    scenario.onActivity(activity -> {
+      Glide.with(activity).pauseAllRequests();
+      Glide.with(activity).resumeRequests();
+      assertThat(Glide.with(activity).isPaused()).isFalse();
+    });
   }
 
   @Test
   public void pauseRequests_onActivity_doesNotPauseChildren() {
-    withActivityFragmentAndChildFragment(
-        activity -> {
-          Fragment fragment = getFragment(activity);
-          initRequestManagers(activity, fragment);
+    withActivityFragmentAndChildFragment(activity -> {
+      Fragment fragment = getFragment(activity);
+      initRequestManagers(activity, fragment);
 
-          Glide.with(activity).pauseAllRequests();
-          assertThat(Glide.with(fragment).isPaused()).isFalse();
-        });
+      Glide.with(activity).pauseAllRequests();
+      assertThat(Glide.with(fragment).isPaused()).isFalse();
+    });
   }
 
   @Test
   public void resumeRequests_onActivity_doesNotResumeChildren() {
-    withActivityFragmentAndChildFragment(
-        activity -> {
-          Fragment fragment = getFragment(activity);
-          initRequestManagers(activity, fragment);
+    withActivityFragmentAndChildFragment(activity -> {
+      Fragment fragment = getFragment(activity);
+      initRequestManagers(activity, fragment);
 
-          Glide.with(activity).pauseAllRequests();
-          Glide.with(fragment).pauseAllRequests();
-          Glide.with(activity).resumeRequests();
+      Glide.with(activity).pauseAllRequests();
+      Glide.with(fragment).pauseAllRequests();
+      Glide.with(activity).resumeRequests();
 
-          assertThat(Glide.with(fragment).isPaused()).isTrue();
-        });
+      assertThat(Glide.with(fragment).isPaused()).isTrue();
+    });
   }
 
   @Test
   public void pauseRequests_onFragment_pausesRequestManager() {
-    withActivityFragmentAndChildFragment(
-        activity -> {
-          Fragment fragment = getFragment(activity);
-          Glide.with(fragment).pauseAllRequests();
-          assertThat(Glide.with(fragment).isPaused()).isTrue();
-        });
+    withActivityFragmentAndChildFragment(activity -> {
+      Fragment fragment = getFragment(activity);
+      Glide.with(fragment).pauseAllRequests();
+      assertThat(Glide.with(fragment).isPaused()).isTrue();
+    });
   }
 
   @Test
   public void resumeRequests_onFragment_resumesRequestManager() {
-    withActivityFragmentAndChildFragment(
-        activity -> {
-          Fragment fragment = getFragment(activity);
-          Glide.with(fragment).pauseAllRequests();
-          Glide.with(fragment).resumeRequests();
-          assertThat(Glide.with(fragment).isPaused()).isFalse();
-        });
+    withActivityFragmentAndChildFragment(activity -> {
+      Fragment fragment = getFragment(activity);
+      Glide.with(fragment).pauseAllRequests();
+      Glide.with(fragment).resumeRequests();
+      assertThat(Glide.with(fragment).isPaused()).isFalse();
+    });
   }
 
   @Test
   public void pauseRequests_onChildFragment_doesNotPauseParentFragment() {
-    withActivityFragmentAndChildFragment(
-        activity -> {
-          Glide.with(getChildFragment(activity)).pauseAllRequests();
+    withActivityFragmentAndChildFragment(activity -> {
+      Glide.with(getChildFragment(activity)).pauseAllRequests();
 
-          assertThat(Glide.with(getFragment(activity)).isPaused()).isFalse();
-        });
+      assertThat(Glide.with(getFragment(activity)).isPaused()).isFalse();
+    });
   }
 
   @Test
   public void resumeRequests_onChildFragment_doesNotResumeParentFragment() {
-    withActivityFragmentAndChildFragment(
-        activity -> {
-          Fragment parentFragment = getFragment(activity);
-          Fragment childFragment = getChildFragment(activity);
-          Glide.with(childFragment).pauseAllRequests();
-          Glide.with(parentFragment).pauseAllRequests();
-          Glide.with(childFragment).resumeRequests();
+    withActivityFragmentAndChildFragment(activity -> {
+      Fragment parentFragment = getFragment(activity);
+      Fragment childFragment = getChildFragment(activity);
+      Glide.with(childFragment).pauseAllRequests();
+      Glide.with(parentFragment).pauseAllRequests();
+      Glide.with(childFragment).resumeRequests();
 
-          assertThat(Glide.with(parentFragment).isPaused()).isTrue();
-        });
+      assertThat(Glide.with(parentFragment).isPaused()).isTrue();
+    });
   }
 
   @Test
   public void pauseRequests_onChildFragment_pausesChildFragment() {
-    withActivityFragmentAndChildFragment(
-        activity -> {
-          Fragment childFragment = getChildFragment(activity);
-          Glide.with(childFragment).pauseAllRequests();
+    withActivityFragmentAndChildFragment(activity -> {
+      Fragment childFragment = getChildFragment(activity);
+      Glide.with(childFragment).pauseAllRequests();
 
-          assertThat(Glide.with(childFragment).isPaused()).isTrue();
-        });
+      assertThat(Glide.with(childFragment).isPaused()).isTrue();
+    });
   }
 
   @Test
   public void resumeRequests_onChildFragment_resumesChildFragment() {
-    withActivityFragmentAndChildFragment(
-        activity -> {
-          Fragment childFragment = getChildFragment(activity);
-          Glide.with(childFragment).pauseAllRequests();
-          Glide.with(childFragment).resumeRequests();
+    withActivityFragmentAndChildFragment(activity -> {
+      Fragment childFragment = getChildFragment(activity);
+      Glide.with(childFragment).pauseAllRequests();
+      Glide.with(childFragment).resumeRequests();
 
-          assertThat(Glide.with(childFragment).isPaused()).isFalse();
-        });
+      assertThat(Glide.with(childFragment).isPaused()).isFalse();
+    });
   }
 
   @Test
   public void pauseRequestsRecursive_onActivity_withTwoSiblingFragments_pausesBothSiblings() {
-    withActivityAndTwoFragmentSiblings(
-        activity -> {
-          Fragment fragment = getFragment(activity);
-          Fragment sibling = getSiblingFragment(activity);
+    withActivityAndTwoFragmentSiblings(activity -> {
+      Fragment fragment = getFragment(activity);
+      Fragment sibling = getSiblingFragment(activity);
 
-          Glide.with(activity).pauseAllRequestsRecursive();
+      Glide.with(activity).pauseAllRequestsRecursive();
 
-          assertThat(Glide.with(fragment).isPaused()).isTrue();
-          assertThat(Glide.with(sibling).isPaused()).isTrue();
-        });
+      assertThat(Glide.with(fragment).isPaused()).isTrue();
+      assertThat(Glide.with(sibling).isPaused()).isTrue();
+    });
   }
 
   @Test
   public void resumeRequestsRecursive_onActivity_withTwoSiblingFragments_resumesBothSiblings() {
-    withActivityAndTwoFragmentSiblings(
-        activity -> {
-          Fragment fragment = getFragment(activity);
-          Fragment sibling = getSiblingFragment(activity);
+    withActivityAndTwoFragmentSiblings(activity -> {
+      Fragment fragment = getFragment(activity);
+      Fragment sibling = getSiblingFragment(activity);
 
-          Glide.with(activity).pauseAllRequestsRecursive();
-          Glide.with(activity).resumeRequestsRecursive();
+      Glide.with(activity).pauseAllRequestsRecursive();
+      Glide.with(activity).resumeRequestsRecursive();
 
-          assertThat(Glide.with(fragment).isPaused()).isFalse();
-          assertThat(Glide.with(sibling).isPaused()).isFalse();
-        });
+      assertThat(Glide.with(fragment).isPaused()).isFalse();
+      assertThat(Glide.with(sibling).isPaused()).isFalse();
+    });
   }
 
   @Test
   public void pauseRequestsRecursive_onFragment_withSibling_doesNotPauseSibling() {
-    withActivityAndTwoFragmentSiblings(
-        activity -> {
-          Fragment fragment = getFragment(activity);
-          Fragment sibling = getSiblingFragment(activity);
+    withActivityAndTwoFragmentSiblings(activity -> {
+      Fragment fragment = getFragment(activity);
+      Fragment sibling = getSiblingFragment(activity);
 
-          Glide.with(fragment).pauseAllRequestsRecursive();
+      Glide.with(fragment).pauseAllRequestsRecursive();
 
-          assertThat(Glide.with(sibling).isPaused()).isFalse();
-        });
+      assertThat(Glide.with(sibling).isPaused()).isFalse();
+    });
   }
 
   @Test
   public void resumeRequestsRecursive_onFragment_withSibling_doesNotResumeSibling() {
-    withActivityAndTwoFragmentSiblings(
-        activity -> {
-          Fragment fragment = getFragment(activity);
-          Fragment sibling = getSiblingFragment(activity);
+    withActivityAndTwoFragmentSiblings(activity -> {
+      Fragment fragment = getFragment(activity);
+      Fragment sibling = getSiblingFragment(activity);
 
-          Glide.with(fragment).pauseAllRequestsRecursive();
-          Glide.with(sibling).pauseAllRequests();
-          Glide.with(fragment).resumeRequestsRecursive();
+      Glide.with(fragment).pauseAllRequestsRecursive();
+      Glide.with(sibling).pauseAllRequests();
+      Glide.with(fragment).resumeRequestsRecursive();
 
-          assertThat(Glide.with(sibling).isPaused()).isTrue();
-        });
+      assertThat(Glide.with(sibling).isPaused()).isTrue();
+    });
   }
 
   // We need to create the RequestManager first, or else it will start in the paused state.

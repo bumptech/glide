@@ -187,7 +187,7 @@ public final class GlideException extends Exception {
   // Appendable throws, PrintWriter, PrintStream, and IndentedAppendable do not, so this should
   // never happen.
   @SuppressWarnings("PMD.PreserveStackTrace")
-  private static void appendExceptionMessage(Throwable t, Appendable appendable) {
+  private static void appendExceptionMessage(@NonNull Throwable t, Appendable appendable) {
     try {
       appendable.append(t.getClass().toString()).append(": ").append(t.getMessage()).append('\n');
     } catch (IOException e1) {
@@ -222,6 +222,8 @@ public final class GlideException extends Exception {
       if (cause instanceof GlideException) {
         GlideException glideCause = (GlideException) cause;
         glideCause.printStackTrace(appendable);
+      } else if (cause == null) {
+        appendable.append("null\n");
       } else {
         appendExceptionMessage(cause, appendable);
       }

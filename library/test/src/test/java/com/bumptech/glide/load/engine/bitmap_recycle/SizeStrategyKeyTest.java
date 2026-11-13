@@ -24,7 +24,7 @@ public class SizeStrategyKeyTest {
   }
 
   @Test
-  public void testEquality() {
+  public void equality() {
     Key first = new Key(keyPool);
     first.init(100);
     Key second = new Key(keyPool);
@@ -36,7 +36,7 @@ public class SizeStrategyKeyTest {
   }
 
   @Test
-  public void testReturnsSelfToPoolOnOffer() {
+  public void returnsSelfToPoolOnOffer() {
     Key key = new Key(keyPool);
     key.offer();
 
@@ -44,7 +44,7 @@ public class SizeStrategyKeyTest {
   }
 
   @Test
-  public void testInitSetsSize() {
+  public void initSetsSize() {
     Key key = new Key(keyPool);
     key.init(100);
 

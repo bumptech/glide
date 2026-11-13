@@ -44,7 +44,7 @@ public class DataCacheKeyTest {
   }
 
   @Test
-  public void testEqualsHashCodeDigest() throws NoSuchAlgorithmException {
+  public void equalsHashCodeDigest() throws NoSuchAlgorithmException {
     keyTester
         .addEquivalenceGroup(
             new DataCacheKey(firstKey, firstSignature), new DataCacheKey(firstKey, firstSignature))

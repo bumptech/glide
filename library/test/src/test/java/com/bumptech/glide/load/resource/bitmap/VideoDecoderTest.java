@@ -19,7 +19,6 @@ import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.request.target.Target;
-import com.bumptech.glide.tests.Util;
 import com.bumptech.glide.util.Preconditions;
 import java.io.IOException;
 import org.junit.After;
@@ -43,7 +42,6 @@ public class VideoDecoderTest {
   @Mock private BitmapPool bitmapPool;
   private VideoDecoder<ParcelFileDescriptor> decoder;
   private Options options;
-  private int initialSdkVersion;
   private String initialMake;
   private String initialModel;
   private String initialBuildId;
@@ -56,7 +54,6 @@ public class VideoDecoderTest {
     decoder = new VideoDecoder<>(bitmapPool, initializer, factory);
     options = new Options();
 
-    initialSdkVersion = Build.VERSION.SDK_INT;
     initialMake = Build.MANUFACTURER;
     initialModel = Build.MODEL;
     initialBuildId = Build.ID;
@@ -65,13 +62,12 @@ public class VideoDecoderTest {
 
   @After
   public void tearDown() {
-    Util.setSdkVersionInt(initialSdkVersion);
     resetBuildInfo(initialMake, initialModel, initialBuildId, initialDevice);
   }
 
   @Test
-  public void testReturnsRetrievedFrameForResource() throws IOException {
-    Util.setSdkVersionInt(19);
+  @Config(sdk = VERSION_CODES.M)
+  public void returnsRetrievedFrameForResource() throws IOException {
     Bitmap expected = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     when(retriever.getFrameAtTime(VideoDecoder.DEFAULT_FRAME, VideoDecoder.DEFAULT_FRAME_OPTION))
         .thenReturn(expected);
@@ -84,8 +80,8 @@ public class VideoDecoderTest {
   }
 
   @Test
-  public void testReleasesMediaMetadataRetriever() {
-    Util.setSdkVersionInt(19);
+  @Config(sdk = VERSION_CODES.M)
+  public void releasesMediaMetadataRetriever() {
     assertThrows(
         RuntimeException.class,
         new ThrowingRunnable() {
@@ -102,15 +98,15 @@ public class VideoDecoderTest {
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void testThrowsExceptionIfCalledWithInvalidFrame() throws IOException {
-    Util.setSdkVersionInt(19);
+  @Config(sdk = VERSION_CODES.M)
+  public void throwsExceptionIfCalledWithInvalidFrame() throws IOException {
     options.set(VideoDecoder.TARGET_FRAME, -5L);
     new VideoDecoder<>(bitmapPool, initializer, factory).decode(resource, 100, 100, options);
   }
 
   @Test
-  public void testSpecifiesThumbnailFrameIfICalledWithFrameNumber() {
-    Util.setSdkVersionInt(19);
+  @Config(sdk = VERSION_CODES.M)
+  public void specifiesThumbnailFrameIfICalledWithFrameNumber() {
     long frame = 5;
     options.set(VideoDecoder.TARGET_FRAME, frame);
     decoder = new VideoDecoder<>(bitmapPool, initializer, factory);
@@ -128,8 +124,8 @@ public class VideoDecoderTest {
   }
 
   @Test
-  public void testDoesNotSpecifyThumbnailFrameIfCalledWithoutFrameNumber() {
-    Util.setSdkVersionInt(19);
+  @Config(sdk = VERSION_CODES.M)
+  public void doesNotSpecifyThumbnailFrameIfCalledWithoutFrameNumber() {
     decoder = new VideoDecoder<>(bitmapPool, initializer, factory);
     assertThrows(
         RuntimeException.class,

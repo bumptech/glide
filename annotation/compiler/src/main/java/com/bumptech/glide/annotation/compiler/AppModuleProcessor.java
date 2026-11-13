@@ -121,7 +121,6 @@ final class AppModuleProcessor {
     return appModule.getAnnotation(GlideModule.class).glideName();
   }
 
-  @SuppressWarnings("unchecked")
   private FoundIndexedClassNames getIndexedClassNames(PackageElement glideGenPackage) {
     Set<String> glideModules = new HashSet<>();
     Set<String> extensions = new HashSet<>();

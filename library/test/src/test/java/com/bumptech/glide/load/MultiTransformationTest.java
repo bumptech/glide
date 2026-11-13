@@ -28,7 +28,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidJUnit4.class)
-@SuppressWarnings("unchecked")
 public class MultiTransformationTest {
   @Rule public final KeyTester keyTester = new KeyTester();
 
@@ -54,7 +53,7 @@ public class MultiTransformationTest {
   }
 
   @Test
-  public void testAppliesTransformationsInOrder() {
+  public void appliesTransformationsInOrder() {
     final int width = 584;
     final int height = 768;
 
@@ -69,7 +68,7 @@ public class MultiTransformationTest {
   }
 
   @Test
-  public void testInitialResourceIsNotRecycled() {
+  public void initialResourceIsNotRecycled() {
     when(first.transform(anyContext(), anyResource(), anyInt(), anyInt()))
         .thenReturn(firstTransformed);
 
@@ -81,7 +80,7 @@ public class MultiTransformationTest {
   }
 
   @Test
-  public void testInitialResourceIsNotRecycledEvenIfReturnedByMultipleTransformations() {
+  public void initialResourceIsNotRecycledEvenIfReturnedByMultipleTransformations() {
     when(first.transform(anyContext(), anyResource(), anyInt(), anyInt())).thenReturn(initial);
     when(second.transform(anyContext(), anyResource(), anyInt(), anyInt())).thenReturn(initial);
 
@@ -93,7 +92,7 @@ public class MultiTransformationTest {
 
   @Test
   public void
-      testInitialResourceIsNotRecycledIfReturnedByOneTransformationButNotByALaterTransformation() {
+      initialResourceIsNotRecycledIfReturnedByOneTransformationButNotByALaterTransformation() {
     when(first.transform(anyContext(), anyResource(), anyInt(), anyInt())).thenReturn(initial);
     when(second.transform(anyContext(), anyResource(), anyInt(), anyInt()))
         .thenReturn(mockResource());
@@ -105,7 +104,7 @@ public class MultiTransformationTest {
   }
 
   @Test
-  public void testFinalResourceIsNotRecycled() {
+  public void finalResourceIsNotRecycled() {
     when(first.transform(anyContext(), anyResource(), anyInt(), anyInt()))
         .thenReturn(firstTransformed);
 
@@ -117,7 +116,7 @@ public class MultiTransformationTest {
   }
 
   @Test
-  public void testIntermediateResourcesAreRecycled() {
+  public void intermediateResourcesAreRecycled() {
     when(first.transform(anyContext(), anyResource(), anyInt(), anyInt()))
         .thenReturn(firstTransformed);
     when(second.transform(anyContext(), anyResource(), anyInt(), anyInt()))
@@ -131,7 +130,7 @@ public class MultiTransformationTest {
   }
 
   @Test
-  public void testEquals() throws NoSuchAlgorithmException {
+  public void equals() throws NoSuchAlgorithmException {
     keyTester
         .addEquivalenceGroup(new MultiTransformation<>(first), new MultiTransformation<>(first))
         .addEquivalenceGroup(new MultiTransformation<>(second))

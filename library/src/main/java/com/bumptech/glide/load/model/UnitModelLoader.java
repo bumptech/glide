@@ -14,7 +14,6 @@ import com.bumptech.glide.signature.ObjectKey;
  * @param <Model> The type of model that will also be returned as decodable data.
  */
 public class UnitModelLoader<Model> implements ModelLoader<Model, Model> {
-  @SuppressWarnings("deprecation")
   private static final UnitModelLoader<?> INSTANCE = new UnitModelLoader<>();
 
   @SuppressWarnings("unchecked")
@@ -89,7 +88,6 @@ public class UnitModelLoader<Model> implements ModelLoader<Model, Model> {
   // PMD.SingleMethodSingleton false positive: https://github.com/pmd/pmd/issues/816
   @SuppressWarnings("PMD.SingleMethodSingleton")
   public static class Factory<Model> implements ModelLoaderFactory<Model, Model> {
-    @SuppressWarnings("deprecation")
     private static final Factory<?> FACTORY = new Factory<>();
 
     @SuppressWarnings("unchecked")

@@ -143,22 +143,22 @@ public class RequestOptionsTest {
   }
 
   @Test
-  public void testIsTransformationRequired_byDefault_isFalse() {
+  public void isTransformationRequired_byDefault_isFalse() {
     assertThat(options.isTransformationRequired()).isFalse();
   }
 
   @Test
-  public void testIsTransformationSet_byDefault_isFalse() {
+  public void isTransformationSet_byDefault_isFalse() {
     assertThat(options.isTransformationSet()).isFalse();
   }
 
   @Test
-  public void testIsTransformationAllowed_byDefault_isTrue() {
+  public void isTransformationAllowed_byDefault_isTrue() {
     assertThat(options.isTransformationAllowed()).isTrue();
   }
 
   @Test
-  public void testIsTransformationSet_afterApplyingOptionsWithTransform_isTrue() {
+  public void isTransformationSet_afterApplyingOptionsWithTransform_isTrue() {
     RequestOptions other = new RequestOptions();
     other.transform(Bitmap.class, transformation);
     options.apply(other);
@@ -166,25 +166,25 @@ public class RequestOptionsTest {
   }
 
   @Test
-  public void testIsTransformationSet_afterDontTransform_isFalse() {
+  public void isTransformationSet_afterDontTransform_isFalse() {
     options.dontTransform();
     assertThat(options.isTransformationSet()).isFalse();
   }
 
   @Test
-  public void testIsTransformationAllowed_afterDontTransform_isFalse() {
+  public void isTransformationAllowed_afterDontTransform_isFalse() {
     options.dontTransform();
     assertThat(options.isTransformationAllowed()).isFalse();
   }
 
   @Test
-  public void testIsTransformationRequired_afterDontTransform_isFalse() {
+  public void isTransformationRequired_afterDontTransform_isFalse() {
     options.dontTransform();
     assertThat(options.isTransformationRequired()).isFalse();
   }
 
   @Test
-  public void testApplyingDontTransform_overridesTransformations() {
+  public void applyingDontTransform_overridesTransformations() {
     options.transform(transformation);
     options.dontTransform();
     assertThat(options.isTransformationSet()).isFalse();
@@ -193,7 +193,7 @@ public class RequestOptionsTest {
   }
 
   @Test
-  public void testApplyingTransformation_overridesDontTransform() {
+  public void applyingTransformation_overridesDontTransform() {
     options.dontTransform();
     options.transform(transformation);
 
@@ -203,7 +203,7 @@ public class RequestOptionsTest {
   }
 
   @Test
-  public void testApplyingOptions_withDontTransform_overridesTransformations() {
+  public void applyingOptions_withDontTransform_overridesTransformations() {
     options.transform(transformation);
     RequestOptions other = new RequestOptions();
     other.dontTransform();
@@ -217,7 +217,7 @@ public class RequestOptionsTest {
   }
 
   @Test
-  public void testApplyingOptions_withTransformation_overridesDontTransform() {
+  public void applyingOptions_withTransformation_overridesDontTransform() {
     options.dontTransform();
     RequestOptions other = new RequestOptions();
     other.transform(transformation);
@@ -231,7 +231,7 @@ public class RequestOptionsTest {
   }
 
   @Test
-  public void testApplyingDefaultOptions_withDontTransform_retainsDontTransform() {
+  public void applyingDefaultOptions_withDontTransform_retainsDontTransform() {
     options.dontTransform();
     options.apply(new RequestOptions());
 
@@ -241,7 +241,7 @@ public class RequestOptionsTest {
   }
 
   @Test
-  public void testApplyingDefaultOptions_withTransform_retrainsTransform() {
+  public void applyingDefaultOptions_withTransform_retrainsTransform() {
     options.transform(transformation);
     options.apply(new RequestOptions());
 
@@ -251,8 +251,8 @@ public class RequestOptionsTest {
   }
 
   @Test
-  @SuppressWarnings({"unchecked", "varargs"})
-  public void testApplyMultiTransform() {
+  @SuppressWarnings("unchecked")
+  public void applyMultiTransform() {
     options.transform(new CircleCrop(), new CenterCrop());
     assertThat(options.isTransformationRequired()).isTrue();
     assertThat(options.getTransformations()).containsKey(Bitmap.class);
@@ -554,7 +554,7 @@ public class RequestOptionsTest {
   }
 
   @Test
-  public void testEqualsHashCode() {
+  public void equalsHashCode() {
     Drawable first = new ColorDrawable(Color.RED);
     Drawable second = new GradientDrawable();
     assertThat(first).isNotEqualTo(second);

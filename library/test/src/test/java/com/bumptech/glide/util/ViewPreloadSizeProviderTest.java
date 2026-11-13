@@ -26,12 +26,12 @@ public class ViewPreloadSizeProviderTest {
   }
 
   @Test
-  public void testReturnsNullFromGetPreloadSizeBeforeHasSize() {
+  public void returnsNullFromGetPreloadSizeBeforeHasSize() {
     assertNull(provider.getPreloadSize(new Object(), 0, 0));
   }
 
   @Test
-  public void testReturnsValidSizeFromGetPreloadSizeAfterHasSize() {
+  public void returnsValidSizeFromGetPreloadSizeAfterHasSize() {
     int width = 4123;
     int height = 342;
     provider.onSizeReady(width, height);
@@ -41,7 +41,7 @@ public class ViewPreloadSizeProviderTest {
   }
 
   @Test
-  public void testDoesNotObtainSizeFromViewOnceSizeIsSet() {
+  public void doesNotObtainSizeFromViewOnceSizeIsSet() {
     int width = 123;
     int height = 456;
     provider.onSizeReady(width, height);
@@ -55,7 +55,7 @@ public class ViewPreloadSizeProviderTest {
   }
 
   @Test
-  public void testCanObtainFixedSizeFromView() {
+  public void canObtainFixedSizeFromView() {
     int width = 123;
     int height = 456;
     view.setLayoutParams(new ViewGroup.LayoutParams(width, height));
@@ -68,7 +68,7 @@ public class ViewPreloadSizeProviderTest {
   }
 
   @Test
-  public void testIgnoresNewViewIfAlreadyWaitingOnSizeOfAnotherView() {
+  public void ignoresNewViewIfAlreadyWaitingOnSizeOfAnotherView() {
     provider.setView(view);
 
     View newView = new View(ApplicationProvider.getApplicationContext());
@@ -79,7 +79,7 @@ public class ViewPreloadSizeProviderTest {
   }
 
   @Test
-  public void testCanObtainSizeFromViewWhenGivenViewInConstructor() {
+  public void canObtainSizeFromViewWhenGivenViewInConstructor() {
     int width = 100;
     int height = 200;
     view.setLayoutParams(new ViewGroup.LayoutParams(width, height));

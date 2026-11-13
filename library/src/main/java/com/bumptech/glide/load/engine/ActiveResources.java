@@ -4,7 +4,6 @@ import android.os.Process;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
-import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.EngineResource.ResourceListener;
 import com.bumptech.glide.util.Executors;
 import com.bumptech.glide.util.Preconditions;
@@ -20,7 +19,10 @@ import java.util.concurrent.ThreadFactory;
 final class ActiveResources {
   private final boolean isActiveResourceRetentionAllowed;
   private final Executor monitorClearedResourcesExecutor;
-  @VisibleForTesting final Map<Key, ResourceWeakReference> activeEngineResources = new HashMap<>();
+
+  @VisibleForTesting
+  final Map<EngineKey, ResourceWeakReference> activeEngineResources = new HashMap<>();
+
   private final ReferenceQueue<EngineResource<?>> resourceReferenceQueue = new ReferenceQueue<>();
 
   private ResourceListener listener;
@@ -71,7 +73,7 @@ final class ActiveResources {
     }
   }
 
-  synchronized void activate(Key key, EngineResource<?> resource) {
+  synchronized void activate(EngineKey key, EngineResource<?> resource) {
     ResourceWeakReference toPut =
         new ResourceWeakReference(
             key, resource, resourceReferenceQueue, isActiveResourceRetentionAllowed);
@@ -82,7 +84,7 @@ final class ActiveResources {
     }
   }
 
-  synchronized void deactivate(Key key) {
+  synchronized void deactivate(EngineKey key) {
     ResourceWeakReference removed = activeEngineResources.remove(key);
     if (removed != null) {
       removed.reset();
@@ -90,7 +92,7 @@ final class ActiveResources {
   }
 
   @Nullable
-  synchronized EngineResource<?> get(Key key) {
+  synchronized EngineResource<?> get(EngineKey key) {
     ResourceWeakReference activeRef = activeEngineResources.get(key);
     if (activeRef == null) {
       return null;
@@ -167,7 +169,7 @@ final class ActiveResources {
   static final class ResourceWeakReference extends WeakReference<EngineResource<?>> {
     @SuppressWarnings("WeakerAccess")
     @Synthetic
-    final Key key;
+    final EngineKey key;
 
     @SuppressWarnings("WeakerAccess")
     @Synthetic
@@ -181,7 +183,7 @@ final class ActiveResources {
     @Synthetic
     @SuppressWarnings("WeakerAccess")
     ResourceWeakReference(
-        @NonNull Key key,
+        @NonNull EngineKey key,
         @NonNull EngineResource<?> referent,
         @NonNull ReferenceQueue<? super EngineResource<?>> queue,
         boolean isActiveResourceRetentionAllowed) {

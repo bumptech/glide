@@ -37,7 +37,7 @@ public class AssetUriLoaderTest {
   }
 
   @Test
-  public void testHandlesAssetUris() {
+  public void handlesAssetUris() {
     Uri assetUri = Uri.parse("file:///android_asset/assetName");
     when(factory.buildFetcher(any(AssetManager.class), eq("assetName"))).thenReturn(fetcher);
     assertTrue(loader.handles(assetUri));

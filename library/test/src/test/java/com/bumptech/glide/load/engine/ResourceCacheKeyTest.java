@@ -45,7 +45,7 @@ public class ResourceCacheKeyTest {
   }
 
   @Test
-  public void testEqualsAndHashCode() {
+  public void equalsAndHashCode() {
     Options memoryOptions = new Options();
     memoryOptions.set(Option.memory("key", new Object()), new Object());
 

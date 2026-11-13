@@ -32,12 +32,12 @@ public class ViewPropertyAnimationTest {
   }
 
   @Test
-  public void testAlwaysReturnsFalse() {
+  public void alwaysReturnsFalse() {
     assertFalse(animation.transition(new Object(), mock(ViewAdapter.class)));
   }
 
   @Test
-  public void testCallsAnimatorWithGivenView() {
+  public void callsAnimatorWithGivenView() {
     ImageView view = new ImageView(ApplicationProvider.getApplicationContext());
     ViewAdapter adapter = mock(ViewAdapter.class);
     when(adapter.getView()).thenReturn(view);
@@ -47,7 +47,7 @@ public class ViewPropertyAnimationTest {
   }
 
   @Test
-  public void testDoesNotCallAnimatorIfGivenAdapterWithNullView() {
+  public void doesNotCallAnimatorIfGivenAdapterWithNullView() {
     ViewAdapter adapter = mock(ViewAdapter.class);
     animation.transition(new Object(), adapter);
 

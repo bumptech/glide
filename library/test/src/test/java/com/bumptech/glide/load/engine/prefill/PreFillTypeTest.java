@@ -15,56 +15,56 @@ import org.robolectric.annotation.Config;
 public class PreFillTypeTest {
 
   @Test(expected = IllegalArgumentException.class)
-  public void testThrowsIfSizeIsZero() {
+  public void throwsIfSizeIsZero() {
     new PreFillType.Builder(0);
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void testThrowsIfWidthIsZero() {
+  public void throwsIfWidthIsZero() {
     new PreFillType.Builder(0, 100);
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void testThrowsIfHeightIsZero() {
+  public void throwsIfHeightIsZero() {
     new PreFillType.Builder(100, 0);
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void testThrowsIfWeightIsZero() {
+  public void throwsIfWeightIsZero() {
     new PreFillType.Builder(100).setWeight(0);
   }
 
   @Test(expected = NullPointerException.class)
-  public void testConstructorThrowsIfConfigIsNull() {
+  public void constructorThrowsIfConfigIsNull() {
     new PreFillType(100, 100, null, 1);
   }
 
   @Test
-  public void testGetWidthReturnsGivenWidth() {
+  public void getWidthReturnsGivenWidth() {
     int width = 500;
     assertEquals(width, new PreFillType(width, 100, Bitmap.Config.ARGB_4444, 1).getWidth());
   }
 
   @Test
-  public void testGetHeightReturnsGivenHeight() {
+  public void getHeightReturnsGivenHeight() {
     int height = 123;
     assertEquals(height, new PreFillType(100, height, Bitmap.Config.ARGB_4444, 1).getHeight());
   }
 
   @Test
-  public void testGetConfigReturnsGivenConfig() {
+  public void getConfigReturnsGivenConfig() {
     Bitmap.Config config = Bitmap.Config.ARGB_8888;
     assertEquals(config, new PreFillType(100, 100, config, 1).getConfig());
   }
 
   @Test
-  public void testGetWeightReturnsGivenWeight() {
+  public void getWeightReturnsGivenWeight() {
     int weight = 400;
     assertEquals(weight, new PreFillType(100, 100, Bitmap.Config.ARGB_4444, weight).getWeight());
   }
 
   @Test
-  public void testEquality() {
+  public void equality() {
     new EqualsTester()
         .addEqualityGroup(
             new PreFillType(100, 100, Bitmap.Config.ARGB_4444, 1),

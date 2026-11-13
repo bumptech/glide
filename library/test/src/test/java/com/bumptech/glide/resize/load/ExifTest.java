@@ -51,27 +51,27 @@ public class ExifTest {
   }
 
   @Test
-  public void testIssue387() throws IOException {
+  public void issue387() throws IOException {
     InputStream is = TestResourceUtil.openResource(getClass(), "issue387_rotated_jpeg.jpg");
     assertThat(new DefaultImageHeaderParser().getOrientation(is, byteArrayPool)).isEqualTo(6);
   }
 
   @Test
-  public void testLandscape() throws IOException {
+  public void landscape() throws IOException {
     for (int i = 1; i <= 8; i++) {
       assertOrientation("Landscape", i);
     }
   }
 
   @Test
-  public void testPortrait() throws IOException {
+  public void portrait() throws IOException {
     for (int i = 1; i <= 8; i++) {
       assertOrientation("Portrait", i);
     }
   }
 
   @Test
-  public void testHandlesInexactSizesInByteArrayPools() {
+  public void handlesInexactSizesInByteArrayPools() {
     for (int i = 1; i <= 8; i++) {
       byteArrayPool.put(new byte[ArrayPool.STANDARD_BUFFER_SIZE_BYTES]);
       assertOrientation("Portrait", i);

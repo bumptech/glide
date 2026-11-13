@@ -8,7 +8,6 @@ import static org.mockito.Mockito.mock;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.os.Build;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.engine.Resource;
@@ -22,7 +21,6 @@ import java.security.MessageDigest;
 import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.robolectric.util.ReflectionHelpers;
 
 // FIXME move to testutil module
 public class Util {
@@ -96,10 +94,6 @@ public class Util {
       }
     }
     return result;
-  }
-
-  public static void setSdkVersionInt(int version) {
-    ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT", version);
   }
 
   public static final class WriteDigest implements Answer<Void> {

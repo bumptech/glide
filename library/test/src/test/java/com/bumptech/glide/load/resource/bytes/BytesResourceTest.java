@@ -10,7 +10,7 @@ import org.junit.runners.JUnit4;
 public class BytesResourceTest {
 
   @Test
-  public void testReturnsGivenBytes() {
+  public void returnsGivenBytes() {
     byte[] bytes = new byte[0];
     BytesResource resource = new BytesResource(bytes);
 
@@ -18,7 +18,7 @@ public class BytesResourceTest {
   }
 
   @Test
-  public void testReturnsSizeOfGivenBytes() {
+  public void returnsSizeOfGivenBytes() {
     byte[] bytes = new byte[123];
     BytesResource resource = new BytesResource(bytes);
 
@@ -26,7 +26,7 @@ public class BytesResourceTest {
   }
 
   @Test(expected = NullPointerException.class)
-  public void testThrowsIfGivenNullBytes() {
+  public void throwsIfGivenNullBytes() {
     new BytesResource(null);
   }
 }

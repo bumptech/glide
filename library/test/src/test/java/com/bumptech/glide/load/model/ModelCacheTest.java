@@ -19,7 +19,7 @@ public class ModelCacheTest {
   }
 
   @Test
-  public void testModelKeyEquivalence() {
+  public void modelKeyEquivalence() {
     new EqualsTester()
         .addEqualityGroup(
             ModelCache.ModelKey.get(14f, 100, 200), ModelCache.ModelKey.get(14f, 100, 200))
@@ -30,7 +30,7 @@ public class ModelCacheTest {
   }
 
   @Test
-  public void testCanSetAndGetModel() {
+  public void canSetAndGetModel() {
     Object model = new Object();
     int width = 10;
     int height = 20;
@@ -40,7 +40,7 @@ public class ModelCacheTest {
   }
 
   @Test
-  public void testCanSetAndGetMultipleResultsWithDifferentDimensionsForSameObject() {
+  public void canSetAndGetMultipleResultsWithDifferentDimensionsForSameObject() {
     Object model = new Object();
     int firstWidth = 10;
     int firstHeight = 20;

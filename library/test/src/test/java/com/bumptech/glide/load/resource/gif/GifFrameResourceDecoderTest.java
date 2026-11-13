@@ -33,7 +33,7 @@ public class GifFrameResourceDecoderTest {
   }
 
   @Test
-  public void testReturnsFrameFromGifDecoder() throws IOException {
+  public void returnsFrameFromGifDecoder() throws IOException {
     Bitmap expected = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_4444);
     when(gifDecoder.getNextFrame()).thenReturn(expected);
 
@@ -43,7 +43,7 @@ public class GifFrameResourceDecoderTest {
   }
 
   @Test
-  public void testReturnsNullIfGifDecoderReturnsNullFrame() {
+  public void returnsNullIfGifDecoderReturnsNullFrame() {
     when(gifDecoder.getNextFrame()).thenReturn(null);
 
     assertNull(resourceDecoder.decode(gifDecoder, 100, 100, options));

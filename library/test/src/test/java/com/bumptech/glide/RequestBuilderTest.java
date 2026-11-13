@@ -63,35 +63,35 @@ public class RequestBuilderTest {
   }
 
   @Test(expected = NullPointerException.class)
-  public void testThrowsIfContextIsNull() {
+  public void throwsIfContextIsNull() {
     new RequestBuilder<>(null /*context*/, requestManager, Object.class, context);
   }
 
   @Test(expected = NullPointerException.class)
-  public void testThrowsWhenTransitionsOptionsIsNull() {
+  public void throwsWhenTransitionsOptionsIsNull() {
     //noinspection ConstantConditions testing if @NonNull is enforced
     getNullModelRequest().transition(null);
   }
 
   @Test
-  public void testDoesNotThrowWithNullModelWhenRequestIsBuilt() {
+  public void doesNotThrowWithNullModelWhenRequestIsBuilt() {
     getNullModelRequest().into(target);
   }
 
   @Test
-  public void testDoesNotThrowWithNullModelWhenRequestIsBuiltFront() {
+  public void doesNotThrowWithNullModelWhenRequestIsBuiltFront() {
     getNullModelRequest().experimentalIntoFront(target);
   }
 
   @Test
-  public void testAddsNewRequestToRequestTracker() {
+  public void addsNewRequestToRequestTracker() {
     getNullModelRequest().into(target);
 
     verify(requestManager).track(eq(target), isA(Request.class));
   }
 
   @Test
-  public void testAddsNewRequestToRequestTrackerWithCustomExecutor() {
+  public void addsNewRequestToRequestTrackerWithCustomExecutor() {
     getNullModelRequest()
         .into(target, /* targetListener= */ null, Executors.newSingleThreadExecutor());
 
@@ -99,14 +99,14 @@ public class RequestBuilderTest {
   }
 
   @Test
-  public void testAddsNewRequestToRequestTrackerFront() {
+  public void addsNewRequestToRequestTrackerFront() {
     getNullModelRequest().experimentalIntoFront(target);
 
     verify(requestManager).track(eq(target), isA(Request.class));
   }
 
   @Test
-  public void testRemovesPreviousRequestFromRequestTracker() {
+  public void removesPreviousRequestFromRequestTracker() {
     Request previous = mock(Request.class);
     when(target.getRequest()).thenReturn(previous);
 
@@ -116,7 +116,7 @@ public class RequestBuilderTest {
   }
 
   @Test
-  public void testRemovesPreviousRequestFromRequestTrackerFront() {
+  public void removesPreviousRequestFromRequestTrackerFront() {
     Request previous = mock(Request.class);
     when(target.getRequest()).thenReturn(previous);
 
@@ -126,29 +126,29 @@ public class RequestBuilderTest {
   }
 
   @Test(expected = NullPointerException.class)
-  public void testThrowsIfGivenNullTarget() {
+  public void throwsIfGivenNullTarget() {
     //noinspection ConstantConditions testing if @NonNull is enforced
     getNullModelRequest().into((Target<Object>) null);
   }
 
   @Test(expected = NullPointerException.class)
-  public void testThrowsIfGivenNullTargetFront() {
+  public void throwsIfGivenNullTargetFront() {
     //noinspection ConstantConditions testing if @NonNull is enforced
     getNullModelRequest().experimentalIntoFront((Target<Object>) null);
   }
 
   @Test(expected = NullPointerException.class)
-  public void testThrowsIfGivenNullView() {
+  public void throwsIfGivenNullView() {
     getNullModelRequest().into((ImageView) null);
   }
 
   @Test(expected = NullPointerException.class)
-  public void testThrowsIfGivenNullViewFront() {
+  public void throwsIfGivenNullViewFront() {
     getNullModelRequest().experimentalIntoFront((ImageView) null);
   }
 
   @Test(expected = RuntimeException.class)
-  public void testThrowsIfIntoViewCalledOnBackgroundThread() throws InterruptedException {
+  public void throwsIfIntoViewCalledOnBackgroundThread() throws InterruptedException {
     final ImageView imageView = new ImageView(ApplicationProvider.getApplicationContext());
     testInBackground(
         new BackgroundTester() {
@@ -160,7 +160,7 @@ public class RequestBuilderTest {
   }
 
   @Test(expected = RuntimeException.class)
-  public void testThrowsIfIntoViewCalledOnBackgroundThreadFront() throws InterruptedException {
+  public void throwsIfIntoViewCalledOnBackgroundThreadFront() throws InterruptedException {
     final ImageView imageView = new ImageView(ApplicationProvider.getApplicationContext());
     testInBackground(
         new BackgroundTester() {
@@ -210,7 +210,7 @@ public class RequestBuilderTest {
   }
 
   @Test
-  public void testMultipleRequestListeners() {
+  public void multipleRequestListeners() {
     getNullModelRequest().addListener(listener1).addListener(listener2).into(target);
     verify(requestManager).track(any(Target.class), requestCaptor.capture());
     requestCaptor
@@ -227,7 +227,7 @@ public class RequestBuilderTest {
   }
 
   @Test
-  public void testMultipleRequestListenersFront() {
+  public void multipleRequestListenersFront() {
     getNullModelRequest()
         .addListener(listener1)
         .addListener(listener2)
@@ -247,7 +247,7 @@ public class RequestBuilderTest {
   }
 
   @Test
-  public void testListenerApiOverridesListeners() {
+  public void listenerApiOverridesListeners() {
     getNullModelRequest().addListener(listener1).listener(listener2).into(target);
     verify(requestManager).track(any(Target.class), requestCaptor.capture());
     requestCaptor
@@ -265,7 +265,7 @@ public class RequestBuilderTest {
   }
 
   @Test
-  public void testListenerApiOverridesListenersFront() {
+  public void listenerApiOverridesListenersFront() {
     getNullModelRequest().addListener(listener1).listener(listener2).experimentalIntoFront(target);
     verify(requestManager).track(any(Target.class), requestCaptor.capture());
     requestCaptor
@@ -283,7 +283,7 @@ public class RequestBuilderTest {
   }
 
   @Test
-  public void testEquals() {
+  public void equals() {
     Object firstModel = new Object();
     Object secondModel = new Object();
 

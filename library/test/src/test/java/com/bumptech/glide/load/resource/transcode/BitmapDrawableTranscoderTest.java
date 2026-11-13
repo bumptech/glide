@@ -28,7 +28,7 @@ public class BitmapDrawableTranscoderTest {
   }
 
   @Test
-  public void testReturnsBitmapDrawableResourceContainingGivenBitmap() {
+  public void returnsBitmapDrawableResourceContainingGivenBitmap() {
     Bitmap expected = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     Resource<Bitmap> resource = mockResource();
     when(resource.get()).thenReturn(expected);

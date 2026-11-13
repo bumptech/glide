@@ -38,7 +38,7 @@ public class AppWidgetTargetTest {
   }
 
   @Test
-  public void testSetsBitmapOnRemoteViewsWithViewIdWhenCreatedWithComponentName() {
+  public void setsBitmapOnRemoteViewsWithViewIdWhenCreatedWithComponentName() {
     ComponentName componentName = mock(ComponentName.class);
     AppWidgetTarget target =
         new AppWidgetTarget(
@@ -51,7 +51,7 @@ public class AppWidgetTargetTest {
   }
 
   @Test
-  public void testUpdatesAppWidgetWhenCreatedWithComponentName() {
+  public void updatesAppWidgetWhenCreatedWithComponentName() {
     ComponentName componentName = mock(ComponentName.class);
     AppWidgetTarget target =
         new AppWidgetTarget(
@@ -66,7 +66,7 @@ public class AppWidgetTargetTest {
   }
 
   @Test
-  public void testSetsBitmapOnRemoteViewsWithViewIdWhenCreatedWithWidgetIds() {
+  public void setsBitmapOnRemoteViewsWithViewIdWhenCreatedWithWidgetIds() {
     int[] widgetIds = new int[] {1};
     AppWidgetTarget target =
         new AppWidgetTarget(ApplicationProvider.getApplicationContext(), viewId, views, widgetIds);
@@ -78,7 +78,7 @@ public class AppWidgetTargetTest {
   }
 
   @Test
-  public void testUpdatesAppWidgetWhenCreatedWithWidgetIds() {
+  public void updatesAppWidgetWhenCreatedWithWidgetIds() {
     int[] widgetIds = new int[] {1};
     AppWidgetTarget target =
         new AppWidgetTarget(ApplicationProvider.getApplicationContext(), viewId, views, widgetIds);
@@ -92,23 +92,23 @@ public class AppWidgetTargetTest {
   }
 
   @Test(expected = NullPointerException.class)
-  public void testThrowsWhenGivenNullContextWithWidgetIds() {
+  public void throwsWhenGivenNullContextWithWidgetIds() {
     new AppWidgetTarget(null /*context*/, 1234 /*viewId*/, views, 1 /*widgetIds*/);
   }
 
   @Test(expected = NullPointerException.class)
-  public void testThrowsWhenGivenNullContextWithComponentName() {
+  public void throwsWhenGivenNullContextWithComponentName() {
     new AppWidgetTarget(null /*context*/, 1234 /*viewId*/, views, mock(ComponentName.class));
   }
 
   @Test(expected = NullPointerException.class)
-  public void testThrowsWhenGivenNullRemoteViewsWithWidgetIds() {
+  public void throwsWhenGivenNullRemoteViewsWithWidgetIds() {
     new AppWidgetTarget(
         ApplicationProvider.getApplicationContext(), viewId, null /*remoteViews*/, 1 /*widgetIds*/);
   }
 
   @Test(expected = NullPointerException.class)
-  public void testThrowsWhenGivenNullRemoteViewsWithComponentName() {
+  public void throwsWhenGivenNullRemoteViewsWithComponentName() {
     new AppWidgetTarget(
         ApplicationProvider.getApplicationContext(),
         viewId,
@@ -117,18 +117,18 @@ public class AppWidgetTargetTest {
   }
 
   @Test(expected = NullPointerException.class)
-  public void testThrowsWhenGivenNullWidgetIds() {
+  public void throwsWhenGivenNullWidgetIds() {
     new AppWidgetTarget(
         ApplicationProvider.getApplicationContext(), viewId, views, (int[]) null /*widgetIds*/);
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void testThrowsWhenGivenEmptyWidgetIds() {
+  public void throwsWhenGivenEmptyWidgetIds() {
     new AppWidgetTarget(ApplicationProvider.getApplicationContext(), viewId, views);
   }
 
   @Test(expected = NullPointerException.class)
-  public void testThrowsWhenGivenNullComponentName() {
+  public void throwsWhenGivenNullComponentName() {
     new AppWidgetTarget(
         ApplicationProvider.getApplicationContext(), viewId, views, (ComponentName) null);
   }

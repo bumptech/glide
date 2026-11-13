@@ -44,7 +44,7 @@ public class FileDescriptorLocalUriFetcherTest {
   }
 
   @Test
-  public void testLoadResource_returnsFileDescriptor() throws Exception {
+  public void loadResource_returnsFileDescriptor() throws Exception {
     Context context = ApplicationProvider.getApplicationContext();
     Uri uri = Uri.parse("file://nothing");
 
@@ -63,7 +63,7 @@ public class FileDescriptorLocalUriFetcherTest {
   }
 
   @Test
-  public void testLoadResource_mediaUri_returnsFileDescriptor() throws Exception {
+  public void loadResource_mediaUri_returnsFileDescriptor() throws Exception {
     Context context = ApplicationProvider.getApplicationContext();
     Uri uri = Uri.parse("content://media");
 
@@ -89,7 +89,7 @@ public class FileDescriptorLocalUriFetcherTest {
   }
 
   @Test
-  public void testLoadResource_withNullFileDescriptor_callsLoadFailed() {
+  public void loadResource_withNullFileDescriptor_callsLoadFailed() {
     Context context = ApplicationProvider.getApplicationContext();
     Uri uri = Uri.parse("file://nothing");
 
