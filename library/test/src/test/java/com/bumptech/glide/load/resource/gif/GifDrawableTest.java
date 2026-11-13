@@ -27,15 +27,12 @@ import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
-import android.os.Build;
 import android.view.View;
 import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.tests.TearDownGlide;
-import com.bumptech.glide.tests.Util;
 import com.bumptech.glide.util.Preconditions;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -57,7 +54,6 @@ public class GifDrawableTest {
   private int frameHeight;
   private int frameWidth;
   private Bitmap firstFrame;
-  private int initialSdkVersion;
 
   @Mock private Drawable.Callback cb;
   @Mock private GifFrameLoader frameLoader;
@@ -86,12 +82,6 @@ public class GifDrawableTest {
     when(frameLoader.getCurrentFrame()).thenReturn(firstFrame);
     when(frameLoader.getCurrentIndex()).thenReturn(0);
     drawable.setCallback(cb);
-    initialSdkVersion = Build.VERSION.SDK_INT;
-  }
-
-  @After
-  public void tearDown() {
-    Util.setSdkVersionInt(initialSdkVersion);
   }
 
   @Test
