@@ -1,12 +1,15 @@
 package com.bumptech.glide.integration.cronet;
 
 import android.util.Log;
+import androidx.annotation.GuardedBy;
 import androidx.annotation.Nullable;
 import com.bumptech.glide.Priority;
+import com.bumptech.glide.integration.cronet.ChromiumUrlLoader.Options;
 import com.bumptech.glide.load.HttpException;
 import com.bumptech.glide.load.engine.executor.GlideExecutor;
 import com.bumptech.glide.load.engine.executor.GlideExecutor.UncaughtThrowableStrategy;
 import com.bumptech.glide.load.model.GlideUrl;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import java.io.IOException;
@@ -92,16 +95,29 @@ final class ChromiumRequestSerializer {
   }
 
   private final JobPool jobPool;
+
+  @GuardedBy("this")
   private final Map<GlideUrl, Job> jobs = new HashMap<>();
+
   private final CronetRequestFactory requestFactory;
   @Nullable private final DataLogger dataLogger;
+  private final Options options;
 
   ChromiumRequestSerializer(
       CronetRequestFactory requestFactory,
       @Nullable DataLogger dataLogger,
       @Nullable final GlideExecutor executor) {
+    this(requestFactory, dataLogger, executor, Options.DEFAULT);
+  }
+
+  ChromiumRequestSerializer(
+      CronetRequestFactory requestFactory,
+      @Nullable DataLogger dataLogger,
+      @Nullable final GlideExecutor executor,
+      Options options) {
     this.requestFactory = requestFactory;
     this.dataLogger = dataLogger;
+    this.options = Preconditions.checkNotNull(options);
     if (executor == null) {
       this.jobPool = new JobPool(GLIDE_EXECUTOR_SUPPLIER);
     } else {
@@ -119,6 +135,7 @@ final class ChromiumRequestSerializer {
   void startRequest(Priority priority, GlideUrl glideUrl, Listener listener) {
     boolean startNewRequest = false;
     Job job;
+    final int jobGeneration;
     synchronized (this) {
       job = jobs.get(glideUrl);
       if (job == null) {
@@ -126,7 +143,7 @@ final class ChromiumRequestSerializer {
         job = jobPool.get(glideUrl);
         jobs.put(glideUrl, job);
       }
-      job.addListener(listener);
+      jobGeneration = job.addListenerAndGetGeneration(listener);
     }
 
     if (startNewRequest) {
@@ -134,7 +151,7 @@ final class ChromiumRequestSerializer {
         Log.v(TAG, "Fetching image url using cronet" + " url: " + glideUrl);
       }
       job.priority = priority;
-      job.request =
+      final UrlRequest cronetRequest =
           requestFactory
               .newRequest(
                   glideUrl.toStringUrl(),
@@ -142,14 +159,16 @@ final class ChromiumRequestSerializer {
                   glideUrl.getHeaders(),
                   job)
               .build();
-      job.request.start();
+      cronetRequest.start();
 
       // It's possible we will be cancelled between adding the job to the job list and starting the
       // corresponding request. We don't want to hold a lock while starting the request, because
       // starting the request may block for a while and we need cancellation to happen quickly (it
-      // happens on the main thread).
-      if (job.isCancelled) {
-        job.request.cancel();
+      // happens on the main thread). Publish cronetRequest or detect pre-start cancellation under
+      // ChromiumRequestSerializer.this, checking jobGeneration in case start() already finished and
+      // returned this Job to jobPool.
+      if (job.publishRequestOrShouldCancel(jobGeneration, cronetRequest)) {
+        cronetRequest.cancel();
       }
     }
   }
@@ -188,10 +207,22 @@ final class ChromiumRequestSerializer {
     private GlideUrl glideUrl;
     private Priority priority;
     private long startTime;
+
+    // Incremented in clearListeners() each time this Job is returned to JobPool for reuse so
+    // startRequest() can detect if a fast-finishing request already recycled this Job.
+    @GuardedBy("ChromiumRequestSerializer.this")
+    private int generation;
+
+    @GuardedBy("ChromiumRequestSerializer.this")
+    @Nullable
     private UrlRequest request;
+
     private long endTimeMs;
     private long responseStartTimeMs;
-    private volatile boolean isCancelled;
+
+    @GuardedBy("ChromiumRequestSerializer.this")
+    private boolean isCancelled;
+
     private BufferQueue.Builder builder;
     private final Supplier<Executor> executorSupplier;
 
@@ -204,30 +235,56 @@ final class ChromiumRequestSerializer {
       this.glideUrl = glideUrl;
     }
 
-    void addListener(Listener listener) {
+    int addListenerAndGetGeneration(Listener listener) {
       synchronized (ChromiumRequestSerializer.this) {
         listeners.add(listener);
+        return generation;
+      }
+    }
+
+    boolean publishRequestOrShouldCancel(int expectedGeneration, UrlRequest cronetRequest) {
+      synchronized (ChromiumRequestSerializer.this) {
+        if (options.guardActiveJobEviction() && generation != expectedGeneration) {
+          // generation only increments in clearListeners() when onRequestFinished returns this Job
+          // to jobPool:
+          // 1. cronetRequest has already completed, failed, or been cancelled, so we no longer need
+          //    to retain a reference to it.
+          // 2. We must not publish cronetRequest into this.request (which now belongs to the pooled
+          //    or reused Job) or return true to cancel it again.
+          return false;
+        }
+        if (isCancelled) {
+          return true;
+        }
+        request = cronetRequest;
+        return false;
       }
     }
 
     void removeListener(Listener listener) {
+      UrlRequest requestToCancel = null;
       synchronized (ChromiumRequestSerializer.this) {
         // Note: multiple cancellation calls + a subsequent request for a url may mean we fail to
         // remove the listener here because that listener is actually for a previous request. Since
         // that race is harmless, we simply ignore it.
-        listeners.remove(listener);
+        boolean removed = listeners.remove(listener);
+        if (options.guardActiveJobEviction() && !removed) {
+          return;
+        }
         if (listeners.isEmpty()) {
           isCancelled = true;
-          jobs.remove(glideUrl);
+          requestToCancel = request;
+          request = null;
+          // Only remove the entry if it still maps to this Job (see onRequestFinished).
+          if (!options.guardActiveJobEviction() || jobs.get(glideUrl) == this) {
+            jobs.remove(glideUrl);
+          }
         }
       }
 
-      // The request may not have started yet, so request may be null.
-      if (isCancelled) {
-        UrlRequest localRequest = request;
-        if (localRequest != null) {
-          localRequest.cancel();
-        }
+      // The request may not have started yet, so requestToCancel may be null.
+      if (requestToCancel != null) {
+        requestToCancel.cancel();
       }
     }
 
@@ -248,7 +305,7 @@ final class ChromiumRequestSerializer {
     public void onReadCompleted(
         UrlRequest urlRequest, UrlResponseInfo urlResponseInfo, ByteBuffer byteBuffer)
         throws Exception {
-      request.read(builder.getNextBuffer(byteBuffer));
+      urlRequest.read(builder.getNextBuffer(byteBuffer));
     }
 
     @Override
@@ -302,7 +359,13 @@ final class ChromiumRequestSerializer {
         boolean wasCancelled,
         ByteBuffer buffer) {
       synchronized (ChromiumRequestSerializer.this) {
-        jobs.remove(glideUrl);
+        // When a Job is cancelled, removeListener() removes glideUrl from jobs immediately on the
+        // caller thread, while Cronet invokes onCanceled() (or a racing completion callback)
+        // asynchronously later. If glideUrl was requested again in that window, jobs.get(glideUrl)
+        // already points to the newer active Job and must not be evicted by this finishing Job.
+        if (!options.guardActiveJobEviction() || jobs.get(glideUrl) == this) {
+          jobs.remove(glideUrl);
+        }
       }
 
       Exception exception = getExceptionIfFailed(info, e, wasCancelled);
@@ -373,8 +436,12 @@ final class ChromiumRequestSerializer {
       }
     }
 
+    /**
+     * Resets state when {@link JobPool#put(Job)} returns this {@link Job} to the pool for reuse.
+     */
     private void clearListeners() {
       synchronized (ChromiumRequestSerializer.this) {
+        generation++;
         listeners.clear();
         request = null;
         isCancelled = false;
