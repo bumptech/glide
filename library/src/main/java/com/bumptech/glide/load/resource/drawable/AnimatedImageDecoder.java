@@ -91,8 +91,8 @@ public final class AnimatedImageDecoder {
 
     @NonNull
     @Override
-    public Class<Drawable> getResourceClass() {
-      return Drawable.class;
+    public Class<AnimatedImageDrawable> getResourceClass() {
+      return AnimatedImageDrawable.class;
     }
 
     @NonNull

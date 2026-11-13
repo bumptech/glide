@@ -66,7 +66,7 @@ final class LockedResource<Z> implements Resource<Z>, FactoryPools.Poolable {
 
   @NonNull
   @Override
-  public Class<Z> getResourceClass() {
+  public Class<? extends Z> getResourceClass() {
     return toWrap.getResourceClass();
   }
 

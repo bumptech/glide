@@ -21,10 +21,9 @@ final class NonOwnedDrawableResource extends DrawableResource<Drawable> {
   }
 
   @NonNull
-  @SuppressWarnings("unchecked")
   @Override
-  public Class<Drawable> getResourceClass() {
-    return (Class<Drawable>) drawable.getClass();
+  public Class<? extends Drawable> getResourceClass() {
+    return drawable.getClass();
   }
 
   @Override

@@ -27,7 +27,7 @@ public class ResourceEncoderRegistry {
 
   @SuppressWarnings("unchecked")
   @Nullable
-  public synchronized <Z> ResourceEncoder<Z> get(@NonNull Class<Z> resourceClass) {
+  public synchronized <Z> ResourceEncoder<Z> get(@NonNull Class<? extends Z> resourceClass) {
     //noinspection ForLoopReplaceableByForEach to improve perf
     for (int i = 0, size = encoders.size(); i < size; i++) {
       Entry<?> entry = encoders.get(i);
