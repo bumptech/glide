@@ -134,6 +134,11 @@ object CommonSources {
   @Language("kotlin")
   const val simpleAppGlideModule =
     """
+@file:Suppress(
+  "REDUNDANT_VISIBILITY_MODIFIER",
+  "REDUNDANT_RETURN_UNIT_TYPE",
+)
+
 package com.bumptech.glide
 
 import AppModule

@@ -735,6 +735,11 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
 @Language("kotlin")
 const val appGlideModuleWithPackagePrefixedLibraryModules =
   """
+@file:Suppress(
+  "REDUNDANT_VISIBILITY_MODIFIER",
+  "REDUNDANT_RETURN_UNIT_TYPE",
+)
+
 package com.bumptech.glide
 
 import AppModule
@@ -776,6 +781,11 @@ internal class GeneratedAppGlideModuleImpl(
 @Language("kotlin")
 const val appGlideModuleWithLibraryModule =
   """
+@file:Suppress(
+  "REDUNDANT_VISIBILITY_MODIFIER",
+  "REDUNDANT_RETURN_UNIT_TYPE",
+)
+
 package com.bumptech.glide
 
 import AppModule
@@ -816,6 +826,11 @@ internal class GeneratedAppGlideModuleImpl(
 @Language("kotlin")
 const val appGlideModuleWithMultipleLibraryModules =
   """
+@file:Suppress(
+  "REDUNDANT_VISIBILITY_MODIFIER",
+  "REDUNDANT_RETURN_UNIT_TYPE",
+)
+
 package com.bumptech.glide
 
 import AppModule
