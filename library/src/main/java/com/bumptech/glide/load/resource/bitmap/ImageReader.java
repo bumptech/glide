@@ -187,7 +187,7 @@ interface ImageReader {
     @Nullable
     @Override
     public Bitmap decodeBitmap(Options options) {
-      if (enableDirectByteBufferDecoding) {
+      if (enableDirectByteBufferDecoding && buffer.hasArray()) {
         return GlideBitmapFactory.decodeByteBuffer(buffer, options, this);
       } else {
         InputStream inputStream = stream();

@@ -49,13 +49,14 @@ public class ImageReaderTest {
   }
 
   @Test
-  public void byteBufferReader_directBuffer_decodesBitmap() throws IOException {
+  public void byteBufferReader_directBuffer_fallsBackToByteBufferStream() throws IOException {
     byte[] imageBytes = openResourceBytes(ROTATED_JPEG_RESOURCE_NAME);
     ByteBuffer buffer = ByteBuffer.allocateDirect(imageBytes.length);
     buffer.put(imageBytes);
     buffer.position(0);
     ImageReader.ByteBufferReader reader =
-        new ImageReader.ByteBufferReader(buffer, parsers, byteArrayPool);
+        new ImageReader.ByteBufferReader(
+            buffer, parsers, byteArrayPool, /* enableDirectByteBufferDecoding= */ true);
 
     BitmapFactory.Options options = new BitmapFactory.Options();
     Bitmap bitmap = reader.decodeBitmap(options);
@@ -63,6 +64,10 @@ public class ImageReaderTest {
     assertThat(bitmap).isNotNull();
     assertThat(bitmap.getWidth()).isGreaterThan(0);
     assertThat(bitmap.getHeight()).isGreaterThan(0);
+    // ByteBufferStream reads directly from buffer (advancing position to limit), whereas
+    // GlideBitmapFactory.decodeByteBuffer -> ByteBufferUtil.toBytes reads from an
+    // asReadOnlyBuffer() duplicate and leaves buffer.position() at 0.
+    assertThat(buffer.position()).isEqualTo(buffer.limit());
   }
 
   @Test
@@ -86,6 +91,26 @@ public class ImageReaderTest {
   }
 
   @Test
+  public void byteBufferReader_readOnlyHeapBuffer_fallsBackToByteBufferStream() throws IOException {
+    byte[] imageBytes = openResourceBytes(ROTATED_JPEG_RESOURCE_NAME);
+    ByteBuffer buffer = ByteBuffer.wrap(imageBytes).asReadOnlyBuffer();
+    ImageReader.ByteBufferReader reader =
+        new ImageReader.ByteBufferReader(
+            buffer, parsers, byteArrayPool, /* enableDirectByteBufferDecoding= */ true);
+
+    BitmapFactory.Options options = new BitmapFactory.Options();
+    Bitmap bitmap = reader.decodeBitmap(options);
+
+    assertThat(bitmap).isNotNull();
+    assertThat(bitmap.getWidth()).isGreaterThan(0);
+    assertThat(bitmap.getHeight()).isGreaterThan(0);
+    // ByteBufferStream reads directly from buffer (advancing position to limit), whereas
+    // GlideBitmapFactory.decodeByteBuffer -> ByteBufferUtil.toBytes reads from an
+    // asReadOnlyBuffer() duplicate and leaves buffer.position() at 0.
+    assertThat(buffer.position()).isEqualTo(buffer.limit());
+  }
+
+  @Test
   public void byteBufferReader_experimentDisabled_decodesBitmapWithStream() throws IOException {
     byte[] imageBytes = openResourceBytes(ROTATED_JPEG_RESOURCE_NAME);
     ByteBuffer buffer = ByteBuffer.wrap(imageBytes);
@@ -99,6 +124,7 @@ public class ImageReaderTest {
     assertThat(bitmap).isNotNull();
     assertThat(bitmap.getWidth()).isGreaterThan(0);
     assertThat(bitmap.getHeight()).isGreaterThan(0);
+    assertThat(buffer.position()).isEqualTo(buffer.limit());
   }
 
   private byte[] openResourceBytes(String resourceName) throws IOException {
