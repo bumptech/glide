@@ -545,7 +545,12 @@ final class RegistryFactory {
         .append(Uri.class, InputStream.class, new UrlUriLoader.StreamFactory())
         .append(URL.class, InputStream.class, new UrlLoader.StreamFactory())
         .append(Uri.class, File.class, new MediaStoreFileLoader.Factory(context))
-        .append(GlideUrl.class, InputStream.class, new HttpGlideUrlLoader.Factory())
+        .append(
+            GlideUrl.class,
+            InputStream.class,
+            new HttpGlideUrlLoader.Factory(
+                experiments.isEnabled(
+                    GlideBuilder.StripSensitiveHeadersOnCrossOriginRedirects.class)))
         .append(byte[].class, ByteBuffer.class, new ByteArrayLoader.ByteBufferFactory())
         .append(byte[].class, InputStream.class, new ByteArrayLoader.StreamFactory())
         .append(Uri.class, Uri.class, UnitModelLoader.Factory.<Uri>getInstance())

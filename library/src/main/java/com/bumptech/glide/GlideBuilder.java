@@ -44,7 +44,8 @@ import java.util.Map;
 @SuppressWarnings("PMD.ImmutableField")
 public final class GlideBuilder {
   private final Map<Class<?>, TransitionOptions<?, ?>> defaultTransitionOptions = new ArrayMap<>();
-  private final GlideExperiments.Builder glideExperimentsBuilder = new GlideExperiments.Builder();
+  private final GlideExperiments.Builder glideExperimentsBuilder =
+      new GlideExperiments.Builder().add(new StripSensitiveHeadersOnCrossOriginRedirects());
   @Nullable private Engine engine;
   @Nullable private BitmapPool bitmapPool;
   @Nullable private ArrayPool arrayPool;
@@ -779,6 +780,22 @@ public final class GlideBuilder {
   }
 
   /**
+   * Set to {@code true} to strip sensitive headers ({@code Authorization}, {@code
+   * Proxy-Authorization}, {@code Cookie}, {@code Cookie2}) on cross-origin redirects when {@link
+   * com.bumptech.glide.load.data.HttpUrlFetcher} handles redirects manually.
+   *
+   * <p>Defaults to {@code true}.
+   *
+   * <p>This is an experimental API that may be removed in the future.
+   */
+  @CanIgnoreReturnValue
+  public GlideBuilder experimentalSetStripSensitiveHeadersOnCrossOriginRedirects(
+      boolean isEnabled) {
+    glideExperimentsBuilder.update(new StripSensitiveHeadersOnCrossOriginRedirects(), isEnabled);
+    return this;
+  }
+
+  /**
    * @deprecated This method does nothing. It will be hard coded and removed in a future release
    *     without further warning.
    */
@@ -955,6 +972,9 @@ public final class GlideBuilder {
 
   /** See {@link #experimentalSetUseTypedLoadForInMemoryObjects(boolean)}. */
   public static final class UseTypedLoadForInMemoryObjects implements Experiment {}
+
+  /** See {@link #experimentalSetStripSensitiveHeadersOnCrossOriginRedirects(boolean)}. */
+  public static final class StripSensitiveHeadersOnCrossOriginRedirects implements Experiment {}
 
   /** See {@link #setLogRequestOrigins(boolean)}. */
   public static final class LogRequestOrigins implements Experiment {}
