@@ -413,9 +413,9 @@ public class EngineTest {
             eq(harness.signature),
             eq(harness.width),
             eq(harness.height),
+            eq(Object.class),
+            eq(Object.class),
             eq(harness.transformations),
-            eq(Object.class),
-            eq(Object.class),
             eq(harness.options));
   }
 
@@ -705,9 +705,9 @@ public class EngineTest {
               eq(signature),
               anyInt(),
               anyInt(),
+              eq(Object.class),
+              eq(Object.class),
               eq(transformations),
-              eq(Object.class),
-              eq(Object.class),
               eq(options)))
           .thenReturn(cacheKey);
       when(resource.getResource()).thenReturn(mock(Resource.class));

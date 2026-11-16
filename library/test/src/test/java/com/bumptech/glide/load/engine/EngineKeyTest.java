@@ -42,9 +42,9 @@ public class EngineKeyTest {
             new ObjectKey("signature"),
             100,
             100,
+            Object.class,
+            Object.class,
             Collections.<Class<?>, Transformation<?>>emptyMap(),
-            Object.class,
-            Object.class,
             new Options());
     assertThrows(
         UnsupportedOperationException.class,
@@ -84,18 +84,18 @@ public class EngineKeyTest {
                 new ObjectKey("signature"),
                 100,
                 100,
+                Object.class,
+                Object.class,
                 Collections.<Class<?>, Transformation<?>>emptyMap(),
-                Object.class,
-                Object.class,
                 new Options()),
             new EngineKey(
                 "id",
                 new ObjectKey("signature"),
                 100,
                 100,
+                Object.class,
+                Object.class,
                 Collections.<Class<?>, Transformation<?>>emptyMap(),
-                Object.class,
-                Object.class,
                 new Options()))
         .addEqualityGroup(
             new EngineKey(
@@ -103,9 +103,9 @@ public class EngineKeyTest {
                 new ObjectKey("signature"),
                 100,
                 100,
+                Object.class,
+                Object.class,
                 Collections.<Class<?>, Transformation<?>>emptyMap(),
-                Object.class,
-                Object.class,
                 new Options()))
         .addEqualityGroup(
             new EngineKey(
@@ -113,9 +113,9 @@ public class EngineKeyTest {
                 new ObjectKey("otherSignature"),
                 100,
                 100,
+                Object.class,
+                Object.class,
                 Collections.<Class<?>, Transformation<?>>emptyMap(),
-                Object.class,
-                Object.class,
                 new Options()))
         .addEqualityGroup(
             new EngineKey(
@@ -123,9 +123,9 @@ public class EngineKeyTest {
                 new ObjectKey("signature"),
                 200,
                 100,
+                Object.class,
+                Object.class,
                 Collections.<Class<?>, Transformation<?>>emptyMap(),
-                Object.class,
-                Object.class,
                 new Options()))
         .addEqualityGroup(
             new EngineKey(
@@ -133,9 +133,9 @@ public class EngineKeyTest {
                 new ObjectKey("signature"),
                 100,
                 200,
+                Object.class,
+                Object.class,
                 Collections.<Class<?>, Transformation<?>>emptyMap(),
-                Object.class,
-                Object.class,
                 new Options()))
         .addEqualityGroup(
             new EngineKey(
@@ -143,9 +143,9 @@ public class EngineKeyTest {
                 new ObjectKey("signature"),
                 100,
                 100,
+                Object.class,
+                Object.class,
                 Collections.<Class<?>, Transformation<?>>singletonMap(Object.class, transformation),
-                Object.class,
-                Object.class,
                 new Options()))
         .addEqualityGroup(
             new EngineKey(
@@ -153,9 +153,9 @@ public class EngineKeyTest {
                 new ObjectKey("signature"),
                 100,
                 100,
-                Collections.<Class<?>, Transformation<?>>emptyMap(),
                 Integer.class,
                 Object.class,
+                Collections.<Class<?>, Transformation<?>>emptyMap(),
                 new Options()))
         .addEqualityGroup(
             new EngineKey(
@@ -163,9 +163,9 @@ public class EngineKeyTest {
                 new ObjectKey("signature"),
                 100,
                 100,
-                Collections.<Class<?>, Transformation<?>>emptyMap(),
                 Object.class,
                 Integer.class,
+                Collections.<Class<?>, Transformation<?>>emptyMap(),
                 new Options()))
         .addEqualityGroup(
             new EngineKey(
@@ -173,9 +173,9 @@ public class EngineKeyTest {
                 new ObjectKey("signature"),
                 100,
                 100,
+                Object.class,
+                Object.class,
                 Collections.<Class<?>, Transformation<?>>emptyMap(),
-                Object.class,
-                Object.class,
                 memoryOptions))
         .addEqualityGroup(
             new EngineKey(
@@ -183,9 +183,9 @@ public class EngineKeyTest {
                 new ObjectKey("signature"),
                 100,
                 100,
+                Object.class,
+                Object.class,
                 Collections.<Class<?>, Transformation<?>>emptyMap(),
-                Object.class,
-                Object.class,
                 diskOptions))
         .testEquals();
   }

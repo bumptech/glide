@@ -189,15 +189,15 @@ public final class Engine
       Executor callbackExecutor) {
     long startTime = VERBOSE_IS_LOGGABLE ? LogTime.getLogTime() : 0;
 
-    EngineKey key =
+    EngineKey engineKey =
         keyFactory.buildKey(
             model,
             signature,
             width,
             height,
-            transformations,
             resourceClass,
             transcodeClass,
+            transformations,
             options);
 
     boolean isReleaseRaceFixEnabled =
@@ -205,30 +205,31 @@ public final class Engine
 
     EngineResource<?> memoryResource;
     synchronized (this) {
-      memoryResource = loadFromMemory(key, isMemoryCacheable, isReleaseRaceFixEnabled, startTime);
+      memoryResource =
+          loadFromMemory(engineKey, isMemoryCacheable, isReleaseRaceFixEnabled, startTime);
 
       if (memoryResource == null) {
         return waitForExistingOrStartNewJob(
             glideContext,
+            engineKey,
             model,
             signature,
             width,
             height,
             resourceClass,
             transcodeClass,
-            priority,
-            diskCacheStrategy,
             transformations,
+            options,
+            diskCacheStrategy,
             isTransformationRequired,
             isScaleOnlyOrNoTransform,
-            options,
             isMemoryCacheable,
             useUnlimitedSourceExecutorPool,
             useAnimationPool,
             onlyRetrieveFromCache,
+            priority,
             cb,
             callbackExecutor,
-            key,
             startTime);
       }
     }
@@ -242,39 +243,39 @@ public final class Engine
 
   private <R> LoadStatus waitForExistingOrStartNewJob(
       GlideContext glideContext,
+      EngineKey engineKey,
       Object model,
       Key signature,
       int width,
       int height,
       Class<?> resourceClass,
       Class<R> transcodeClass,
-      Priority priority,
-      DiskCacheStrategy diskCacheStrategy,
       Map<Class<?>, Transformation<?>> transformations,
+      Options options,
+      DiskCacheStrategy diskCacheStrategy,
       boolean isTransformationRequired,
       boolean isScaleOnlyOrNoTransform,
-      Options options,
       boolean isMemoryCacheable,
       boolean useUnlimitedSourceExecutorPool,
       boolean useAnimationPool,
       boolean onlyRetrieveFromCache,
+      Priority priority,
       ResourceCallback cb,
       Executor callbackExecutor,
-      EngineKey key,
       long startTime) {
 
-    EngineJob<?> current = jobs.get(key, onlyRetrieveFromCache);
+    EngineJob<?> current = jobs.get(engineKey, onlyRetrieveFromCache);
     if (current != null) {
       current.addCallback(cb, callbackExecutor);
       if (VERBOSE_IS_LOGGABLE) {
-        logWithTimeAndKey("Added to existing load", startTime, key);
+        logWithTimeAndKey("Added to existing load", startTime, engineKey);
       }
       return new LoadStatus(cb, current);
     }
 
     EngineJob<R> engineJob =
         engineJobFactory.build(
-            key,
+            engineKey,
             isMemoryCacheable,
             useUnlimitedSourceExecutorPool,
             useAnimationPool,
@@ -283,29 +284,29 @@ public final class Engine
     DecodeJob<R> decodeJob =
         decodeJobFactory.build(
             glideContext,
+            engineKey,
             model,
-            key,
             signature,
             width,
             height,
             resourceClass,
             transcodeClass,
-            priority,
-            diskCacheStrategy,
             transformations,
+            options,
+            diskCacheStrategy,
             isTransformationRequired,
             isScaleOnlyOrNoTransform,
             onlyRetrieveFromCache,
-            options,
-            engineJob);
+            engineJob,
+            priority);
 
-    jobs.put(key, engineJob);
+    jobs.put(engineKey, engineJob);
 
     engineJob.addCallback(cb, callbackExecutor);
     engineJob.start(decodeJob);
 
     if (VERBOSE_IS_LOGGABLE) {
-      logWithTimeAndKey("Started new load", startTime, key);
+      logWithTimeAndKey("Started new load", startTime, engineKey);
     }
     return new LoadStatus(cb, engineJob);
   }
@@ -567,39 +568,39 @@ public final class Engine
     @SuppressWarnings("unchecked")
     <R> DecodeJob<R> build(
         GlideContext glideContext,
+        EngineKey engineKey,
         Object model,
-        EngineKey loadKey,
         Key signature,
         int width,
         int height,
         Class<?> resourceClass,
         Class<R> transcodeClass,
-        Priority priority,
-        DiskCacheStrategy diskCacheStrategy,
         Map<Class<?>, Transformation<?>> transformations,
+        Options options,
+        DiskCacheStrategy diskCacheStrategy,
         boolean isTransformationRequired,
         boolean isScaleOnlyOrNoTransform,
         boolean onlyRetrieveFromCache,
-        Options options,
-        DecodeJob.Callback<R> callback) {
+        DecodeJob.Callback<R> callback,
+        Priority priority) {
       DecodeJob<R> result = Preconditions.checkNotNull((DecodeJob<R>) pool.acquire());
       return result.init(
           glideContext,
+          engineKey,
           model,
-          loadKey,
           signature,
           width,
           height,
           resourceClass,
           transcodeClass,
-          priority,
-          diskCacheStrategy,
           transformations,
+          options,
+          diskCacheStrategy,
           isTransformationRequired,
           isScaleOnlyOrNoTransform,
           onlyRetrieveFromCache,
-          options,
           callback,
+          priority,
           creationOrder++);
     }
   }

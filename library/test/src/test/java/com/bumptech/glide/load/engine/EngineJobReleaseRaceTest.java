@@ -61,9 +61,9 @@ public class EngineJobReleaseRaceTest {
           EmptySignature.obtain(),
           SIZE,
           SIZE,
-          transformations,
           /* resourceClass= */ Object.class,
           /* transcodeClass= */ Object.class,
+          transformations,
           options);
   private final ActiveResources activeResources =
       new ActiveResources(
