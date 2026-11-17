@@ -187,4 +187,43 @@ public final class GlideExperimentsTest {
                 .isEnabled(GlideBuilder.UseBitmapFactoryForInputStreamsWithImageDecoder.class))
         .isTrue();
   }
+
+  @Test
+  public void stripSensitiveHeadersOnCrossOriginRedirects_experimentEnabledByDefault() {
+    Glide.tearDown();
+    GlideExecutor executor = MockGlideExecutor.newMainThreadExecutor();
+    GlideBuilder builder =
+        new GlideBuilder()
+            .setSourceExecutor(executor)
+            .setDiskCacheExecutor(executor)
+            .setAnimationExecutor(executor);
+    Glide.init(context, builder);
+
+    assertThat(
+            Glide.get(context)
+                .getGlideContext()
+                .getExperiments()
+                .isEnabled(GlideBuilder.StripSensitiveHeadersOnCrossOriginRedirects.class))
+        .isTrue();
+  }
+
+  @Test
+  public void stripSensitiveHeadersOnCrossOriginRedirects_experimentDisabled_isRecorded() {
+    Glide.tearDown();
+    GlideExecutor executor = MockGlideExecutor.newMainThreadExecutor();
+    GlideBuilder builder =
+        new GlideBuilder()
+            .setSourceExecutor(executor)
+            .setDiskCacheExecutor(executor)
+            .setAnimationExecutor(executor)
+            .experimentalSetStripSensitiveHeadersOnCrossOriginRedirects(false);
+    Glide.init(context, builder);
+
+    assertThat(
+            Glide.get(context)
+                .getGlideContext()
+                .getExperiments()
+                .isEnabled(GlideBuilder.StripSensitiveHeadersOnCrossOriginRedirects.class))
+        .isFalse();
+  }
 }

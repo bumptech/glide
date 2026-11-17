@@ -43,7 +43,7 @@ public final class UriBitmapImageDecoderResourceDecoder implements ResourceDecod
    *     requests with a positive {@link VideoDecoder#TARGET_FRAME}, so that {@code frame(0)}
    *     requests fall through to the MIME type check. {@code false} short-circuits for any {@link
    *     VideoDecoder#TARGET_FRAME} other than {@link VideoDecoder#DEFAULT_FRAME}. See {@link
-   *     com.bumptech.glide.GlideBuilder#setFileDescriptorImageDecoderEnabled(boolean)}.
+   *     com.bumptech.glide.GlideBuilder#setPrioritizeFileDescriptorOverInputStream(boolean)}.
    */
   public UriBitmapImageDecoderResourceDecoder(
       @NonNull Context context, boolean onlyRejectPositiveVideoFrames) {

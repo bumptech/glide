@@ -78,23 +78,30 @@ class DecodeJob<R>
   private final ReleaseManager releaseManager = new ReleaseManager();
 
   private GlideContext glideContext;
+
+  // Description of the resource being loaded/decoded.
+  private EngineKey engineKey;
+  private Object model;
   private Key signature;
-  private Priority priority;
-  private EngineKey loadKey;
   private int width;
   private int height;
-  private DiskCacheStrategy diskCacheStrategy;
   private Options options;
-  private Callback<R> callback;
-  private int order;
-  private Stage stage;
-  private RunReason runReason;
-  private long startFetchTime;
+
+  // How we're loading it.
+  private DiskCacheStrategy diskCacheStrategy;
   private boolean onlyRetrieveFromCache;
-  private Object model;
+  private Callback<R> callback;
+  private Priority priority;
+  private int creationOrder; // for tie-breaking with priority.
+
+  // GlideContext and Options contain the canonical versions; these should not be here.
   private GlideExperiments experiments;
   @Nullable private Supplier<Integer> glideThreadPriorityOverride;
 
+  // Internal bookkeeping.
+  private Stage stage;
+  private RunReason runReason;
+  private long startFetchTime;
   private Thread currentThread;
   private Key currentSourceKey;
   private Key currentAttemptingKey;
@@ -114,52 +121,52 @@ class DecodeJob<R>
 
   DecodeJob<R> init(
       GlideContext glideContext,
+      EngineKey engineKey,
       Object model,
-      EngineKey loadKey,
       Key signature,
       int width,
       int height,
       Class<?> resourceClass,
       Class<R> transcodeClass,
-      Priority priority,
-      DiskCacheStrategy diskCacheStrategy,
       Map<Class<?>, Transformation<?>> transformations,
+      Options options,
+      DiskCacheStrategy diskCacheStrategy,
       boolean isTransformationRequired,
       boolean isScaleOnlyOrNoTransform,
       boolean onlyRetrieveFromCache,
-      Options options,
       Callback<R> callback,
-      int order) {
+      Priority priority,
+      int creationOrder) {
     decodeHelper.init(
         glideContext,
         model,
         signature,
         width,
         height,
-        diskCacheStrategy,
         resourceClass,
         transcodeClass,
-        priority,
-        options,
         transformations,
+        options,
+        diskCacheStrategy,
+        diskCacheProvider,
         isTransformationRequired,
         isScaleOnlyOrNoTransform,
-        diskCacheProvider);
+        priority);
     this.glideContext = glideContext;
+    this.engineKey = engineKey;
+    this.model = model;
     this.signature = signature;
-    this.priority = priority;
-    this.loadKey = loadKey;
     this.width = width;
     this.height = height;
+    this.options = options;
     this.diskCacheStrategy = diskCacheStrategy;
     this.onlyRetrieveFromCache = onlyRetrieveFromCache;
-    this.options = options;
     this.callback = callback;
-    this.order = order;
-    this.runReason = RunReason.INITIALIZE;
-    this.model = model;
+    this.priority = priority;
+    this.creationOrder = creationOrder;
     this.experiments = glideContext.getExperiments();
     this.glideThreadPriorityOverride = options.get(GLIDE_THREAD_PRIORITY_OVERRIDE);
+    this.runReason = RunReason.INITIALIZE;
     return this;
   }
 
@@ -210,7 +217,7 @@ class DecodeJob<R>
     signature = null;
     options = null;
     priority = null;
-    loadKey = null;
+    engineKey = null;
     callback = null;
     stage = null;
     currentGenerator = null;
@@ -230,7 +237,7 @@ class DecodeJob<R>
   public int compareTo(@NonNull DecodeJob<?> other) {
     int result = priority.compareTo(other.priority);
     if (result == 0) {
-      result = order - other.order;
+      result = creationOrder - other.creationOrder;
     }
     return result;
   }
@@ -625,7 +632,7 @@ class DecodeJob<R>
             + " in "
             + LogTime.getElapsedMillis(startTime)
             + ", load key: "
-            + loadKey
+            + engineKey
             + (extraArgs != null ? ", " + extraArgs : "")
             + ", thread: "
             + Thread.currentThread().getName());

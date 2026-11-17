@@ -12,11 +12,11 @@ class EngineKeyFactory {
       Key signature,
       int width,
       int height,
-      Map<Class<?>, Transformation<?>> transformations,
       Class<?> resourceClass,
       Class<?> transcodeClass,
+      Map<Class<?>, Transformation<?>> transformations,
       Options options) {
     return new EngineKey(
-        model, signature, width, height, transformations, resourceClass, transcodeClass, options);
+        model, signature, width, height, resourceClass, transcodeClass, transformations, options);
   }
 }

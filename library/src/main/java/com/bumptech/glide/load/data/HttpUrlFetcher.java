@@ -17,6 +17,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Map;
 
 /** A DataFetcher that retrieves an {@link java.io.InputStream} for a Url. */
@@ -35,20 +36,45 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
   private final GlideUrl glideUrl;
   private final int timeout;
   private final HttpUrlConnectionFactory connectionFactory;
+  private final boolean stripSensitiveHeadersOnCrossOriginRedirects;
 
   private HttpURLConnection urlConnection;
   private InputStream stream;
   private volatile boolean isCancelled;
 
   public HttpUrlFetcher(GlideUrl glideUrl, int timeout) {
-    this(glideUrl, timeout, DEFAULT_CONNECTION_FACTORY);
+    this(glideUrl, timeout, /* stripSensitiveHeadersOnCrossOriginRedirects= */ true);
+  }
+
+  /**
+   * stripSensitiveHeadersOnCrossOriginRedirects is part of an experiment and the constructor can be
+   * removed in a future version.
+   */
+  public HttpUrlFetcher(
+      GlideUrl glideUrl, int timeout, boolean stripSensitiveHeadersOnCrossOriginRedirects) {
+    this(
+        glideUrl, timeout, DEFAULT_CONNECTION_FACTORY, stripSensitiveHeadersOnCrossOriginRedirects);
   }
 
   @VisibleForTesting
   HttpUrlFetcher(GlideUrl glideUrl, int timeout, HttpUrlConnectionFactory connectionFactory) {
+    this(
+        glideUrl,
+        timeout,
+        connectionFactory,
+        /* stripSensitiveHeadersOnCrossOriginRedirects= */ true);
+  }
+
+  @VisibleForTesting
+  HttpUrlFetcher(
+      GlideUrl glideUrl,
+      int timeout,
+      HttpUrlConnectionFactory connectionFactory,
+      boolean stripSensitiveHeadersOnCrossOriginRedirects) {
     this.glideUrl = glideUrl;
     this.timeout = timeout;
     this.connectionFactory = connectionFactory;
+    this.stripSensitiveHeadersOnCrossOriginRedirects = stripSensitiveHeadersOnCrossOriginRedirects;
   }
 
   @Override
@@ -120,7 +146,11 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
       // Closing the stream specifically is required to avoid leaking ResponseBodys in addition
       // to disconnecting the url connection below. See #2352.
       cleanup();
-      return loadDataWithRedirects(redirectUrl, redirects + 1, url, headers);
+      Map<String, String> redirectHeaders =
+          stripSensitiveHeadersOnCrossOriginRedirects
+              ? getRedirectHeaders(url, redirectUrl, headers)
+              : headers;
+      return loadDataWithRedirects(redirectUrl, redirects + 1, url, redirectHeaders);
     } else if (statusCode == INVALID_STATUS_CODE) {
       throw new HttpException(statusCode);
     } else {
@@ -130,6 +160,37 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
         throw new HttpException("Failed to get a response message", statusCode, e);
       }
     }
+  }
+
+  private static Map<String, String> getRedirectHeaders(
+      URL currentUrl, URL redirectUrl, Map<String, String> headers) {
+    if (headers.isEmpty() || isSameOrigin(currentUrl, redirectUrl)) {
+      return headers;
+    }
+    Map<String, String> sanitizedHeaders = new HashMap<>();
+    for (Map.Entry<String, String> entry : headers.entrySet()) {
+      if (!isSensitiveHeader(entry.getKey())) {
+        sanitizedHeaders.put(entry.getKey(), entry.getValue());
+      }
+    }
+    return sanitizedHeaders;
+  }
+
+  private static boolean isSensitiveHeader(String headerName) {
+    return "Authorization".equalsIgnoreCase(headerName)
+        || "Proxy-Authorization".equalsIgnoreCase(headerName)
+        || "Cookie".equalsIgnoreCase(headerName)
+        || "Cookie2".equalsIgnoreCase(headerName);
+  }
+
+  private static boolean isSameOrigin(URL a, URL b) {
+    String hostA = a.getHost() == null ? "" : a.getHost();
+    String hostB = b.getHost() == null ? "" : b.getHost();
+    int portA = a.getPort() == -1 ? a.getDefaultPort() : a.getPort();
+    int portB = b.getPort() == -1 ? b.getDefaultPort() : b.getPort();
+    return a.getProtocol().equalsIgnoreCase(b.getProtocol())
+        && hostA.equalsIgnoreCase(hostB)
+        && portA == portB;
   }
 
   private static int getHttpStatusCodeOrInvalid(HttpURLConnection urlConnection) {

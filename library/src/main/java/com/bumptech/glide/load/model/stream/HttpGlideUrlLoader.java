@@ -29,13 +29,25 @@ public class HttpGlideUrlLoader implements ModelLoader<GlideUrl, InputStream> {
       Option.memory("com.bumptech.glide.load.model.stream.HttpGlideUrlLoader.Timeout", 2500);
 
   @Nullable private final ModelCache<GlideUrl, GlideUrl> modelCache;
+  private final boolean stripSensitiveHeadersOnCrossOriginRedirects;
 
   public HttpGlideUrlLoader() {
     this(null);
   }
 
   public HttpGlideUrlLoader(@Nullable ModelCache<GlideUrl, GlideUrl> modelCache) {
+    this(modelCache, /* stripSensitiveHeadersOnCrossOriginRedirects= */ true);
+  }
+
+  /**
+   * stripSensitiveHeadersOnCrossOriginRedirects is part of an experiment and the constructor can be
+   * removed in a future version.
+   */
+  public HttpGlideUrlLoader(
+      @Nullable ModelCache<GlideUrl, GlideUrl> modelCache,
+      boolean stripSensitiveHeadersOnCrossOriginRedirects) {
     this.modelCache = modelCache;
+    this.stripSensitiveHeadersOnCrossOriginRedirects = stripSensitiveHeadersOnCrossOriginRedirects;
   }
 
   @Override
@@ -52,7 +64,8 @@ public class HttpGlideUrlLoader implements ModelLoader<GlideUrl, InputStream> {
       }
     }
     int timeout = options.get(TIMEOUT);
-    return new LoadData<>(url, new HttpUrlFetcher(url, timeout));
+    return new LoadData<>(
+        url, new HttpUrlFetcher(url, timeout, stripSensitiveHeadersOnCrossOriginRedirects));
   }
 
   @Override
@@ -63,11 +76,25 @@ public class HttpGlideUrlLoader implements ModelLoader<GlideUrl, InputStream> {
   /** The default factory for {@link HttpGlideUrlLoader}s. */
   public static class Factory implements ModelLoaderFactory<GlideUrl, InputStream> {
     private final ModelCache<GlideUrl, GlideUrl> modelCache = new ModelCache<>(500);
+    private final boolean stripSensitiveHeadersOnCrossOriginRedirects;
+
+    public Factory() {
+      this(/* stripSensitiveHeadersOnCrossOriginRedirects= */ true);
+    }
+
+    /**
+     * stripSensitiveHeadersOnCrossOriginRedirects is part of an experiment and the constructor can
+     * be removed in a future version.
+     */
+    public Factory(boolean stripSensitiveHeadersOnCrossOriginRedirects) {
+      this.stripSensitiveHeadersOnCrossOriginRedirects =
+          stripSensitiveHeadersOnCrossOriginRedirects;
+    }
 
     @NonNull
     @Override
     public ModelLoader<GlideUrl, InputStream> build(MultiModelLoaderFactory multiFactory) {
-      return new HttpGlideUrlLoader(modelCache);
+      return new HttpGlideUrlLoader(modelCache, stripSensitiveHeadersOnCrossOriginRedirects);
     }
 
     @Override

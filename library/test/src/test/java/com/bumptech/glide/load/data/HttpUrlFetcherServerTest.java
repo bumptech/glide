@@ -254,6 +254,66 @@ public class HttpUrlFetcherServerTest {
     assertThat(mockWebServer.takeRequest().getHeader(headerField)).isEqualTo(headerValue);
   }
 
+  @Test
+  public void loadData_crossOriginRedirect_stripsSensitiveHeaders() throws Exception {
+    // Starts a second server on a different ephemeral port (making it a cross-origin redirect).
+    MockWebServer redirectServer = new MockWebServer();
+    redirectServer.enqueue(new MockResponse().setResponseCode(200).setBody("fakedata"));
+    redirectServer.start();
+
+    try {
+      mockWebServer.enqueue(
+          new MockResponse()
+              .setResponseCode(301)
+              .setHeader("Location", redirectServer.url("/redirect").toString()));
+      Map<String, String> headersMap = new HashMap<>();
+      headersMap.put("Authorization", "hunter2");
+      headersMap.put("Cookie", "session=123");
+      headersMap.put("Cookie2", "session2=456");
+      headersMap.put("User-Agent", "CustomAgent");
+      Headers headers = mock(Headers.class);
+      when(headers.getHeaders()).thenReturn(headersMap);
+
+      getFetcher(headers).loadData(Priority.HIGH, callback);
+
+      verify(callback).onDataReady(streamCaptor.capture());
+      TestUtil.assertStreamOf("fakedata", streamCaptor.getValue());
+      RecordedRequest firstRequest = mockWebServer.takeRequest();
+      assertThat(firstRequest.getHeader("Authorization")).isEqualTo("hunter2");
+      assertThat(firstRequest.getHeader("Cookie")).isEqualTo("session=123");
+      assertThat(firstRequest.getHeader("Cookie2")).isEqualTo("session2=456");
+      assertThat(firstRequest.getHeader("User-Agent")).isEqualTo("CustomAgent");
+
+      RecordedRequest secondRequest = redirectServer.takeRequest();
+      assertThat(secondRequest.getHeader("Authorization")).isNull();
+      assertThat(secondRequest.getHeader("Cookie")).isNull();
+      assertThat(secondRequest.getHeader("Cookie2")).isNull();
+      assertThat(secondRequest.getHeader("User-Agent")).isEqualTo("CustomAgent");
+    } finally {
+      redirectServer.shutdown();
+    }
+  }
+
+  @Test
+  public void loadData_sameOriginRedirect_retainsSensitiveHeaders() throws Exception {
+    mockWebServer.enqueue(
+        new MockResponse()
+            .setResponseCode(301)
+            .setHeader("Location", mockWebServer.url("/redirect").toString()));
+    mockWebServer.enqueue(new MockResponse().setResponseCode(200).setBody("fakedata"));
+    Map<String, String> headersMap = new HashMap<>();
+    headersMap.put("Authorization", "hunter2");
+    Headers headers = mock(Headers.class);
+    when(headers.getHeaders()).thenReturn(headersMap);
+
+    getFetcher(headers).loadData(Priority.HIGH, callback);
+
+    verify(callback).onDataReady(streamCaptor.capture());
+    TestUtil.assertStreamOf("fakedata", streamCaptor.getValue());
+    assertThat(mockWebServer.takeRequest().getHeader("Authorization")).isEqualTo("hunter2");
+    assertThat(mockWebServer.takeRequest().getHeader("Authorization")).isEqualTo("hunter2");
+  }
+
   private HttpUrlFetcher getFetcher() {
     return getFetcher(Headers.DEFAULT);
   }

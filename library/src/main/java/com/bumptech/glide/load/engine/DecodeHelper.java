@@ -27,21 +27,27 @@ final class DecodeHelper<Transcode> {
   private final List<Key> cacheKeys = new ArrayList<>();
 
   private GlideContext glideContext;
+
+  // Description of the resource being loaded/decoded.
   private Object model;
+  private Key signature;
   private int width;
   private int height;
   private Class<?> resourceClass;
-  private DecodeJob.DiskCacheProvider diskCacheProvider;
-  private Options options;
-  private Map<Class<?>, Transformation<?>> transformations;
   private Class<Transcode> transcodeClass;
-  private boolean isLoadDataSet;
-  private boolean isCacheKeysSet;
-  private Key signature;
-  private Priority priority;
+  private Map<Class<?>, Transformation<?>> transformations;
+  private Options options;
+
+  // How we're loading it.
   private DiskCacheStrategy diskCacheStrategy;
+  private DecodeJob.DiskCacheProvider diskCacheProvider;
   private boolean isTransformationRequired;
   private boolean isScaleOnlyOrNoTransform;
+  private Priority priority;
+
+  // Internal bookkeeping.
+  private boolean isLoadDataSet;
+  private boolean isCacheKeysSet;
 
   @SuppressWarnings("unchecked")
   <R> void init(
@@ -50,29 +56,29 @@ final class DecodeHelper<Transcode> {
       Key signature,
       int width,
       int height,
-      DiskCacheStrategy diskCacheStrategy,
       Class<?> resourceClass,
       Class<R> transcodeClass,
-      Priority priority,
-      Options options,
       Map<Class<?>, Transformation<?>> transformations,
+      Options options,
+      DiskCacheStrategy diskCacheStrategy,
+      DiskCacheProvider diskCacheProvider,
       boolean isTransformationRequired,
       boolean isScaleOnlyOrNoTransform,
-      DiskCacheProvider diskCacheProvider) {
+      Priority priority) {
     this.glideContext = glideContext;
     this.model = model;
     this.signature = signature;
     this.width = width;
     this.height = height;
-    this.diskCacheStrategy = diskCacheStrategy;
     this.resourceClass = resourceClass;
-    this.diskCacheProvider = diskCacheProvider;
     this.transcodeClass = (Class<Transcode>) transcodeClass;
-    this.priority = priority;
-    this.options = options;
     this.transformations = transformations;
+    this.options = options;
+    this.diskCacheStrategy = diskCacheStrategy;
+    this.diskCacheProvider = diskCacheProvider;
     this.isTransformationRequired = isTransformationRequired;
     this.isScaleOnlyOrNoTransform = isScaleOnlyOrNoTransform;
+    this.priority = priority;
   }
 
   void clear() {
@@ -81,10 +87,10 @@ final class DecodeHelper<Transcode> {
     signature = null;
     resourceClass = null;
     transcodeClass = null;
-    options = null;
-    priority = null;
     transformations = null;
+    options = null;
     diskCacheStrategy = null;
+    priority = null;
 
     loadData.clear();
     isLoadDataSet = false;

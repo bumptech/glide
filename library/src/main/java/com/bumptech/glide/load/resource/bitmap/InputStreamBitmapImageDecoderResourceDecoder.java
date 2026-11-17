@@ -66,7 +66,7 @@ public final class InputStreamBitmapImageDecoderResourceDecoder
   /**
    * @param rejectExplicitVideoFrames {@code true} to return {@code false} from {@link #handles} for
    *     requests with a positive {@link VideoDecoder#TARGET_FRAME}. See {@link
-   *     com.bumptech.glide.GlideBuilder#setFileDescriptorImageDecoderEnabled(boolean)}.
+   *     com.bumptech.glide.GlideBuilder#setPrioritizeFileDescriptorOverInputStream(boolean)}.
    */
   public InputStreamBitmapImageDecoderResourceDecoder(
       List<ImageHeaderParser> parsers,

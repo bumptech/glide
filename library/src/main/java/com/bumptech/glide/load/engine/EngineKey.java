@@ -11,11 +11,11 @@ import java.util.Map;
 /** An in memory only cache key used to multiplex loads. */
 class EngineKey implements Key {
   private final Object model;
+  private final Key signature;
   private final int width;
   private final int height;
   private final Class<?> resourceClass;
   private final Class<?> transcodeClass;
-  private final Key signature;
   private final Map<Class<?>, Transformation<?>> transformations;
   private final Options options;
   private int hashCode;
@@ -25,19 +25,19 @@ class EngineKey implements Key {
       Key signature,
       int width,
       int height,
-      Map<Class<?>, Transformation<?>> transformations,
       Class<?> resourceClass,
       Class<?> transcodeClass,
+      Map<Class<?>, Transformation<?>> transformations,
       Options options) {
     this.model = Preconditions.checkNotNull(model);
     this.signature = Preconditions.checkNotNull(signature, "Signature must not be null");
     this.width = width;
     this.height = height;
-    this.transformations = Preconditions.checkNotNull(transformations);
     this.resourceClass =
         Preconditions.checkNotNull(resourceClass, "Resource class must not be null");
     this.transcodeClass =
         Preconditions.checkNotNull(transcodeClass, "Transcode class must not be null");
+    this.transformations = Preconditions.checkNotNull(transformations);
     this.options = Preconditions.checkNotNull(options);
   }
 
