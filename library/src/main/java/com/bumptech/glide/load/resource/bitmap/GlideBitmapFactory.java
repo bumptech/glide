@@ -56,7 +56,17 @@ final class GlideBitmapFactory {
     return BitmapFactory.decodeStream(inputStream, /* outPadding= */ null, options);
   }
 
-  /** Wrapper for decoding a {@link ByteBuffer} directly without an {@link InputStream}. */
+  /**
+   * Wrapper for decoding a {@link ByteBuffer} without copying it onto the Java heap where possible.
+   *
+   * <p>Array-backed buffers are decoded directly from their backing array. Buffers without an
+   * accessible array (for example direct {@link java.nio.MappedByteBuffer}s of local files, or
+   * read-only buffers) are streamed first to avoid copying the whole encoded image onto the Java
+   * heap. Skia's GIF decoder records the start offset before pre-frame extension blocks while
+   * parsing the header and seeks back to that offset when decoding pixels, so streaming fails for
+   * GIFs with more than a few KB of extension blocks before the first frame. If streaming fails,
+   * the buffer is copied into a byte array and decoded from memory instead.
+   */
   @Nullable
   public static Bitmap decodeByteBuffer(
       ByteBuffer buffer, BitmapFactory.Options options, ImageReader reader) {
@@ -68,10 +78,24 @@ final class GlideBitmapFactory {
           buffer.remaining(),
           options,
           reader);
-    } else {
-      byte[] bytes = ByteBufferUtil.toBytes(buffer);
-      return decodeByteArray(bytes, /* offset= */ 0, bytes.length, options, reader);
     }
+    Bitmap result = decodeStream(ByteBufferUtil.toStream(buffer), options, reader);
+    if (!isDecodeFailure(result, options)) {
+      return result;
+    }
+    if (Log.isLoggable(TAG, Log.DEBUG)) {
+      Log.d(TAG, "Failed to decode ByteBuffer as a stream, copying it into a byte array");
+    }
+    byte[] bytes = ByteBufferUtil.toBytes(ByteBufferUtil.rewind(buffer));
+    return decodeByteArray(bytes, /* offset= */ 0, bytes.length, options, reader);
+  }
+
+  /**
+   * Returns whether a {@link BitmapFactory} decode failed. Bounds-only decodes always return {@code
+   * null}, so they are checked for the {@code -1} width that {@link BitmapFactory} sets on failure.
+   */
+  private static boolean isDecodeFailure(@Nullable Bitmap result, BitmapFactory.Options options) {
+    return options.inJustDecodeBounds ? options.outWidth == -1 : result == null;
   }
 
   /** Wrapper for {@link BitmapFactory#decodeByteArray}. */
