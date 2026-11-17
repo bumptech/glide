@@ -10,7 +10,9 @@ import com.bumptech.glide.load.Option.CacheKeyUpdater;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.signature.ObjectKey;
+import com.bumptech.glide.util.EqualityKeyProxy;
 import com.google.common.testing.EqualsTester;
+import com.google.testing.junit.testparameterinjector.TestParameter;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
@@ -20,13 +22,14 @@ import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RobolectricTestParameterInjector;
 import org.robolectric.annotation.Config;
 
-@RunWith(RobolectricTestRunner.class)
+@RunWith(RobolectricTestParameterInjector.class)
 @Config(sdk = ROBOLECTRIC_SDK)
 public class EngineKeyTest {
   @Mock private Transformation<Object> transformation;
+  @TestParameter private boolean allowWeakReferences;
 
   @Before
   public void setUp() {
@@ -38,13 +41,13 @@ public class EngineKeyTest {
     // If this test fails, update equalsAndHashCode to use KeyTester including regression tests.
     final EngineKey key =
         new EngineKey(
-            "id",
+            EqualityKeyProxy.of("id", allowWeakReferences),
             new ObjectKey("signature"),
             100,
             100,
             Object.class,
             Object.class,
-            Collections.<Class<?>, Transformation<?>>emptyMap(),
+            Collections.<Class<?>, EqualityKeyProxy<Transformation<?>>>emptyMap(),
             new Options());
     assertThrows(
         UnsupportedOperationException.class,
@@ -80,112 +83,113 @@ public class EngineKeyTest {
     new EqualsTester()
         .addEqualityGroup(
             new EngineKey(
-                "id",
+                EqualityKeyProxy.of("id", allowWeakReferences),
                 new ObjectKey("signature"),
                 100,
                 100,
                 Object.class,
                 Object.class,
-                Collections.<Class<?>, Transformation<?>>emptyMap(),
+                Collections.<Class<?>, EqualityKeyProxy<Transformation<?>>>emptyMap(),
                 new Options()),
             new EngineKey(
-                "id",
+                EqualityKeyProxy.of("id", allowWeakReferences),
                 new ObjectKey("signature"),
                 100,
                 100,
                 Object.class,
                 Object.class,
-                Collections.<Class<?>, Transformation<?>>emptyMap(),
+                Collections.<Class<?>, EqualityKeyProxy<Transformation<?>>>emptyMap(),
                 new Options()))
         .addEqualityGroup(
             new EngineKey(
-                "otherId",
+                EqualityKeyProxy.of("otherId", allowWeakReferences),
                 new ObjectKey("signature"),
                 100,
                 100,
                 Object.class,
                 Object.class,
-                Collections.<Class<?>, Transformation<?>>emptyMap(),
+                Collections.<Class<?>, EqualityKeyProxy<Transformation<?>>>emptyMap(),
                 new Options()))
         .addEqualityGroup(
             new EngineKey(
-                "id",
+                EqualityKeyProxy.of("id", allowWeakReferences),
                 new ObjectKey("otherSignature"),
                 100,
                 100,
                 Object.class,
                 Object.class,
-                Collections.<Class<?>, Transformation<?>>emptyMap(),
+                Collections.<Class<?>, EqualityKeyProxy<Transformation<?>>>emptyMap(),
                 new Options()))
         .addEqualityGroup(
             new EngineKey(
-                "id",
+                EqualityKeyProxy.of("id", allowWeakReferences),
                 new ObjectKey("signature"),
                 200,
                 100,
                 Object.class,
                 Object.class,
-                Collections.<Class<?>, Transformation<?>>emptyMap(),
+                Collections.<Class<?>, EqualityKeyProxy<Transformation<?>>>emptyMap(),
                 new Options()))
         .addEqualityGroup(
             new EngineKey(
-                "id",
+                EqualityKeyProxy.of("id", allowWeakReferences),
                 new ObjectKey("signature"),
                 100,
                 200,
                 Object.class,
                 Object.class,
-                Collections.<Class<?>, Transformation<?>>emptyMap(),
+                Collections.<Class<?>, EqualityKeyProxy<Transformation<?>>>emptyMap(),
                 new Options()))
         .addEqualityGroup(
             new EngineKey(
-                "id",
+                EqualityKeyProxy.of("id", allowWeakReferences),
                 new ObjectKey("signature"),
                 100,
                 100,
                 Object.class,
                 Object.class,
-                Collections.<Class<?>, Transformation<?>>singletonMap(Object.class, transformation),
+                Collections.<Class<?>, EqualityKeyProxy<Transformation<?>>>singletonMap(
+                    Object.class, EqualityKeyProxy.of(transformation, allowWeakReferences)),
                 new Options()))
         .addEqualityGroup(
             new EngineKey(
-                "id",
+                EqualityKeyProxy.of("id", allowWeakReferences),
                 new ObjectKey("signature"),
                 100,
                 100,
                 Integer.class,
                 Object.class,
-                Collections.<Class<?>, Transformation<?>>emptyMap(),
+                Collections.<Class<?>, EqualityKeyProxy<Transformation<?>>>emptyMap(),
                 new Options()))
         .addEqualityGroup(
             new EngineKey(
-                "id",
+                EqualityKeyProxy.of("id", allowWeakReferences),
                 new ObjectKey("signature"),
                 100,
                 100,
                 Object.class,
                 Integer.class,
-                Collections.<Class<?>, Transformation<?>>emptyMap(),
+                Collections.<Class<?>, EqualityKeyProxy<Transformation<?>>>emptyMap(),
                 new Options()))
         .addEqualityGroup(
             new EngineKey(
-                "id",
+                EqualityKeyProxy.of("id", allowWeakReferences),
                 new ObjectKey("signature"),
                 100,
                 100,
                 Object.class,
                 Object.class,
-                Collections.<Class<?>, Transformation<?>>emptyMap(),
+                Collections.<Class<?>, EqualityKeyProxy<Transformation<?>>>emptyMap(),
                 memoryOptions))
         .addEqualityGroup(
             new EngineKey(
-                "id",
+                EqualityKeyProxy.of("id", allowWeakReferences),
                 new ObjectKey("signature"),
                 100,
                 100,
                 Object.class,
                 Object.class,
-                Collections.<Class<?>, Transformation<?>>emptyMap(),
+                Collections.<Class<?>, EqualityKeyProxy<Transformation<?>>>emptyMap(),
                 diskOptions))
         .testEquals();
   }

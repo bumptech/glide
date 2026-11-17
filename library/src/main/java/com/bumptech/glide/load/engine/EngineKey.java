@@ -4,30 +4,31 @@ import androidx.annotation.NonNull;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.util.EqualityKeyProxy;
 import com.bumptech.glide.util.Preconditions;
 import java.security.MessageDigest;
 import java.util.Map;
 
 /** An in memory only cache key used to multiplex loads. */
 class EngineKey implements Key {
-  private final Object model;
+  private final EqualityKeyProxy<Object> model;
   private final Key signature;
   private final int width;
   private final int height;
   private final Class<?> resourceClass;
   private final Class<?> transcodeClass;
-  private final Map<Class<?>, Transformation<?>> transformations;
+  private final Map<Class<?>, EqualityKeyProxy<Transformation<?>>> transformations;
   private final Options options;
   private int hashCode;
 
   EngineKey(
-      Object model,
+      EqualityKeyProxy<Object> model,
       Key signature,
       int width,
       int height,
       Class<?> resourceClass,
       Class<?> transcodeClass,
-      Map<Class<?>, Transformation<?>> transformations,
+      Map<Class<?>, EqualityKeyProxy<Transformation<?>>> transformations,
       Options options) {
     this.model = Preconditions.checkNotNull(model);
     this.signature = Preconditions.checkNotNull(signature, "Signature must not be null");
