@@ -129,26 +129,6 @@ public final class GlideExperimentsTest {
   }
 
   @Test
-  public void bypassResourceDiskCacheForHardwareBitmaps_experimentEnabled_isRecorded() {
-    Glide.tearDown();
-    GlideExecutor executor = MockGlideExecutor.newMainThreadExecutor();
-    GlideBuilder builder =
-        new GlideBuilder()
-            .setSourceExecutor(executor)
-            .setDiskCacheExecutor(executor)
-            .setAnimationExecutor(executor)
-            .setBypassResourceDiskCacheForHardwareBitmaps(true);
-    Glide.init(context, builder);
-
-    assertThat(
-            Glide.get(context)
-                .getGlideContext()
-                .getExperiments()
-                .isEnabled(GlideBuilder.BypassResourceDiskCacheForHardwareBitmaps.class))
-        .isTrue();
-  }
-
-  @Test
   public void respectExifOrientationInImageDecoder_experimentEnabled_isRecorded() {
     Glide.tearDown();
     GlideExecutor executor = MockGlideExecutor.newMainThreadExecutor();

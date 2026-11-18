@@ -8,7 +8,6 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.util.Pools;
-import com.bumptech.glide.GlideBuilder;
 import com.bumptech.glide.GlideBuilder.OverrideGlideThreadPriority;
 import com.bumptech.glide.GlideContext;
 import com.bumptech.glide.GlideExperiments;
@@ -683,9 +682,8 @@ class DecodeJob<R>
 
     Resource<Z> result = transformed;
     boolean isFromAlternateCacheKey = !decodeHelper.isSourceKey(currentSourceKey);
-    boolean isResourceCacheable =
-        isResourceCacheable(isFromAlternateCacheKey, dataSource, encodeStrategy, transformed);
-    if (isResourceCacheable) {
+    if (diskCacheStrategy.isResourceCacheable(
+        isFromAlternateCacheKey, dataSource, encodeStrategy)) {
       if (encoder == null) {
         throw new Registry.NoResultEncoderAvailableException(transformed.get().getClass());
       }
@@ -715,34 +713,6 @@ class DecodeJob<R>
       result = lockedResult;
     }
     return result;
-  }
-
-  /**
-   * Returns {@code true} if the decoded and transformed resource is eligible to be written to the
-   * resource disk cache.
-   *
-   * <p>When {@link GlideBuilder.BypassResourceDiskCacheForHardwareBitmaps} is enabled, resources
-   * backed by {@link Bitmap.Config#HARDWARE} bitmaps are never written. Compressing a hardware
-   * bitmap requires the framework to copy its pixels out of graphics memory into a software bitmap
-   * ({@code RenderProxy#copyHWBitmapInto}). That copy runs on this job's thread after the resource
-   * has been delivered, round-trips through the RenderThread (contending with frame rendering),
-   * holds the {@link LockedResource} until it finishes, and transiently allocates a second,
-   * full-size copy of the image in native memory.
-   */
-  private <Z> boolean isResourceCacheable(
-      boolean isFromAlternateCacheKey,
-      DataSource dataSource,
-      EncodeStrategy encodeStrategy,
-      Resource<Z> transformed) {
-    if (!diskCacheStrategy.isResourceCacheable(
-        isFromAlternateCacheKey, dataSource, encodeStrategy)) {
-      return false;
-    }
-    if (experiments.isEnabled(GlideBuilder.BypassResourceDiskCacheForHardwareBitmaps.class)
-        && isHardwareBitmap(transformed)) {
-      return false;
-    }
-    return true;
   }
 
   private static boolean isHardwareBitmap(Resource<?> resource) {
