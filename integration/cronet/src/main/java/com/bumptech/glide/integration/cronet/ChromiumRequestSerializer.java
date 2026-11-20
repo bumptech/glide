@@ -102,6 +102,7 @@ final class ChromiumRequestSerializer {
   private final CronetRequestFactory requestFactory;
   @Nullable private final DataLogger dataLogger;
   private final Options options;
+  private final BufferQueue.BufferAllocator bufferAllocator;
 
   ChromiumRequestSerializer(
       CronetRequestFactory requestFactory,
@@ -115,9 +116,19 @@ final class ChromiumRequestSerializer {
       @Nullable DataLogger dataLogger,
       @Nullable final GlideExecutor executor,
       Options options) {
+    this(requestFactory, dataLogger, executor, options, ByteBuffer::allocateDirect);
+  }
+
+  ChromiumRequestSerializer(
+      CronetRequestFactory requestFactory,
+      @Nullable DataLogger dataLogger,
+      @Nullable final GlideExecutor executor,
+      Options options,
+      BufferQueue.BufferAllocator bufferAllocator) {
     this.requestFactory = requestFactory;
     this.dataLogger = dataLogger;
     this.options = Preconditions.checkNotNull(options);
+    this.bufferAllocator = Preconditions.checkNotNull(bufferAllocator);
     if (executor == null) {
       this.jobPool = new JobPool(GLIDE_EXECUTOR_SUPPLIER);
     } else {
@@ -132,7 +143,18 @@ final class ChromiumRequestSerializer {
     }
   }
 
+  private boolean isolateJobLifecycle() {
+    return options.discardBuffersOnCancel() || options.catchBufferOutOfMemoryError();
+  }
+
+  private boolean guardJobIdentity() {
+    return options.guardActiveJobEviction() || isolateJobLifecycle();
+  }
+
   void startRequest(Priority priority, GlideUrl glideUrl, Listener listener) {
+    if (isolateJobLifecycle()) {
+      Preconditions.checkNotNull(priority);
+    }
     boolean startNewRequest = false;
     Job job;
     final int jobGeneration;
@@ -140,7 +162,8 @@ final class ChromiumRequestSerializer {
       job = jobs.get(glideUrl);
       if (job == null) {
         startNewRequest = true;
-        job = jobPool.get(glideUrl);
+        boolean unpooled = isolateJobLifecycle();
+        job = unpooled ? jobPool.createUnpooled(glideUrl) : jobPool.get(glideUrl);
         jobs.put(glideUrl, job);
       }
       jobGeneration = job.addListenerAndGetGeneration(listener);
@@ -151,15 +174,21 @@ final class ChromiumRequestSerializer {
         Log.v(TAG, "Fetching image url using cronet" + " url: " + glideUrl);
       }
       job.priority = priority;
-      final UrlRequest cronetRequest =
-          requestFactory
-              .newRequest(
-                  glideUrl.toStringUrl(),
-                  GLIDE_TO_CHROMIUM_PRIORITY.get(priority),
-                  glideUrl.getHeaders(),
-                  job)
-              .build();
-      cronetRequest.start();
+      final UrlRequest cronetRequest;
+      try {
+        cronetRequest =
+            requestFactory
+                .newRequest(
+                    glideUrl.toStringUrl(),
+                    GLIDE_TO_CHROMIUM_PRIORITY.get(priority),
+                    glideUrl.getHeaders(),
+                    job)
+                .build();
+        cronetRequest.start();
+      } catch (RuntimeException | OutOfMemoryError error) {
+        job.onStartFailed(error, options.catchBufferOutOfMemoryError());
+        return;
+      }
 
       // It's possible we will be cancelled between adding the job to the job list and starting the
       // corresponding request. We don't want to hold a lock while starting the request, because
@@ -168,6 +197,9 @@ final class ChromiumRequestSerializer {
       // ChromiumRequestSerializer.this, checking jobGeneration in case start() already finished and
       // returned this Job to jobPool.
       if (job.publishRequestOrShouldCancel(jobGeneration, cronetRequest)) {
+        if (options.discardBuffersOnCancel()) {
+          job.discardBuilder();
+        }
         cronetRequest.cancel();
       }
     }
@@ -220,10 +252,18 @@ final class ChromiumRequestSerializer {
     private long endTimeMs;
     private long responseStartTimeMs;
 
+    private volatile boolean isCancelled;
+    private volatile IOException readFailureException;
+
     @GuardedBy("ChromiumRequestSerializer.this")
-    private boolean isCancelled;
+    private boolean isFinished;
 
     private BufferQueue.Builder builder;
+
+    @GuardedBy("this")
+    @Nullable
+    private BufferQueue.DiscardableBuilder discardableBuilder;
+
     private final Supplier<Executor> executorSupplier;
 
     Job(Supplier<Executor> executorSupplier) {
@@ -244,7 +284,7 @@ final class ChromiumRequestSerializer {
 
     boolean publishRequestOrShouldCancel(int expectedGeneration, UrlRequest cronetRequest) {
       synchronized (ChromiumRequestSerializer.this) {
-        if (options.guardActiveJobEviction() && generation != expectedGeneration) {
+        if ((options.guardActiveJobEviction() && generation != expectedGeneration) || isFinished) {
           // generation only increments in clearListeners() when onRequestFinished returns this Job
           // to jobPool:
           // 1. cronetRequest has already completed, failed, or been cancelled, so we no longer need
@@ -261,14 +301,60 @@ final class ChromiumRequestSerializer {
       }
     }
 
+    private void rethrowIfDisabled(Throwable cause, boolean enabled) {
+      if (!enabled) {
+        if (cause instanceof Error) {
+          throw (Error) cause;
+        }
+        throw (RuntimeException) cause;
+      }
+    }
+
+    void onStartFailed(Throwable cause, boolean catchFailure) {
+      List<Listener> toNotify = null;
+      synchronized (ChromiumRequestSerializer.this) {
+        if (!isFinished && !isCancelled) {
+          isFinished = true;
+          if (!guardJobIdentity() || jobs.get(glideUrl) == this) {
+            jobs.remove(glideUrl);
+          }
+          toNotify = catchFailure ? new ArrayList<>(listeners) : null;
+        }
+      }
+      rethrowIfDisabled(cause, catchFailure);
+      Exception err = cause instanceof Exception ? (Exception) cause : new IOException(cause);
+      for (int i = 0; toNotify != null && i < toNotify.size(); i++) {
+        toNotify.get(i).onRequestFailed(err);
+      }
+    }
+
+    private void recordReadFailureAndCancel(UrlRequest req, String msg, Throwable cause) {
+      rethrowIfDisabled(cause, options.catchBufferOutOfMemoryError());
+      if (!isCancelled) {
+        readFailureException = new IOException(msg, cause);
+      }
+      discardBuilder();
+      req.cancel();
+    }
+
+    synchronized void discardBuilder() {
+      if (discardableBuilder != null) {
+        discardableBuilder.discard();
+        discardableBuilder = null;
+      }
+    }
+
     void removeListener(Listener listener) {
       UrlRequest requestToCancel = null;
       synchronized (ChromiumRequestSerializer.this) {
         // Note: multiple cancellation calls + a subsequent request for a url may mean we fail to
         // remove the listener here because that listener is actually for a previous request. Since
         // that race is harmless, we simply ignore it.
+        if (isolateJobLifecycle() && (isFinished || isCancelled)) {
+          return;
+        }
         boolean removed = listeners.remove(listener);
-        if (options.guardActiveJobEviction() && !removed) {
+        if (guardJobIdentity() && !removed) {
           return;
         }
         if (listeners.isEmpty()) {
@@ -276,12 +362,15 @@ final class ChromiumRequestSerializer {
           requestToCancel = request;
           request = null;
           // Only remove the entry if it still maps to this Job (see onRequestFinished).
-          if (!options.guardActiveJobEviction() || jobs.get(glideUrl) == this) {
+          if (!guardJobIdentity() || jobs.get(glideUrl) == this) {
             jobs.remove(glideUrl);
           }
         }
       }
 
+      if (options.discardBuffersOnCancel() && isCancelled) {
+        discardBuilder();
+      }
       // The request may not have started yet, so requestToCancel may be null.
       if (requestToCancel != null) {
         requestToCancel.cancel();
@@ -291,13 +380,43 @@ final class ChromiumRequestSerializer {
     @Override
     public void onRedirectReceived(UrlRequest urlRequest, UrlResponseInfo urlResponseInfo, String s)
         throws Exception {
+      if (options.discardBuffersOnCancel() && isCancelled) {
+        discardBuilder();
+        urlRequest.cancel();
+        return;
+      }
       urlRequest.followRedirect();
     }
 
     @Override
     public void onResponseStarted(UrlRequest request, UrlResponseInfo info) {
       responseStartTimeMs = System.currentTimeMillis();
-      builder = BufferQueue.builder();
+      if (options.discardBuffersOnCancel() || options.catchBufferOutOfMemoryError()) {
+        if (shouldDiscardOnCancel()) {
+          request.cancel();
+          return;
+        }
+        BufferQueue.DiscardableBuilder newBuilder = BufferQueue.discardableBuilder(bufferAllocator);
+        final ByteBuffer firstBuffer;
+        try {
+          firstBuffer = newBuilder.getFirstBuffer(info);
+        } catch (RuntimeException | OutOfMemoryError error) {
+          newBuilder.discard();
+          recordReadFailureAndCancel(request, "Initial buffer alloc failed", error);
+          return;
+        }
+        synchronized (this) {
+          discardableBuilder = newBuilder;
+        }
+        if (shouldDiscardOnCancel()) {
+          discardBuilder();
+          request.cancel();
+          return;
+        }
+        request.read(firstBuffer);
+        return;
+      }
+      builder = BufferQueue.builder(bufferAllocator);
       request.read(builder.getFirstBuffer(info));
     }
 
@@ -305,22 +424,85 @@ final class ChromiumRequestSerializer {
     public void onReadCompleted(
         UrlRequest urlRequest, UrlResponseInfo urlResponseInfo, ByteBuffer byteBuffer)
         throws Exception {
+      if (options.discardBuffersOnCancel() || options.catchBufferOutOfMemoryError()) {
+        BufferQueue.DiscardableBuilder localBuilder;
+        synchronized (this) {
+          localBuilder = shouldDiscardOnCancel() ? null : discardableBuilder;
+        }
+        try {
+          ByteBuffer next = localBuilder == null ? null : localBuilder.getNextBuffer(byteBuffer);
+          if (next != null && !shouldDiscardOnCancel()) {
+            urlRequest.read(next);
+            return;
+          }
+        } catch (RuntimeException | OutOfMemoryError error) {
+          if (!(error instanceof IllegalStateException && shouldDiscardOnCancel())) {
+            recordReadFailureAndCancel(urlRequest, "Chunk buffer alloc failed", error);
+            return;
+          }
+        }
+        discardBuilder();
+        urlRequest.cancel();
+        return;
+      }
       urlRequest.read(builder.getNextBuffer(byteBuffer));
+    }
+
+    boolean shouldDiscardOnCancel() {
+      return options.discardBuffersOnCancel() && isCancelled;
+    }
+
+    private Priority completionPriority(boolean expedite) {
+      return options.discardBuffersOnCancel() && expedite ? Priority.IMMEDIATE : priority;
+    }
+
+    @Nullable
+    private synchronized BufferQueue.DiscardableBuilder claimBuilderForSucceeded() {
+      BufferQueue.DiscardableBuilder b = discardableBuilder;
+      discardableBuilder = null;
+      if (shouldDiscardOnCancel() && b != null) {
+        b.discard();
+        return null;
+      }
+      return b;
+    }
+
+    private void finishCoalesce(BufferQueue queue, UrlResponseInfo info) {
+      final ByteBuffer coalesced;
+      try {
+        coalesced = queue.coalesceToBuffer();
+      } catch (RuntimeException | OutOfMemoryError t) {
+        if (!options.catchBufferOutOfMemoryError()) {
+          throw t;
+        }
+        onRequestFinished(info, new IOException("Coalesce failed", t), isCancelled, null);
+        return;
+      }
+      onRequestFinished(info, null, shouldDiscardOnCancel(), coalesced);
     }
 
     @Override
     public void onSucceeded(UrlRequest request, final UrlResponseInfo info) {
+      if (shouldDiscardOnCancel()) {
+        discardBuilder();
+      }
       executorSupplier
           .get()
           .execute(
-              new PriorityRunnable(priority) {
+              new PriorityRunnable(completionPriority(isCancelled)) {
                 @Override
                 public void run() {
-                  onRequestFinished(
-                      info,
-                      null /*exception*/,
-                      false /*wasCancelled*/,
-                      builder.build().coalesceToBuffer());
+                  if (options.discardBuffersOnCancel() || options.catchBufferOutOfMemoryError()) {
+                    BufferQueue.DiscardableBuilder localBuilder = claimBuilderForSucceeded();
+                    if (localBuilder == null) {
+                      boolean cancelled = readFailureException == null || isCancelled;
+                      onRequestFinished(info, readFailureException, cancelled, null);
+                      return;
+                    }
+                    finishCoalesce(localBuilder.build(), info);
+                    return;
+                  }
+                  finishCoalesce(builder.build(), info);
                 }
               });
     }
@@ -328,42 +510,49 @@ final class ChromiumRequestSerializer {
     @Override
     public void onFailed(
         UrlRequest urlRequest, final UrlResponseInfo urlResponseInfo, final CronetException e) {
+      if (options.discardBuffersOnCancel()) {
+        discardBuilder();
+      }
       executorSupplier
           .get()
           .execute(
-              new PriorityRunnable(priority) {
+              new PriorityRunnable(completionPriority(true)) {
                 @Override
                 public void run() {
-                  onRequestFinished(urlResponseInfo, e, false /*wasCancelled*/, null /*buffer*/);
+                  onRequestFinished(urlResponseInfo, e, shouldDiscardOnCancel(), null);
                 }
               });
     }
 
     @Override
     public void onCanceled(UrlRequest urlRequest, @Nullable final UrlResponseInfo urlResponseInfo) {
+      if (options.discardBuffersOnCancel()) {
+        discardBuilder();
+      }
       executorSupplier
           .get()
           .execute(
-              new PriorityRunnable(priority) {
+              new PriorityRunnable(completionPriority(true)) {
                 @Override
                 public void run() {
-                  onRequestFinished(
-                      urlResponseInfo, null /*exception*/, true /*wasCancelled*/, null /*buffer*/);
+                  IOException failure = readFailureException;
+                  onRequestFinished(urlResponseInfo, failure, failure == null || isCancelled, null);
                 }
               });
     }
 
     private void onRequestFinished(
-        UrlResponseInfo info,
-        @Nullable CronetException e,
-        boolean wasCancelled,
-        ByteBuffer buffer) {
+        UrlResponseInfo info, @Nullable IOException e, boolean wasCancelled, ByteBuffer buffer) {
       synchronized (ChromiumRequestSerializer.this) {
+        if (isolateJobLifecycle()) {
+          isFinished = true;
+          request = null;
+        }
         // When a Job is cancelled, removeListener() removes glideUrl from jobs immediately on the
         // caller thread, while Cronet invokes onCanceled() (or a racing completion callback)
         // asynchronously later. If glideUrl was requested again in that window, jobs.get(glideUrl)
         // already points to the newer active Job and must not be evicted by this finishing Job.
-        if (!options.guardActiveJobEviction() || jobs.get(glideUrl) == this) {
+        if (!guardJobIdentity() || jobs.get(glideUrl) == this) {
           jobs.remove(glideUrl);
         }
       }
@@ -382,6 +571,11 @@ final class ChromiumRequestSerializer {
 
       if (dataLogger != null) {
         dataLogger.logNetworkData(info, startTime, responseStartTimeMs, endTimeMs);
+      }
+      if (isolateJobLifecycle()) {
+        discardBuilder();
+        builder = null;
+        return;
       }
       builder = null;
 
@@ -456,6 +650,12 @@ final class ChromiumRequestSerializer {
 
     public JobPool(Supplier<Executor> executorSupplier) {
       this.executorSupplier = executorSupplier;
+    }
+
+    Job createUnpooled(GlideUrl glideUrl) {
+      Job job = new Job(executorSupplier);
+      job.init(glideUrl);
+      return job;
     }
 
     public synchronized Job get(GlideUrl glideUrl) {
