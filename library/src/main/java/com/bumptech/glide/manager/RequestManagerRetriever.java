@@ -259,6 +259,11 @@ public class RequestManagerRetriever implements Handler.Callback {
     return activity == null || !activity.isFinishing();
   }
 
+  /** Internal method. Must be called on the main thread. */
+  public boolean hasStartedLifecycle() {
+    return lifecycleRequestManagerRetriever.hasStartedLifecycle();
+  }
+
   /**
    * @deprecated This method is no longer called by Glide or provides any functionality and it will
    *     be removed in the future. Retained for now to preserve backwards compatibility.

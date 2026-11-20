@@ -714,6 +714,34 @@ public final class GlideBuilder {
   }
 
   /**
+   * Sets whether Glide trims its {@link MemoryCache}, {@link BitmapPool}, and {@link ArrayPool} and
+   * applies {@link #setMemoryCategoryInBackground(MemoryCategory)} directly from {@link
+   * android.app.Application.ActivityLifecycleCallbacks} whenever all started Activities and
+   * Glide-tracked lifecycles stop (not changing configurations) or when Glide initializes without a
+   * foreground or visible Activity.
+   *
+   * <p>The trim and background memory category transition are posted to the main thread so
+   * back-to-back Activity transitions in the same looper turn do not wipe caches, and are cancelled
+   * if an Activity starts or resumes before execution.
+   *
+   * <p>Android's {@code AppProfiler} suppresses {@link
+   * android.content.ComponentCallbacks2#onTrimMemory(int)} with {@link
+   * android.content.ComponentCallbacks2#TRIM_MEMORY_UI_HIDDEN} while a Foreground Service keeps the
+   * process state above {@code PROCESS_STATE_IMPORTANT_BACKGROUND} or when the process cold-starts
+   * into a Foreground Service with zero Activities. Enabling this option allows Glide to reclaim
+   * foreground-sized caches as soon as the UI is no longer started and restore normal capacity when
+   * an Activity starts or resumes, independent of {@link
+   * #experimentalSetEnableTrimMemoryOnUiHidden(boolean)}.
+   *
+   * <p>This is an experimental API that may be removed in the future.
+   */
+  @CanIgnoreReturnValue
+  public GlideBuilder experimentalSetTrimMemoryOnAllActivitiesStopped(boolean isEnabled) {
+    glideExperimentsBuilder.update(new TrimMemoryOnAllActivitiesStopped(), isEnabled);
+    return this;
+  }
+
+  /**
    * Set to {@code true} to make loads skip an active resource that no request holds anymore,
    * instead of acquiring it again. The load then falls through to the memory cache.
    *
@@ -936,6 +964,9 @@ public final class GlideBuilder {
 
   /** See {@link #experimentalSetEnableTrimMemoryOnUiHidden(boolean)}. */
   public static final class EnableTrimMemoryOnUiHidden implements Experiment {}
+
+  /** See {@link #experimentalSetTrimMemoryOnAllActivitiesStopped(boolean)}. */
+  public static final class TrimMemoryOnAllActivitiesStopped implements Experiment {}
 
   /** See {@link #experimentalSetEnableActiveResourceReleaseRaceFix(boolean)}. */
   public static final class EnableActiveResourceReleaseRaceFix implements Experiment {}
