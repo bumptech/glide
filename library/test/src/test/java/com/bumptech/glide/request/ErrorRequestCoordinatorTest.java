@@ -46,7 +46,7 @@ public class ErrorRequestCoordinatorTest {
   @Test
   public void clear_whenPrimaryHasNotFailed_clearsPrimary() {
     coordinator.clear();
-    verify(primary).clear();
+    verify(primary).clear(false);
   }
 
   @Test
@@ -59,14 +59,14 @@ public class ErrorRequestCoordinatorTest {
   public void clear_whenPrimaryHasFailed_errorIsRunning_clearsError() {
     coordinator.onRequestFailed(primary);
     coordinator.clear();
-    verify(error).clear();
+    verify(error).clear(false);
   }
 
   @Test
   public void clear_whenPrimaryHasFailed_clearsPrimary() {
     coordinator.onRequestFailed(primary);
     coordinator.clear();
-    verify(primary).clear();
+    verify(primary).clear(false);
   }
 
   @Test
@@ -74,7 +74,7 @@ public class ErrorRequestCoordinatorTest {
     coordinator.onRequestFailed(primary);
     coordinator.clear();
 
-    verify(error).clear();
+    verify(error).clear(false);
   }
 
   @Test
