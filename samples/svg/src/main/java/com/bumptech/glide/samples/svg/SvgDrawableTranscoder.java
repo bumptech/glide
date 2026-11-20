@@ -19,7 +19,14 @@ public class SvgDrawableTranscoder implements ResourceTranscoder<SVG, PictureDra
   public Resource<PictureDrawable> transcode(
       @NonNull Resource<SVG> toTranscode, @NonNull Options options) {
     SVG svg = toTranscode.get();
-    Picture picture = svg.renderToPicture();
+    int width = (int) svg.getDocumentWidth();
+    int height = (int) svg.getDocumentHeight();
+    Picture picture;
+    if (width < 0 || height < 0) {
+      picture = svg.renderToPicture();
+    } else {
+      picture = svg.renderToPicture(width, height);
+    }
     PictureDrawable drawable = new PictureDrawable(picture);
     return new SimpleResource<>(drawable);
   }
