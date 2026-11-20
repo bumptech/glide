@@ -772,6 +772,19 @@ public final class GlideBuilder {
   }
 
   /**
+   * Set to {@code true} to allow in-memory cache keys to hold weak references to objects that use
+   * identity equality (such as {@link Bitmap}, {@link android.graphics.drawable.Drawable}, or
+   * arrays) so they can be garbage-collected once unreferenced by callers.
+   *
+   * <p>This is an experimental API that may be removed in the future.
+   */
+  @CanIgnoreReturnValue
+  GlideBuilder experimentalSetAllowWeakReferencesInCacheKeys(boolean isEnabled) {
+    glideExperimentsBuilder.update(new AllowWeakReferencesInCacheKeys(), isEnabled);
+    return this;
+  }
+
+  /**
    * @deprecated This method does nothing. It will be hard coded and removed in a future release
    *     without further warning.
    */
@@ -948,6 +961,11 @@ public final class GlideBuilder {
 
   /** See {@link #experimentalSetStripSensitiveHeadersOnCrossOriginRedirects(boolean)}. */
   public static final class StripSensitiveHeadersOnCrossOriginRedirects implements Experiment {}
+
+  /** See {@link #experimentalSetAllowWeakReferencesInCacheKeys(boolean)}. */
+  public static final class AllowWeakReferencesInCacheKeys implements Experiment {
+    AllowWeakReferencesInCacheKeys() {}
+  }
 
   /** See {@link #setLogRequestOrigins(boolean)}. */
   public static final class LogRequestOrigins implements Experiment {}

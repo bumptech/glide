@@ -56,15 +56,17 @@ public class EngineJobReleaseRaceTest {
   private final Map<Class<?>, Transformation<?>> transformations = new HashMap<>();
   private final Options options = new Options();
   private final EngineKey key =
-      new EngineKey(
-          MODEL,
-          EmptySignature.obtain(),
-          SIZE,
-          SIZE,
-          /* resourceClass= */ Object.class,
-          /* transcodeClass= */ Object.class,
-          transformations,
-          options);
+      new EngineKeyFactory()
+          .buildKey(
+              MODEL,
+              EmptySignature.obtain(),
+              SIZE,
+              SIZE,
+              /* resourceClass= */ Object.class,
+              /* transcodeClass= */ Object.class,
+              transformations,
+              options,
+              /* allowWeakReferences= */ false);
   private final ActiveResources activeResources =
       new ActiveResources(
           /* isActiveResourceRetentionAllowed= */ false,

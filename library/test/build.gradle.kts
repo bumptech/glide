@@ -54,6 +54,7 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.mockito.core)
     testImplementation(libs.robolectric)
+    testImplementation(libs.test.parameter.injector)
     testImplementation(libs.mockwebserver)
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.androidx.junit)
