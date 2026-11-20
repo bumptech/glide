@@ -72,4 +72,20 @@ public class UrlUriLoaderTest {
             eq(IMAGE_SIDE),
             eq(OPTIONS));
   }
+
+  // Test for https://github.com/bumptech/glide/issues/4858.
+  @Test
+  public void testHandlesHttpUrisWithCapitalizedScheme() {
+    Uri httpUri = Uri.parse("HTTP://www.google.com");
+
+    assertTrue(loader.handles(httpUri));
+  }
+
+  // Test for https://github.com/bumptech/glide/issues/4858.
+  @Test
+  public void testHandlesHttpsUrisWithCapitalizedScheme() {
+    Uri httpsUri = Uri.parse("Https://www.google.com");
+
+    assertTrue(loader.handles(httpsUri));
+  }
 }
