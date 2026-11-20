@@ -58,7 +58,9 @@ public typealias RequestBuilderTransform<T> = (RequestBuilder<T>) -> RequestBuil
  *
  * This method will inspect [contentScale] and apply a matching transformation if one exists. Any
  * automatically applied transformation can be overridden using [requestBuilderTransform]. Either
- * apply a specific transformation instead, or use [RequestBuilder.dontTransform]]
+ * apply a specific transformation instead, or use [RequestBuilder.dontTransform]]. For
+ * [ContentScale.Crop], `centerCrop` is only applied if [alignment] is [Alignment.Center] so that
+ * other alignments can still be respected when the image is cropped.
  *
  * Transitions set via [RequestBuilder.transition] are currently ignored.
  *
@@ -113,6 +115,7 @@ public fun GlideImage(
                 requestManager,
                 requestBuilderTransform,
                 contentScale,
+                alignment,
             )
             .let { loading?.apply(it::placeholder, it::placeholder) ?: it }
             .let { failure?.apply(it::error, it::error) ?: it }
@@ -269,17 +272,24 @@ private fun rememberRequestBuilderWithDefaults(
     requestManager: RequestManager,
     requestBuilderTransform: RequestBuilderTransform<Drawable>,
     contentScale: ContentScale,
+    alignment: Alignment,
 ) =
-    remember(model, requestManager, requestBuilderTransform, contentScale) {
-        requestBuilderTransform(requestManager.load(model).contentScaleTransform(contentScale))
+    remember(model, requestManager, requestBuilderTransform, contentScale, alignment) {
+        requestBuilderTransform(
+            requestManager.load(model).contentScaleTransform(contentScale, alignment)
+        )
     }
 
 private fun RequestBuilder<Drawable>.contentScaleTransform(
-    contentScale: ContentScale
+    contentScale: ContentScale,
+    alignment: Alignment,
 ): RequestBuilder<Drawable> {
     return when (contentScale) {
         ContentScale.Crop -> {
-            optionalCenterCrop()
+            // centerCrop() discards everything outside of the center of the image, which would
+            // leave nothing for a non-center alignment to reveal. For other alignments, let the
+            // UI crop the image instead.
+            if (alignment == Alignment.Center) optionalCenterCrop() else this
         }
         ContentScale.Inside,
         ContentScale.Fit -> {
