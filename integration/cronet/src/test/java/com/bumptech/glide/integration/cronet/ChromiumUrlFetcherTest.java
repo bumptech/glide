@@ -1,6 +1,8 @@
 package com.bumptech.glide.integration.cronet;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.util.concurrent.Uninterruptibles.awaitUninterruptibly;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -41,6 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import org.chromium.net.CronetEngine;
@@ -598,6 +601,53 @@ public class ChromiumUrlFetcherTest {
     guardedFetcher.cancel();
 
     verify(request, times(1)).cancel();
+  }
+
+  @Test
+  public void discardableBuilder_buildAfterDiscard_throwsIllegalStateException() {
+    BufferQueue.DiscardableBuilder builder = BufferQueue.discardableBuilder();
+    builder.discard();
+    assertThrows(IllegalStateException.class, builder::build);
+  }
+
+  @Test
+  public void discardableBuilder_getNextBufferAfterDiscard_throwsIllegalStateException() {
+    BufferQueue.DiscardableBuilder builder = BufferQueue.discardableBuilder();
+    builder.discard();
+    ByteBuffer lastBuffer = ByteBuffer.allocateDirect(1);
+    assertThrows(IllegalStateException.class, () -> builder.getNextBuffer(lastBuffer));
+  }
+
+  @Test
+  public void discardableBuilder_getNextBufferAfterBuild_throwsIllegalStateExceptionWithCause() {
+    BufferQueue.DiscardableBuilder builder = BufferQueue.discardableBuilder();
+    BufferQueue unused = builder.build();
+    ByteBuffer lastBuffer = ByteBuffer.allocateDirect(1);
+    IllegalStateException thrown =
+        assertThrows(IllegalStateException.class, () -> builder.getNextBuffer(lastBuffer));
+    assertThat(thrown).hasCauseThat().isNotNull();
+  }
+
+  @Test
+  public void discardableBuilder_discardDuringChunkAllocation_doesNotBlockCaller()
+      throws Exception {
+    CountDownLatch entered = new CountDownLatch(1);
+    CountDownLatch release = new CountDownLatch(1);
+    BufferQueue.DiscardableBuilder builder =
+        BufferQueue.discardableBuilder(capacity -> {
+          entered.countDown();
+          assertThat(awaitUninterruptibly(release, 5, TimeUnit.SECONDS)).isTrue();
+          return ByteBuffer.allocateDirect(capacity);
+        });
+    ByteBuffer fullChunk = ByteBuffer.allocate(0);
+    FutureTask<IllegalStateException> nextBufferTask =
+        new FutureTask<>(() ->
+            assertThrows(IllegalStateException.class, () -> builder.getNextBuffer(fullChunk)));
+    new Thread(nextBufferTask).start();
+    assertThat(entered.await(2, TimeUnit.SECONDS)).isTrue();
+    builder.discard();
+    release.countDown();
+    assertThat(nextBufferTask.get(2, TimeUnit.SECONDS)).isNotNull();
   }
 
   private static Map<String, String> anyHeaders() {

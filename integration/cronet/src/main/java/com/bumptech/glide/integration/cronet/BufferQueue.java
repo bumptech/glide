@@ -1,5 +1,7 @@
 package com.bumptech.glide.integration.cronet;
 
+import androidx.annotation.GuardedBy;
+import androidx.annotation.Nullable;
 import java.nio.ByteBuffer;
 import java.util.ArrayDeque;
 import java.util.List;
@@ -16,11 +18,24 @@ final class BufferQueue {
   public static final String CONTENT_LENGTH = "content-length";
   public static final String CONTENT_ENCODING = "content-encoding";
   private static final int DEFAULT_BUFFER_SIZE = 16384;
+
+  interface BufferAllocator {
+    ByteBuffer allocate(int capacity);
+  }
+
   private final Queue<ByteBuffer> buffers;
   private final AtomicBoolean isCoalesced = new AtomicBoolean(false);
 
   public static Builder builder() {
     return new Builder();
+  }
+
+  static DiscardableBuilder discardableBuilder() {
+    return new DiscardableBuilder(ByteBuffer::allocateDirect);
+  }
+
+  static DiscardableBuilder discardableBuilder(BufferAllocator allocator) {
+    return new DiscardableBuilder(allocator);
   }
 
   /**
@@ -60,7 +75,11 @@ final class BufferQueue {
       // the server having to actually send those bytes. This isn't considered to be an
       // issue, because that same malicious server could use our transparent gzip to force us
       // to allocate 1032 bytes per byte sent by the server.
-      return ByteBuffer.allocateDirect((int) Math.min(bufferSizeHeuristic(info), 524288));
+      return ByteBuffer.allocateDirect(firstBufferSize(info));
+    }
+
+    static int firstBufferSize(UrlResponseInfo info) {
+      return (int) Math.min(bufferSizeHeuristic(info), 524288);
     }
 
     @SuppressWarnings("checkstyle:UnnecessaryParentheses") // Readability
@@ -97,6 +116,85 @@ final class BufferQueue {
       final ArrayDeque<ByteBuffer> buffers = this.buffers;
       this.buffers = null;
       return new BufferQueue(buffers);
+    }
+  }
+
+  /** Thread-safe {@link Builder} variant supporting {@link #discard()} and lock-free allocation. */
+  static final class DiscardableBuilder {
+    private final BufferAllocator allocator;
+
+    @GuardedBy("this")
+    @Nullable
+    private ArrayDeque<ByteBuffer> buffers = new ArrayDeque<>();
+
+    /** Call site of {@link #build()} on reuse ({@code null} after {@link #discard()}). */
+    @GuardedBy("this")
+    @Nullable
+    private RuntimeException whenClosed;
+
+    private DiscardableBuilder(BufferAllocator allocator) {
+      this.allocator = allocator;
+    }
+
+    ByteBuffer getFirstBuffer(UrlResponseInfo info) {
+      return allocator.allocate(Builder.firstBufferSize(info));
+    }
+
+    /**
+     * Returns the next buffer to write data into.
+     *
+     * @throws IllegalStateException if {@link #build()} or {@link #discard()} has already run
+     */
+    @SuppressWarnings("ReferenceEquality") // Comparing ByteBuffer identity, not contents.
+    ByteBuffer getNextBuffer(ByteBuffer lastBuffer) {
+      synchronized (this) {
+        checkNotClosedLocked();
+        if (lastBuffer != buffers.peekLast()) {
+          buffers.addLast(lastBuffer);
+        }
+        if (lastBuffer.hasRemaining()) {
+          return lastBuffer;
+        }
+      }
+      ByteBuffer nextBuffer = allocator.allocate(DEFAULT_BUFFER_SIZE);
+      synchronized (this) {
+        checkNotClosedLocked();
+      }
+      return nextBuffer;
+    }
+
+    /**
+     * Verifies that this builder is still open.
+     *
+     * @throws IllegalStateException if {@link #build()} or {@link #discard()} has already run
+     */
+    @GuardedBy("this")
+    private void checkNotClosedLocked() {
+      if (buffers == null) {
+        throw new IllegalStateException("Builder already closed", whenClosed);
+      }
+    }
+
+    /**
+     * Builds a {@link BufferQueue} from the queued buffers.
+     *
+     * @throws IllegalStateException if {@link #build()} or {@link #discard()} has already run
+     */
+    synchronized BufferQueue build() {
+      checkNotClosedLocked();
+      ArrayDeque<ByteBuffer> localBuffers = this.buffers;
+      // Only capture call site on one-time build(); discard() leaves whenClosed null.
+      whenClosed = new RuntimeException();
+      this.buffers = null;
+      return new BufferQueue(localBuffers);
+    }
+
+    /** Discards any queued buffers without coalescing them. */
+    synchronized void discard() {
+      if (buffers != null) {
+        buffers.clear();
+        buffers = null;
+      }
     }
   }
 
