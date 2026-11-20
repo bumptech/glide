@@ -89,6 +89,7 @@ public class Glide implements ComponentCallbacks2 {
   private MemoryCategory memoryCategoryInBackground;
   private MemoryCategory memoryCategoryInForeground = MemoryCategory.NORMAL;
   private final boolean enableTrimMemoryOnUiHidden;
+  @Nullable private final AppVisibilityMemoryTrimmer appVisibilityMemoryTrimmer;
 
   private final GlideSupplier<SetMemoryCategoryOnLifecycleCallbacks> setMemoryCategoryCallbacks =
       GlideSuppliers.memorize(SetMemoryCategoryOnLifecycleCallbacks::new);
@@ -354,6 +355,10 @@ public class Glide implements ComponentCallbacks2 {
 
     this.enableTrimMemoryOnUiHidden =
         experiments.isEnabled(GlideBuilder.EnableTrimMemoryOnUiHidden.class);
+    this.appVisibilityMemoryTrimmer =
+        experiments.isEnabled(GlideBuilder.TrimMemoryOnAllActivitiesStopped.class)
+            ? new AppVisibilityMemoryTrimmer(this)
+            : null;
 
     // This has a circular relationship with Glide and GlideContext in that it depends on both,
     // but it's created by Glide's constructor. In practice this shouldn't matter because the
@@ -730,6 +735,10 @@ public class Glide implements ComponentCallbacks2 {
   }
 
   private void registerActivityLifecycleCallbacks() {
+    if (appVisibilityMemoryTrimmer != null) {
+      appVisibilityMemoryTrimmer.register(getContext());
+      return;
+    }
     if (memoryCategoryInBackground != null) {
       Context context = getContext().getApplicationContext();
       if (!(context instanceof Application) && Log.isLoggable(TAG, Log.WARN)) {
@@ -745,6 +754,10 @@ public class Glide implements ComponentCallbacks2 {
   }
 
   private void unregisterActivityLifecycleCallbacks() {
+    if (appVisibilityMemoryTrimmer != null) {
+      appVisibilityMemoryTrimmer.unregister(getContext());
+      return;
+    }
     if (memoryCategoryInBackground != null) {
       Context context = getContext().getApplicationContext();
       if (context instanceof Application) {
@@ -754,7 +767,7 @@ public class Glide implements ComponentCallbacks2 {
     }
   }
 
-  private void setMemoryCategoryWhenInBackground() {
+  void setMemoryCategoryWhenInBackground() {
     if (memoryCategoryInBackground == null || inBackground) {
       return;
     }
