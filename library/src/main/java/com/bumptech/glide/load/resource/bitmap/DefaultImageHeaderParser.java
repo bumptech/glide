@@ -486,74 +486,90 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
     segmentData.order(byteOrder);
 
     int firstIfdOffset = segmentData.getInt32(headerOffsetSize + 4) + headerOffsetSize;
-    int tagCount = segmentData.getInt16(firstIfdOffset);
-    for (int i = 0; i < tagCount; i++) {
-      final int tagOffset = calcTagOffset(firstIfdOffset, i);
-
-      final int tagType = segmentData.getInt16(tagOffset);
-      // We only want orientation.
-      if (tagType != ORIENTATION_TAG_TYPE) {
-        continue;
-      }
-
-      final int formatCode = segmentData.getInt16(tagOffset + 2);
-      // 12 is max format code.
-      if (formatCode < 1 || formatCode > 12) {
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-          Log.d(TAG, "Got invalid format code = " + formatCode);
-        }
-        continue;
-      }
-
-      final int componentCount = segmentData.getInt32(tagOffset + 4);
-      if (componentCount < 0) {
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-          Log.d(TAG, "Negative tiff component count");
-        }
-        continue;
-      }
-
+    // Validate IFD offset to prevent IndexOutOfBoundsException from abnormal EXIF data.
+    // Negative IFD offsets or offsets exceeding segment length indicate corrupt EXIF.
+    if (firstIfdOffset < 0 || firstIfdOffset >= segmentData.length()) {
       if (Log.isLoggable(TAG, Log.DEBUG)) {
-        Log.d(
-            TAG,
-            "Got tagIndex="
-                + i
-                + " tagType="
-                + tagType
-                + " formatCode="
-                + formatCode
-                + " componentCount="
-                + componentCount);
+        Log.d(TAG, "Invalid firstIfdOffset=" + firstIfdOffset + " segmentLength=" + segmentData.length());
       }
-
-      final int byteCount = componentCount + BYTES_PER_FORMAT[formatCode];
-      if (byteCount > 4) {
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-          Log.d(TAG, "Got byte count > 4, not orientation, continuing, formatCode=" + formatCode);
-        }
-        continue;
-      }
-
-      final int tagValueOffset = tagOffset + 8;
-      if (tagValueOffset < 0 || tagValueOffset > segmentData.length()) {
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-          Log.d(TAG, "Illegal tagValueOffset=" + tagValueOffset + " tagType=" + tagType);
-        }
-        continue;
-      }
-
-      if (byteCount < 0 || tagValueOffset + byteCount > segmentData.length()) {
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-          Log.d(TAG, "Illegal number of bytes for TI tag data tagType=" + tagType);
-        }
-        continue;
-      }
-
-      // assume componentCount == 1 && fmtCode == 3
-      return segmentData.getInt16(tagValueOffset);
+      return UNKNOWN_ORIENTATION;
     }
 
-    return -1;
+    try {
+      int tagCount = segmentData.getInt16(firstIfdOffset);
+      for (int i = 0; i < tagCount; i++) {
+        final int tagOffset = calcTagOffset(firstIfdOffset, i);
+
+        final int tagType = segmentData.getInt16(tagOffset);
+        // We only want orientation.
+        if (tagType != ORIENTATION_TAG_TYPE) {
+          continue;
+        }
+
+        final int formatCode = segmentData.getInt16(tagOffset + 2);
+        // 12 is max format code.
+        if (formatCode < 1 || formatCode > 12) {
+          if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, "Got invalid format code = " + formatCode);
+          }
+          continue;
+        }
+
+        final int componentCount = segmentData.getInt32(tagOffset + 4);
+        if (componentCount < 0) {
+          if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, "Negative tiff component count");
+          }
+          continue;
+        }
+
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+          Log.d(
+              TAG,
+              "Got tagIndex="
+                  + i
+                  + " tagType="
+                  + tagType
+                  + " formatCode="
+                  + formatCode
+                  + " componentCount="
+                  + componentCount);
+        }
+
+        final int byteCount = componentCount + BYTES_PER_FORMAT[formatCode];
+        if (byteCount > 4) {
+          if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, "Got byte count > 4, not orientation, continuing, formatCode=" + formatCode);
+          }
+          continue;
+        }
+
+        final int tagValueOffset = tagOffset + 8;
+        if (tagValueOffset < 0 || tagValueOffset > segmentData.length()) {
+          if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, "Illegal tagValueOffset=" + tagValueOffset + " tagType=" + tagType);
+          }
+          continue;
+        }
+
+        if (byteCount < 0 || tagValueOffset + byteCount > segmentData.length()) {
+          if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, "Illegal number of bytes for TI tag data tagType=" + tagType);
+          }
+          continue;
+        }
+
+        // assume componentCount == 1 && fmtCode == 3
+        return segmentData.getInt16(tagValueOffset);
+      }
+
+      return -1;
+    } catch (RuntimeException e) {
+      if (Log.isLoggable(TAG, Log.DEBUG)) {
+        Log.d(TAG, "Error parsing EXIF segment", e);
+      }
+      return UNKNOWN_ORIENTATION;
+    }
   }
 
   private static int calcTagOffset(int ifdOffset, int tagIndex) {
@@ -590,7 +606,7 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
     }
 
     private boolean isAvailable(int offset, int byteSize) {
-      return data.remaining() - offset >= byteSize;
+      return offset >= 0 && data.remaining() - offset >= byteSize;
     }
   }
 
