@@ -389,7 +389,7 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
   private Drawable getErrorDrawable() {
     if (errorDrawable == null) {
       errorDrawable = requestOptions.getErrorPlaceholder();
-      if (errorDrawable == null && requestOptions.getErrorId() > 0) {
+      if (errorDrawable == null && requestOptions.hasErrorId()) {
         errorDrawable = loadDrawable(requestOptions.getErrorId());
       }
     }
@@ -400,7 +400,7 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
   private Drawable getPlaceholderDrawable() {
     if (placeholderDrawable == null) {
       placeholderDrawable = requestOptions.getPlaceholderDrawable();
-      if (placeholderDrawable == null && requestOptions.getPlaceholderId() > 0) {
+      if (placeholderDrawable == null && requestOptions.hasPlaceholderId()) {
         placeholderDrawable = loadDrawable(requestOptions.getPlaceholderId());
       }
     }
@@ -411,7 +411,7 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
   private Drawable getFallbackDrawable() {
     if (fallbackDrawable == null) {
       fallbackDrawable = requestOptions.getFallbackDrawable();
-      if (fallbackDrawable == null && requestOptions.getFallbackId() > 0) {
+      if (fallbackDrawable == null && requestOptions.hasFallbackId()) {
         fallbackDrawable = loadDrawable(requestOptions.getFallbackId());
       }
     }
