@@ -1,6 +1,7 @@
 package com.bumptech.glide.integration.cronet;
 
 import androidx.annotation.Nullable;
+import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.engine.executor.GlideExecutor;
 import com.bumptech.glide.load.model.GlideUrl;
@@ -9,8 +10,10 @@ import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.MultiModelLoaderFactory;
 import com.bumptech.glide.util.ByteBufferUtil;
 import com.google.common.base.Preconditions;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.util.PriorityQueue;
 
 /**
  * A {@link com.bumptech.glide.load.model.ModelLoader} for loading urls using cronet.
@@ -22,6 +25,79 @@ import java.nio.ByteBuffer;
  */
 public final class ChromiumUrlLoader<T> implements ModelLoader<GlideUrl, T> {
 
+  /** Priority-ordered limiter bounding simultaneous in-flight Cronet requests across loaders. */
+  public static final class ConcurrencyLimiter {
+    private final int maxConcurrentRequests;
+    private final PriorityQueue<PendingJob> pendingJobs = new PriorityQueue<>();
+    private int inFlightRequests;
+    private long nextSequenceNumber;
+
+    private ConcurrencyLimiter(int max) {
+      Preconditions.checkArgument(max > 0);
+      this.maxConcurrentRequests = max;
+    }
+
+    /** Creates a limiter allowing at most {@code maxConcurrentRequests} simultaneous requests. */
+    public static ConcurrencyLimiter create(int maxConcurrentRequests) {
+      return new ConcurrencyLimiter(maxConcurrentRequests);
+    }
+
+    synchronized boolean tryAcquireOrEnqueue(PendingJob job, Priority initialPriority) {
+      job.priority = initialPriority;
+      job.sequenceNumber = nextSequenceNumber++;
+      if (inFlightRequests < maxConcurrentRequests) {
+        inFlightRequests++;
+        return true;
+      }
+      job.enqueued = true;
+      pendingJobs.offer(job);
+      return false;
+    }
+
+    synchronized void maybePromote(PendingJob job, Priority newPriority) {
+      if (job.enqueued && newPriority.compareTo(job.priority) < 0) {
+        pendingJobs.remove(job);
+        job.priority = newPriority;
+        pendingJobs.offer(job);
+      }
+    }
+
+    synchronized boolean removePending(PendingJob job) {
+      boolean wasEnqueued = job.enqueued;
+      job.enqueued = false;
+      return wasEnqueued && pendingJobs.remove(job);
+    }
+
+    @Nullable
+    synchronized PendingJob releaseAndPollNext() {
+      for (PendingJob next = pendingJobs.poll(); next != null; next = pendingJobs.poll()) {
+        next.enqueued = false;
+        if (!next.isCancelled()) {
+          return next;
+        }
+      }
+      inFlightRequests--;
+      return null;
+    }
+
+    abstract static class PendingJob implements Comparable<PendingJob> {
+      Priority priority = Priority.NORMAL;
+      long sequenceNumber;
+      boolean enqueued;
+
+      @Override
+      public final int compareTo(PendingJob other) {
+        int diff = this.priority.compareTo(other.priority);
+        return diff != 0 ? diff : Long.compare(this.sequenceNumber, other.sequenceNumber);
+      }
+
+      abstract boolean isCancelled();
+
+      @Nullable
+      abstract PendingJob onDequeuedWithSlot();
+    }
+  }
+
   /**
    * Opt-in behavioral configuration for {@link ChromiumUrlLoader} factories.
    *
@@ -32,9 +108,15 @@ public final class ChromiumUrlLoader<T> implements ModelLoader<GlideUrl, T> {
     static final Options DEFAULT = builder().build();
 
     private final boolean guardActiveJobEviction;
+    private final boolean discardBuffersOnCancel;
+    private final boolean catchBufferOutOfMemoryError;
+    @Nullable private final ConcurrencyLimiter concurrencyLimiter;
 
     private Options(Builder builder) {
       this.guardActiveJobEviction = builder.guardActiveJobEviction;
+      this.discardBuffersOnCancel = builder.discardBuffersOnCancel;
+      this.catchBufferOutOfMemoryError = builder.catchBufferOutOfMemoryError;
+      this.concurrencyLimiter = builder.concurrencyLimiter;
     }
 
     /** Creates a new {@link Builder} with all opt-in options disabled by default. */
@@ -46,9 +128,25 @@ public final class ChromiumUrlLoader<T> implements ModelLoader<GlideUrl, T> {
       return guardActiveJobEviction;
     }
 
+    boolean discardBuffersOnCancel() {
+      return discardBuffersOnCancel;
+    }
+
+    boolean catchBufferOutOfMemoryError() {
+      return catchBufferOutOfMemoryError;
+    }
+
+    @Nullable
+    ConcurrencyLimiter concurrencyLimiter() {
+      return concurrencyLimiter;
+    }
+
     /** Builder for {@link Options}. */
     public static final class Builder {
       private boolean guardActiveJobEviction;
+      private boolean discardBuffersOnCancel;
+      private boolean catchBufferOutOfMemoryError;
+      @Nullable private ConcurrencyLimiter concurrencyLimiter;
 
       private Builder() {}
 
@@ -59,6 +157,37 @@ public final class ChromiumUrlLoader<T> implements ModelLoader<GlideUrl, T> {
        */
       public Builder setGuardActiveJobEviction(boolean enabled) {
         this.guardActiveJobEviction = enabled;
+        return this;
+      }
+
+      /** When enabled, cancelling a request eagerly discards queued response chunks. */
+      @CanIgnoreReturnValue
+      public Builder setDiscardBuffersOnCancel(boolean enabled) {
+        this.discardBuffersOnCancel = enabled;
+        return this;
+      }
+
+      /** Catches {@link BufferQueue} allocation/coalesce OOMs and fails via Glide's callback. */
+      @CanIgnoreReturnValue
+      public Builder setCatchBufferOutOfMemoryError(boolean enabled) {
+        this.catchBufferOutOfMemoryError = enabled;
+        return this;
+      }
+
+      /**
+       * Creates a {@link ConcurrencyLimiter} shared by loaders built from this {@link Options}
+       * instance (use {@link #setConcurrencyLimiter} to share across {@link Options} instances).
+       */
+      @CanIgnoreReturnValue
+      public Builder setMaxConcurrentRequests(int maxConcurrentRequests) {
+        this.concurrencyLimiter = ConcurrencyLimiter.create(maxConcurrentRequests);
+        return this;
+      }
+
+      /** Configures a shared {@link ConcurrencyLimiter} (or {@code null} for unbounded). */
+      @CanIgnoreReturnValue
+      public Builder setConcurrencyLimiter(@Nullable ConcurrencyLimiter concurrencyLimiter) {
+        this.concurrencyLimiter = concurrencyLimiter;
         return this;
       }
 
