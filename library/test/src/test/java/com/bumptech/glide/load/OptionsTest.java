@@ -1,6 +1,7 @@
 package com.bumptech.glide.load;
 
 import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
+import static com.google.common.truth.Truth.assertThat;
 
 import androidx.annotation.NonNull;
 import com.bumptech.glide.load.Option.CacheKeyUpdater;
@@ -16,6 +17,16 @@ import org.robolectric.annotation.Config;
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = ROBOLECTRIC_SDK)
 public class OptionsTest {
+  private static final CacheKeyUpdater<Integer> INTEGER_UPDATER =
+      new CacheKeyUpdater<Integer>() {
+        @Override
+        public void update(
+            @NonNull byte[] keyBytes, @NonNull Integer value, @NonNull MessageDigest messageDigest) {
+          messageDigest.update(keyBytes);
+          messageDigest.update(ByteBuffer.allocate(4).putInt(value).array());
+        }
+      };
+
   @Rule public final KeyTester keyTester = new KeyTester();
 
   @Test
@@ -72,5 +83,37 @@ public class OptionsTest {
             new Options().set(firstDiskOption, 123).set(secondDiskOption, 123),
             "6697f654686c9a925905db3840e9c99944642c2b91d6200360d77639c1754d51")
         .test();
+  }
+
+  @Test
+  public void testEquals_withOptionSetToDefaultValue_isEquivalentToUnsetOption() {
+    Option<Boolean> memoryOption = Option.memory("memoryKey", false);
+    Option<Integer> diskOption = Option.disk("diskKey", 0, INTEGER_UPDATER);
+
+    keyTester
+        .addEquivalenceGroup(
+            new Options(),
+            new Options().set(memoryOption, false),
+            new Options().set(diskOption, 0),
+            new Options().set(memoryOption, false).set(diskOption, 0))
+        .addEquivalenceGroup(
+            new Options().set(memoryOption, true),
+            new Options().set(memoryOption, true).set(diskOption, 0))
+        .addEquivalenceGroup(
+            new Options().set(diskOption, 1),
+            new Options().set(diskOption, 1).set(memoryOption, false))
+        .addEmptyDigestRegressionTest(new Options().set(diskOption, 0))
+        .test();
+  }
+
+  @Test
+  public void testPutAll_withOptionSetToDefaultValue_overridesNonDefaultValue() {
+    Option<Boolean> option = Option.memory("key", false);
+    Options options = new Options().set(option, true);
+
+    options.putAll(new Options().set(option, false));
+
+    assertThat(options.get(option)).isFalse();
+    assertThat(options).isEqualTo(new Options());
   }
 }
