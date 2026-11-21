@@ -11,7 +11,7 @@ public interface Resource<Z> {
 
   /** Returns the {@link Class} of the wrapped resource. */
   @NonNull
-  Class<Z> getResourceClass();
+  Class<? extends Z> getResourceClass();
 
   /**
    * Returns an instance of the wrapped resource.
