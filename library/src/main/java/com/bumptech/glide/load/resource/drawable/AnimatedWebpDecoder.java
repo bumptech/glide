@@ -90,8 +90,10 @@ public final class AnimatedWebpDecoder {
 
     @NonNull
     @Override
+    @SuppressWarnings("unchecked") // Safe covariant cast; Glide reads Class tokens covariantly.
     public Class<Drawable> getResourceClass() {
-      return Drawable.class;
+      // Report the concrete class so callers detect Animatable without invoking get().
+      return (Class<Drawable>) (Class<?>) AnimatedImageDrawable.class;
     }
 
     @NonNull
