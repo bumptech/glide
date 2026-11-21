@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.util.Pools;
 import com.bumptech.glide.GlideBuilder.OverrideGlideThreadPriority;
+import com.bumptech.glide.GlideBuilder.UseResourceClassForDecoding;
 import com.bumptech.glide.GlideContext;
 import com.bumptech.glide.GlideExperiments;
 import com.bumptech.glide.Priority;
@@ -213,6 +214,7 @@ class DecodeJob<R>
     decodeHelper.clear();
     isCallbackNotified = false;
     glideContext = null;
+    experiments = null;
     signature = null;
     options = null;
     priority = null;
@@ -646,8 +648,7 @@ class DecodeJob<R>
   @Synthetic
   @NonNull
   <Z> Resource<Z> onResourceDecoded(DataSource dataSource, @NonNull Resource<Z> decoded) {
-    @SuppressWarnings("unchecked")
-    Class<Z> resourceSubClass = (Class<Z>) decoded.get().getClass();
+    Class<? extends Z> resourceSubClass = getResourceSubClass(decoded);
     Transformation<Z> appliedTransformation = null;
     Resource<Z> transformed = decoded;
     if (dataSource != DataSource.RESOURCE_DISK_CACHE) {
@@ -685,7 +686,7 @@ class DecodeJob<R>
     if (diskCacheStrategy.isResourceCacheable(
         isFromAlternateCacheKey, dataSource, encodeStrategy)) {
       if (encoder == null) {
-        throw new Registry.NoResultEncoderAvailableException(transformed.get().getClass());
+        throw new Registry.NoResultEncoderAvailableException(getResourceSubClass(transformed));
       }
       final Key key;
       switch (encodeStrategy) {
@@ -713,6 +714,21 @@ class DecodeJob<R>
       result = lockedResult;
     }
     return result;
+  }
+
+  @NonNull
+  @SuppressWarnings("unchecked") // get() returns Z, so getClass() is Class<? extends Z>.
+  private <Z> Class<? extends Z> getResourceSubClass(@NonNull Resource<Z> resource) {
+    // Avoid calling get() when UseResourceClassForDecoding is enabled so resources that allocate
+    // a fresh instance per get() call do not create an unused instance during decode.
+    if (experiments != null && experiments.isEnabled(UseResourceClassForDecoding.class)) {
+      Class<? extends Z> declaredClass = resource.getResourceClass();
+      // Guard against third-party or mock Resource implementations returning null despite @NonNull.
+      if (declaredClass != null) {
+        return declaredClass;
+      }
+    }
+    return (Class<? extends Z>) resource.get().getClass();
   }
 
   private static boolean isHardwareBitmap(Resource<?> resource) {

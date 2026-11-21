@@ -206,4 +206,64 @@ public final class GlideExperimentsTest {
                 .isEnabled(GlideBuilder.StripSensitiveHeadersOnCrossOriginRedirects.class))
         .isFalse();
   }
+
+  @Test
+  public void useResourceClassForDecoding_experimentDisabledByDefault() {
+    Glide.tearDown();
+    GlideExecutor executor = MockGlideExecutor.newMainThreadExecutor();
+    GlideBuilder builder =
+        new GlideBuilder()
+            .setSourceExecutor(executor)
+            .setDiskCacheExecutor(executor)
+            .setAnimationExecutor(executor);
+    Glide.init(context, builder);
+
+    assertThat(
+            Glide.get(context)
+                .getGlideContext()
+                .getExperiments()
+                .isEnabled(GlideBuilder.UseResourceClassForDecoding.class))
+        .isFalse();
+  }
+
+  @Test
+  public void useResourceClassForDecoding_experimentEnabled_isRecorded() {
+    Glide.tearDown();
+    GlideExecutor executor = MockGlideExecutor.newMainThreadExecutor();
+    GlideBuilder builder =
+        new GlideBuilder()
+            .setSourceExecutor(executor)
+            .setDiskCacheExecutor(executor)
+            .setAnimationExecutor(executor)
+            .experimentalSetUseResourceClassForDecoding(true);
+    Glide.init(context, builder);
+
+    assertThat(
+            Glide.get(context)
+                .getGlideContext()
+                .getExperiments()
+                .isEnabled(GlideBuilder.UseResourceClassForDecoding.class))
+        .isTrue();
+  }
+
+  @Test
+  public void useResourceClassForDecoding_enabledThenDisabled_isRecordedAsDisabled() {
+    Glide.tearDown();
+    GlideExecutor executor = MockGlideExecutor.newMainThreadExecutor();
+    GlideBuilder builder =
+        new GlideBuilder()
+            .setSourceExecutor(executor)
+            .setDiskCacheExecutor(executor)
+            .setAnimationExecutor(executor)
+            .experimentalSetUseResourceClassForDecoding(true)
+            .experimentalSetUseResourceClassForDecoding(false);
+    Glide.init(context, builder);
+
+    assertThat(
+            Glide.get(context)
+                .getGlideContext()
+                .getExperiments()
+                .isEnabled(GlideBuilder.UseResourceClassForDecoding.class))
+        .isFalse();
+  }
 }
