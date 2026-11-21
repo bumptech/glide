@@ -161,7 +161,7 @@ final class DecodeHelper<Transcode> {
   }
 
   @SuppressWarnings("unchecked")
-  <Z> Transformation<Z> getTransformation(Class<Z> resourceClass) {
+  <Z> Transformation<Z> getTransformation(Class<? extends Z> resourceClass) {
     Transformation<Z> result = (Transformation<Z>) transformations.get(resourceClass);
     if (result == null) {
       for (Entry<Class<?>, Transformation<?>> entry : transformations.entrySet()) {
