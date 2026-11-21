@@ -9,7 +9,13 @@ import androidx.annotation.NonNull;
  */
 public interface Resource<Z> {
 
-  /** Returns the {@link Class} of the wrapped resource. */
+  /**
+   * Returns the {@link Class} of the wrapped resource.
+   *
+   * <p>Implementations should return the concrete runtime class returned by {@link #get()} needed
+   * for transformation and encoder lookup (for example, {@code GifDrawable.class} rather than
+   * {@code Drawable.class}).
+   */
   @NonNull
   Class<Z> getResourceClass();
 
