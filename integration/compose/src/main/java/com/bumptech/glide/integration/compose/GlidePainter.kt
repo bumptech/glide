@@ -47,163 +47,163 @@ import kotlinx.coroutines.plus
 internal class GlidePainter
 @OptIn(InternalGlideApi::class)
 constructor(
-    private val requestBuilder: RequestBuilder<Drawable>,
-    private val size: ResolvableGlideSize,
-    scope: CoroutineScope,
-    private val lifecycleOwner: LifecycleOwner,
+  private val requestBuilder: RequestBuilder<Drawable>,
+  private val size: ResolvableGlideSize,
+  scope: CoroutineScope,
+  private val lifecycleOwner: LifecycleOwner,
 ) : Painter(), RememberObserver {
-    private val clearOnStop: Boolean = requestBuilder.isClearGlidePainterOnStopEnabled
-    @OptIn(ExperimentGlideFlows::class)
-    internal var status: Status by mutableStateOf(Status.CLEARED)
-    internal val currentDrawable: MutableState<Drawable?> = mutableStateOf(null)
-    private var alpha: Float by mutableFloatStateOf(DefaultAlpha)
-    private var colorFilter: ColorFilter? by mutableStateOf(null)
-    private var delegate: Painter? by mutableStateOf(null)
-    private val scope =
-        scope + SupervisorJob(parent = scope.coroutineContext.job) + Dispatchers.Main.immediate
-    private var currentJob: Job? = null
+  private val clearOnStop: Boolean = requestBuilder.isClearGlidePainterOnStopEnabled
+  @OptIn(ExperimentGlideFlows::class) internal var status: Status by mutableStateOf(Status.CLEARED)
+  internal val currentDrawable: MutableState<Drawable?> = mutableStateOf(null)
+  private var alpha: Float by mutableFloatStateOf(DefaultAlpha)
+  private var colorFilter: ColorFilter? by mutableStateOf(null)
+  private var delegate: Painter? by mutableStateOf(null)
+  private val scope =
+    scope + SupervisorJob(parent = scope.coroutineContext.job) + Dispatchers.Main.immediate
+  private var currentJob: Job? = null
 
-    init {
-        scope.launch {
-            if (clearOnStop) {
-                return@launch
+  init {
+    scope.launch {
+      if (clearOnStop) {
+        return@launch
+      }
+      // If the Lifecycle state is at least STARTED, start the animation. Otherwise, stop the
+      // animation.
+      lifecycleOwner.lifecycle.currentStateFlow.collect {
+        if (it.isAtLeast(Lifecycle.State.STARTED)) {
+          currentDrawable.value?.let { drawable ->
+            if (drawable is Animatable) {
+              drawable.start()
             }
-            // If the Lifecycle state is at least STARTED, start the animation. Otherwise, stop the
-            // animation.
-            lifecycleOwner.lifecycle.currentStateFlow.collect {
-                if (it.isAtLeast(Lifecycle.State.STARTED)) {
-                    currentDrawable.value?.let { drawable ->
-                        if (drawable is Animatable) {
-                            drawable.start()
-                        }
-                    }
-                } else {
-                    currentDrawable.value?.let { drawable ->
-                        if (drawable is Animatable) {
-                            drawable.stop()
-                        }
-                    }
-                }
+          }
+        } else {
+          currentDrawable.value?.let { drawable ->
+            if (drawable is Animatable) {
+              drawable.stop()
             }
+          }
         }
+      }
     }
+  }
 
-    override val intrinsicSize: Size
-        get() = delegate?.intrinsicSize ?: Size.Unspecified
+  override val intrinsicSize: Size
+    get() = delegate?.intrinsicSize ?: Size.Unspecified
 
-    override fun DrawScope.onDraw() {
-        delegate?.apply { draw(size, alpha, colorFilter) }
+  override fun DrawScope.onDraw() {
+    delegate?.apply { draw(size, alpha, colorFilter) }
+  }
+
+  override fun onAbandoned() {
+    (delegate as? RememberObserver)?.onAbandoned()
+    if (clearOnStop) {
+      cancelAndClear()
     }
+  }
 
-    override fun onAbandoned() {
-        (delegate as? RememberObserver)?.onAbandoned()
-        if (clearOnStop) {
-            cancelAndClear()
-        }
+  override fun onForgotten() {
+    (delegate as? RememberObserver)?.onForgotten()
+    if (clearOnStop) {
+      cancelAndClear()
+      return
     }
+    currentJob?.cancel()
+    currentJob = null
+    currentDrawable.value = null
+    delegate = null
+  }
 
-    override fun onForgotten() {
-        (delegate as? RememberObserver)?.onForgotten()
-        if (clearOnStop) {
-            cancelAndClear()
-            return
-        }
-        currentJob?.cancel()
-        currentJob = null
-        currentDrawable.value = null
-        delegate = null
-    }
-
-    override fun onRemembered() {
-        (delegate as? RememberObserver)?.onRemembered()
-        if (clearOnStop) {
-            if (currentJob?.isActive != true) {
-                currentJob = scope.launch {
-                    lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                        try {
-                            collectRequest()
-                        } finally {
-                            clearDrawableAndDelegate()
-                        }
-                    }
-                }
+  override fun onRemembered() {
+    (delegate as? RememberObserver)?.onRemembered()
+    if (clearOnStop) {
+      if (currentJob?.isActive != true) {
+        currentJob = scope.launch {
+          lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            try {
+              collectRequest()
+            } finally {
+              clearDrawableAndDelegate()
             }
-            if (!lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
-                clearDrawableAndDelegate()
-            }
-            return
+          }
         }
-        if (currentJob == null) {
-            currentJob = launchRequest()
-        }
-        // In case the onRemembered is called after the lifecycle onStop, it will start the
-        // animation,
-        // stop it here again.
-        if (!lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
-            currentDrawable.value?.let { drawable ->
-                if (drawable is Animatable) {
-                    drawable.stop()
-                }
-            }
-        }
-    }
-
-    private fun cancelAndClear() {
-        delegate = null
-        currentJob?.cancel()
-        currentJob = null
+      }
+      if (!lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
         clearDrawableAndDelegate()
+      }
+      return
     }
-
-    @OptIn(ExperimentGlideFlows::class)
-    private fun clearDrawableAndDelegate() {
-        (currentDrawable.value as? Animatable)?.stop()
-        updateDelegate(null)
-        currentDrawable.value = null
-        status = Status.CLEARED
+    if (currentJob == null) {
+      currentJob = launchRequest()
     }
-
-    @OptIn(ExperimentGlideFlows::class, InternalGlideApi::class)
-    private suspend fun collectRequest() {
-        requestBuilder.flowResolvable(size).collect {
-            updateDelegate(
-                when (it) {
-                    is Resource -> it.resource
-                    is Placeholder -> it.placeholder
-                }
-            )
-            status = it.status
+    // In case the onRemembered is called after the lifecycle onStop, it will start the
+    // animation,
+    // stop it here again.
+    if (!lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+      currentDrawable.value?.let { drawable ->
+        if (drawable is Animatable) {
+          drawable.stop()
         }
+      }
     }
+  }
 
-    @OptIn(ExperimentGlideFlows::class, InternalGlideApi::class)
-    private fun launchRequest() = this.scope.launch { collectRequest() }
+  private fun cancelAndClear() {
+    delegate = null
+    currentJob?.cancel()
+    currentJob = null
+    clearDrawableAndDelegate()
+  }
 
-    private fun Drawable.toPainter() =
-        when (this) {
-            is BitmapDrawable -> BitmapPainter(bitmap.asImageBitmap())
-            is ColorDrawable -> ColorPainter(Color(color))
-            else -> DrawablePainter(mutate())
+  @OptIn(ExperimentGlideFlows::class)
+  private fun clearDrawableAndDelegate() {
+    (currentDrawable.value as? Animatable)?.stop()
+    updateDelegate(null)
+    currentDrawable.value = null
+    status = Status.CLEARED
+  }
+
+  @OptIn(ExperimentGlideFlows::class, InternalGlideApi::class)
+  private suspend fun collectRequest() {
+    requestBuilder.flowResolvable(size).collect {
+      updateDelegate(
+        when (it) {
+          is Resource -> it.resource
+          is Placeholder -> it.placeholder
         }
+      )
+      status = it.status
+    }
+  }
 
-    private fun updateDelegate(drawable: Drawable?) {
-        val newDelegate = drawable?.toPainter()
-        val oldDelegate = delegate
-        if (newDelegate !== oldDelegate) {
-            (oldDelegate as? RememberObserver)?.onForgotten()
-            (newDelegate as? RememberObserver)?.onRemembered()
-            currentDrawable.value = drawable
-            delegate = newDelegate
-        }
+  @OptIn(ExperimentGlideFlows::class, InternalGlideApi::class)
+  private fun launchRequest() = this.scope.launch { collectRequest() }
+
+  private fun Drawable.toPainter() =
+    when (this) {
+      // TODO(b/470840484): BitmapDrawable#getBitmap() can return null.
+      is BitmapDrawable -> BitmapPainter(bitmap.asImageBitmap())
+      is ColorDrawable -> ColorPainter(Color(color))
+      else -> DrawablePainter(mutate())
     }
 
-    override fun applyAlpha(alpha: Float): Boolean {
-        this.alpha = alpha
-        return true
+  private fun updateDelegate(drawable: Drawable?) {
+    val newDelegate = drawable?.toPainter()
+    val oldDelegate = delegate
+    if (newDelegate !== oldDelegate) {
+      (oldDelegate as? RememberObserver)?.onForgotten()
+      (newDelegate as? RememberObserver)?.onRemembered()
+      currentDrawable.value = drawable
+      delegate = newDelegate
     }
+  }
 
-    override fun applyColorFilter(colorFilter: ColorFilter?): Boolean {
-        this.colorFilter = colorFilter
-        return true
-    }
+  override fun applyAlpha(alpha: Float): Boolean {
+    this.alpha = alpha
+    return true
+  }
+
+  override fun applyColorFilter(colorFilter: ColorFilter?): Boolean {
+    this.colorFilter = colorFilter
+    return true
+  }
 }
