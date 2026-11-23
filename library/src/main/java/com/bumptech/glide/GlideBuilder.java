@@ -772,6 +772,27 @@ public final class GlideBuilder {
   }
 
   /**
+   * Set to {@code true} to inspect {@link
+   * com.bumptech.glide.load.engine.Resource#getResourceClass()} instead of calling {@link
+   * com.bumptech.glide.load.engine.Resource#get()} when resolving transformations, disk-cache keys,
+   * and missing-encoder error messages in {@code DecodeJob}.
+   *
+   * <p>This avoids allocating unused instances for {@code Resource} implementations that construct
+   * a new instance on each {@code get()} call. Custom {@code Resource} implementations must return
+   * the concrete runtime class returned by {@code get()} needed for transformation and encoder
+   * lookup from {@code getResourceClass()} rather than a generic supertype such as {@link
+   * android.graphics.drawable.Drawable}.
+   *
+   * <p>Defaults to {@code false}. This is an experimental API that may be removed in the future.
+   */
+  @NonNull
+  @CanIgnoreReturnValue
+  public GlideBuilder experimentalSetUseResourceClassForDecoding(boolean isEnabled) {
+    glideExperimentsBuilder.update(new UseResourceClassForDecoding(), isEnabled);
+    return this;
+  }
+
+  /**
    * @deprecated This method does nothing. It will be hard coded and removed in a future release
    *     without further warning.
    */
@@ -948,6 +969,9 @@ public final class GlideBuilder {
 
   /** See {@link #experimentalSetStripSensitiveHeadersOnCrossOriginRedirects(boolean)}. */
   public static final class StripSensitiveHeadersOnCrossOriginRedirects implements Experiment {}
+
+  /** See {@link #experimentalSetUseResourceClassForDecoding(boolean)}. */
+  public static final class UseResourceClassForDecoding implements Experiment {}
 
   /** See {@link #setLogRequestOrigins(boolean)}. */
   public static final class LogRequestOrigins implements Experiment {}
