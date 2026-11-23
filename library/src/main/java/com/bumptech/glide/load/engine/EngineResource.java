@@ -46,7 +46,7 @@ class EngineResource<Z> implements Resource<Z> {
 
   @NonNull
   @Override
-  public Class<Z> getResourceClass() {
+  public Class<? extends Z> getResourceClass() {
     return resource.getResourceClass();
   }
 
