@@ -1,5 +1,8 @@
 package com.bumptech.glide.integration.compose
 
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import android.graphics.drawable.Drawable
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
@@ -19,6 +22,7 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.semantics.SemanticsPropertyKey
 import androidx.compose.ui.semantics.SemanticsPropertyReceiver
 import androidx.compose.ui.semantics.semantics
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
@@ -349,13 +353,29 @@ private fun rememberGlidePainter(
 ): GlidePainter {
     val scope = rememberCoroutineScope()
     val lifecycleOwner = LocalLifecycleOwner.current
+    val context = LocalContext.current
+    val clearOnStopLifecycleOwner =
+        remember(context) { context.findActivityLifecycleOwner() } ?: lifecycleOwner
     // TODO(judds): Calling onRemembered here manually might make a minor improvement in how quickly
     //  the image load is started, but it also triggers a recomposition. I can't figure out why it
     //  triggers a recomposition
-    return remember(requestBuilder, size, lifecycleOwner) {
-        GlidePainter(requestBuilder, size, scope, lifecycleOwner)
+    return remember(requestBuilder, size, lifecycleOwner, clearOnStopLifecycleOwner) {
+        GlidePainter(
+            requestBuilder = requestBuilder,
+            size = size,
+            scope = scope,
+            lifecycleOwner = lifecycleOwner,
+            clearOnStopLifecycleOwner = clearOnStopLifecycleOwner,
+        )
     }
 }
+
+private tailrec fun Context?.findActivityLifecycleOwner(): LifecycleOwner? =
+    when (this) {
+        is Activity -> this as? LifecycleOwner
+        is ContextWrapper -> baseContext.takeIf { it !== this }.findActivityLifecycleOwner()
+        else -> null
+    }
 
 @OptIn(InternalGlideApi::class)
 private fun Modifier.sizeObservingModifier(sizeObserver: SizeObserver): Modifier =
