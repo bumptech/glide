@@ -1,5 +1,6 @@
 package com.bumptech.glide.request.target;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.mock;
 
@@ -43,18 +44,20 @@ public class SimpleTargetTest {
 
   @Test
   public void canBeConstructedWithoutDimensions() {
-    new SimpleTarget<Object>() {
-      @Override
-      public void onResourceReady(
-          @NonNull Object resource, @Nullable Transition<? super Object> transition) {
-        // Do nothing.
-      }
-    };
+    assertThat(
+            new SimpleTarget<Object>() {
+              @Override
+              public void onResourceReady(
+                  @NonNull Object resource, @Nullable Transition<? super Object> transition) {
+                // Do nothing.
+              }
+            })
+        .isNotNull();
   }
 
   @Test
   public void constructorDoesNotThrowWithSizeOriginal() {
-    getTarget(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL);
+    assertThat(getTarget(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)).isNotNull();
   }
 
   @Test

@@ -214,17 +214,18 @@ public class RequestManagerTest {
               }
             },
             context);
-    new RequestManager(
-        Glide.get(context),
-        lifecycle,
-        new RequestManagerTreeNode() {
-          @NonNull
-          @Override
-          public Set<RequestManager> getDescendants() {
-            return new HashSet<>(java.util.Arrays.asList(child1, child2));
-          }
-        },
-        context);
+    RequestManager unused =
+        new RequestManager(
+            Glide.get(context),
+            lifecycle,
+            new RequestManagerTreeNode() {
+              @NonNull
+              @Override
+              public Set<RequestManager> getDescendants() {
+                return new HashSet<>(java.util.Arrays.asList(child1, child2));
+              }
+            },
+            context);
 
     File file = new File("fake");
     child1.load(file).into(target);
