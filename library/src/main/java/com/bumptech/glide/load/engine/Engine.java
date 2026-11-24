@@ -28,8 +28,12 @@ import com.bumptech.glide.util.pool.FactoryPools;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
-/** Responsible for starting loads and managing active and cached resources. */
-public final class Engine
+/**
+ * Responsible for starting loads and managing active and cached resources.
+ *
+ * <p>Non-final for mocking.
+ */
+public class Engine
     implements EngineJobListener,
         MemoryCache.ResourceRemovedListener,
         EngineResource.ResourceListener {
@@ -82,6 +86,7 @@ public final class Engine
   }
 
   @VisibleForTesting
+  @SuppressWarnings("this-escape")
   Engine(
       MemoryCache cache,
       DiskCache.Factory diskCacheFactory,

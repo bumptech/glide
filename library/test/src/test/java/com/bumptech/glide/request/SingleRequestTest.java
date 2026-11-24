@@ -21,11 +21,14 @@ import static org.mockito.Mockito.when;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.GlideContext;
 import com.bumptech.glide.GlideExperiments;
 import com.bumptech.glide.Priority;
+import com.bumptech.glide.Registry;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Options;
@@ -34,7 +37,9 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.load.engine.Resource;
+import com.bumptech.glide.load.engine.bitmap_recycle.LruArrayPool;
 import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.target.ImageViewTargetFactory;
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
@@ -44,6 +49,7 @@ import com.bumptech.glide.util.Executors;
 import com.google.common.base.Equivalence;
 import com.google.common.testing.EquivalenceTester;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -1058,7 +1064,18 @@ public class SingleRequestTest {
     private int overrideWidth = -1;
     private int overrideHeight = -1;
     private List<?> result = new ArrayList<>();
-    private final GlideContext glideContext = mock(GlideContext.class);
+    private final GlideContext glideContext =
+        new GlideContext(
+            /* context= */ ApplicationProvider.getApplicationContext(),
+            /* arrayPool= */ new LruArrayPool(),
+            /* registry= */ Registry::new,
+            /* imageViewTargetFactory= */ new ImageViewTargetFactory(),
+            /* defaultRequestOptionsFactory= */ RequestOptions::new,
+            /* defaultTransitionOptions= */ Collections.emptyMap(),
+            /* defaultRequestListeners= */ Collections.emptyList(),
+            /* engine= */ engine,
+            /* experiments= */ mock(GlideExperiments.class),
+            /* logLevel= */ Log.DEBUG);
     private final Key signature = new ObjectKey(12345);
     private Priority priority = Priority.HIGH;
     private boolean useUnlimitedSourceGeneratorsPool = false;
@@ -1066,7 +1083,6 @@ public class SingleRequestTest {
     private final Map<Class<?>, Transformation<?>> transformations = new HashMap<>();
 
     SingleRequestBuilder() {
-      when(glideContext.getExperiments()).thenReturn(mock(GlideExperiments.class));
       when(requestCoordinator.getRoot()).thenReturn(requestCoordinator);
       when(requestCoordinator.canSetImage(any(Request.class))).thenReturn(true);
       when(requestCoordinator.canNotifyCleared(any(Request.class))).thenReturn(true);
