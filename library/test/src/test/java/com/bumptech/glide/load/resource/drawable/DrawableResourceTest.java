@@ -12,7 +12,6 @@ import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.drawable.Drawable;
 import androidx.annotation.NonNull;
-import com.bumptech.glide.load.resource.gif.GifDrawable;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,16 +51,14 @@ public class DrawableResourceTest {
     assertNotEquals(drawable, resource.get());
   }
 
-  @SuppressWarnings("TruthIncompatibleType")
   @Test
   public void returnsNewDrawableOnGet() {
-    GifDrawable expected = mock(GifDrawable.class);
+    TestDrawable expected = new TestDrawable();
     Drawable.ConstantState constantState = mock(Drawable.ConstantState.class);
     when(constantState.newDrawable()).thenReturn(expected);
     when(drawable.getConstantState()).thenReturn(constantState);
 
-    assertThat(resource.get())
-        .isEqualTo(/* expected: TestDrawable, actual: GifDrawable */ expected);
+    assertThat(resource.get()).isEqualTo(expected);
 
     verify(drawable).getConstantState();
     verify(constantState).newDrawable();

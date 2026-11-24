@@ -1,11 +1,15 @@
 package com.bumptech.glide.signature;
 
 import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.robolectric.Shadows.shadowOf;
 
 import android.content.Context;
+import android.content.ContextWrapper;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.load.Key;
@@ -17,7 +21,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Answers;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
@@ -58,27 +61,28 @@ public class ApplicationVersionSignatureTest {
   }
 
   @Test
-  public void unresolvablePackageInfo() throws NameNotFoundException {
-    Context context = mock(Context.class, Answers.RETURNS_DEEP_STUBS);
-    String packageName = "my.package";
-    when(context.getPackageName()).thenReturn(packageName);
-    when(context.getPackageManager().getPackageInfo(packageName, 0))
-        .thenThrow(new NameNotFoundException("test"));
+  public void unresolvablePackageInfo() {
+    shadowOf(context.getPackageManager()).removePackage(context.getPackageName());
 
     Key key = ApplicationVersionSignature.obtain(context);
 
-    assertNotNull(key);
+    assertThat(key).isNotNull();
   }
 
   @Test
   public void missingPackageInfo() throws NameNotFoundException {
-    Context context = mock(Context.class, Answers.RETURNS_DEEP_STUBS);
-    String packageName = "my.package";
-    when(context.getPackageName()).thenReturn(packageName);
-    when(context.getPackageManager().getPackageInfo(packageName, 0)).thenReturn(null);
+    PackageManager packageManager = mock(PackageManager.class);
+    when(packageManager.getPackageInfo(context.getPackageName(), 0)).thenReturn(null);
+    Context wrappedContext =
+        new ContextWrapper(context) {
+          @Override
+          public PackageManager getPackageManager() {
+            return packageManager;
+          }
+        };
 
-    Key key = ApplicationVersionSignature.obtain(context);
+    Key key = ApplicationVersionSignature.obtain(wrappedContext);
 
-    assertNotNull(key);
+    assertThat(key).isNotNull();
   }
 }

@@ -8,8 +8,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -38,13 +36,10 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
-import org.robolectric.shadow.api.Shadow;
-import org.robolectric.shadows.ShadowCanvas;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = ROBOLECTRIC_SDK)
@@ -58,17 +53,9 @@ public class GifDrawableTest {
 
   @Mock private Drawable.Callback cb;
   @Mock private GifFrameLoader frameLoader;
-  @Mock private Paint paint;
   @Mock private Transformation<Bitmap> transformation;
+  private Paint paint;
   private Application context;
-
-  private static Paint isAPaint() {
-    return isA(Paint.class);
-  }
-
-  private static Rect isARect() {
-    return isA(Rect.class);
-  }
 
   @Before
   public void setUp() {
@@ -77,6 +64,7 @@ public class GifDrawableTest {
     frameWidth = 120;
     frameHeight = 450;
     firstFrame = Bitmap.createBitmap(frameWidth, frameHeight, Bitmap.Config.RGB_565);
+    paint = new Paint();
     drawable = new GifDrawable(frameLoader, paint);
     when(frameLoader.getWidth()).thenReturn(frameWidth);
     when(frameLoader.getHeight()).thenReturn(frameHeight);
@@ -87,28 +75,28 @@ public class GifDrawableTest {
 
   @Test
   public void shouldDrawFirstFrameBeforeAnyFrameRead() {
-    Canvas canvas = new Canvas();
+    RecordingCanvas canvas = new RecordingCanvas();
+
     drawable.draw(canvas);
 
-    ShadowCanvas shadowCanvas = Shadow.extract(canvas);
-    assertThat(shadowCanvas.getDescription())
-        .isEqualTo(
-            "Bitmap ("
-                + firstFrame.getWidth()
-                + " x "
-                + firstFrame.getHeight()
-                + ") at (0,0) with height=0 and width=0");
+    assertThat(canvas.drawCount).isEqualTo(1);
+    assertThat(canvas.lastBitmap).isSameInstanceAs(firstFrame);
+    assertThat(canvas.lastSrc).isNull();
+    assertThat(canvas.lastDst).isEqualTo(new Rect(0, 0, 0, 0));
   }
 
   @Test
   public void doesDrawCurrentFrameIfOneIsAvailable() {
-    Canvas canvas = mock(Canvas.class);
+    RecordingCanvas canvas = new RecordingCanvas();
     Bitmap currentFrame = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_4444);
     when(frameLoader.getCurrentFrame()).thenReturn(currentFrame);
 
     drawable.draw(canvas);
-    verify(canvas).drawBitmap(eq(currentFrame), (Rect) isNull(), isARect(), isAPaint());
-    verify(canvas, never()).drawBitmap(eq(firstFrame), (Rect) isNull(), isARect(), isAPaint());
+
+    assertThat(canvas.drawCount).isEqualTo(1);
+    assertThat(canvas.lastBitmap).isSameInstanceAs(currentFrame);
+    assertThat(canvas.lastSrc).isNull();
+    assertThat(canvas.lastPaint).isSameInstanceAs(paint);
   }
 
   @Test
@@ -513,9 +501,11 @@ public class GifDrawableTest {
     when(frameLoader.getCurrentFrame()).thenReturn(bitmap);
     drawable.onFrameReady();
     drawable.recycle();
-    Canvas canvas = mock(Canvas.class);
+    RecordingCanvas canvas = new RecordingCanvas();
+
     drawable.draw(canvas);
-    verify(canvas, never()).drawBitmap(eq(bitmap), isARect(), isARect(), isAPaint());
+
+    assertThat(canvas.drawCount).isEqualTo(0);
   }
 
   @Test
@@ -538,30 +528,33 @@ public class GifDrawableTest {
   public void appliesGravityOnDrawAfterBoundsChange() {
     Rect bounds = new Rect(0, 0, frameWidth * 2, frameHeight * 2);
     drawable.setBounds(bounds);
+    RecordingCanvas canvas = new RecordingCanvas();
 
-    Canvas canvas = mock(Canvas.class);
     drawable.draw(canvas);
 
-    verify(canvas).drawBitmap(isA(Bitmap.class), (Rect) isNull(), eq(bounds), eq(paint));
+    assertThat(canvas.drawCount).isEqualTo(1);
+    assertThat(canvas.lastBitmap).isSameInstanceAs(firstFrame);
+    assertThat(canvas.lastSrc).isNull();
+    assertThat(canvas.lastDst).isEqualTo(bounds);
+    assertThat(canvas.lastPaint).isSameInstanceAs(paint);
   }
 
   @Test
   public void setAlphaSetsAlphaOnPaint() {
     int alpha = 100;
+
     drawable.setAlpha(alpha);
-    verify(paint).setAlpha(eq(alpha));
+
+    assertThat(paint.getAlpha()).isEqualTo(alpha);
   }
 
   @Test
   public void setColorFilterSetsColorFilterOnPaint() {
     ColorFilter colorFilter = new PorterDuffColorFilter(Color.RED, Mode.ADD);
+
     drawable.setColorFilter(colorFilter);
 
-    // Use ArgumentCaptor instead of eq() due to b/73121412 where ShadowPorterDuffColorFilter.equals
-    // uses a method that can't be found (PorterDuffColorFilter.getColor).
-    ArgumentCaptor<ColorFilter> captor = ArgumentCaptor.forClass(ColorFilter.class);
-    verify(paint).setColorFilter(captor.capture());
-    assertThat(captor.getValue()).isSameInstanceAs(colorFilter);
+    assertThat(paint.getColorFilter()).isSameInstanceAs(colorFilter);
   }
 
   @Test
@@ -617,6 +610,23 @@ public class GifDrawableTest {
             drawable.isRunning());
         drawable.onFrameReady();
       }
+    }
+  }
+
+  private static final class RecordingCanvas extends Canvas {
+    int drawCount;
+    Bitmap lastBitmap;
+    Rect lastSrc;
+    Rect lastDst;
+    Paint lastPaint;
+
+    @Override
+    public void drawBitmap(Bitmap bitmap, Rect src, Rect dst, Paint paint) {
+      drawCount++;
+      lastBitmap = bitmap;
+      lastSrc = src;
+      lastDst = dst != null ? new Rect(dst) : null;
+      lastPaint = paint;
     }
   }
 }

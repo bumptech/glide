@@ -1,13 +1,10 @@
 package com.bumptech.glide.load.resource.bitmap;
 
 import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.LruArrayPool;
@@ -166,21 +163,24 @@ public class RecyclableBufferedInputStreamTest {
 
   @Test
   public void closeClosesWrappedStream() throws IOException {
-    InputStream wrapped = mock(InputStream.class);
+    CloseTrackingInputStream wrapped = new CloseTrackingInputStream(/* throwOnClose= */ false);
     stream = new RecyclableBufferedInputStream(wrapped, byteArrayPool);
+
     stream.close();
-    verify(wrapped).close();
+
+    assertThat(wrapped.closeCount).isEqualTo(1);
   }
 
   @Test
   public void canSafelyBeClosedMultipleTimes() throws IOException {
-    InputStream wrapped = mock(InputStream.class);
+    CloseTrackingInputStream wrapped = new CloseTrackingInputStream(/* throwOnClose= */ false);
     stream = new RecyclableBufferedInputStream(wrapped, byteArrayPool);
+
     stream.close();
     stream.close();
     stream.close();
 
-    verify(wrapped, times(1)).close();
+    assertThat(wrapped.closeCount).isEqualTo(1);
   }
 
   @Test
@@ -242,10 +242,10 @@ public class RecyclableBufferedInputStreamTest {
   }
 
   @Test
-  public void closeThrowsIfWrappedStreamThrowsOnClose() throws IOException {
-    InputStream wrapped = mock(InputStream.class);
-    doThrow(new IOException()).when(wrapped).close();
+  public void closeThrowsIfWrappedStreamThrowsOnClose() {
+    InputStream wrapped = new CloseTrackingInputStream(/* throwOnClose= */ true);
     stream = new RecyclableBufferedInputStream(wrapped, byteArrayPool);
+
     assertThrows(IOException.class, () -> stream.close());
   }
 
@@ -290,5 +290,27 @@ public class RecyclableBufferedInputStreamTest {
     stream.read(new byte[BUFFER_SIZE], 0, BUFFER_SIZE);
     stream.read();
     assertThrows(RecyclableBufferedInputStream.InvalidMarkException.class, () -> stream.reset());
+  }
+
+  private static final class CloseTrackingInputStream extends InputStream {
+    private final boolean throwOnClose;
+    int closeCount;
+
+    CloseTrackingInputStream(boolean throwOnClose) {
+      this.throwOnClose = throwOnClose;
+    }
+
+    @Override
+    public int read() {
+      return -1;
+    }
+
+    @Override
+    public void close() throws IOException {
+      closeCount++;
+      if (throwOnClose) {
+        throw new IOException();
+      }
+    }
   }
 }

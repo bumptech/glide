@@ -13,13 +13,13 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Paint;
 import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.GlideBuilder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-import com.bumptech.glide.load.resource.UnitTransformation;
 import com.bumptech.glide.tests.KeyTester;
 import com.bumptech.glide.tests.Util;
 import java.security.MessageDigest;
@@ -62,15 +62,12 @@ public class GifDrawableTransformationTest {
   @SuppressWarnings("unchecked")
   public void setsTransformationAsFrameTransformation() {
     Resource<GifDrawable> resource = mockResource();
-    GifDrawable gifDrawable = mock(GifDrawable.class);
-    Transformation<Bitmap> unitTransformation = UnitTransformation.get();
-    when(gifDrawable.getFrameTransformation()).thenReturn(unitTransformation);
-    when(gifDrawable.getIntrinsicWidth()).thenReturn(500);
-    when(gifDrawable.getIntrinsicHeight()).thenReturn(500);
+    GifFrameLoader frameLoader = mock(GifFrameLoader.class);
+    GifDrawable gifDrawable = new GifDrawable(frameLoader, new Paint());
     when(resource.get()).thenReturn(gifDrawable);
 
     Bitmap firstFrame = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
-    when(gifDrawable.getFirstFrame()).thenReturn(firstFrame);
+    when(frameLoader.getFirstFrame()).thenReturn(firstFrame);
 
     final int width = 123;
     final int height = 456;
@@ -82,7 +79,7 @@ public class GifDrawableTransformationTest {
 
     transformation.transform(context, resource, width, height);
 
-    verify(gifDrawable).setFrameTransformation(isA(Transformation.class), eq(expectedBitmap));
+    verify(frameLoader).setFrameTransformation(eq(wrapped), eq(expectedBitmap));
   }
 
   @Test

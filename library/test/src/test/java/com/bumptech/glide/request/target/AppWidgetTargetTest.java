@@ -40,12 +40,12 @@ public class AppWidgetTargetTest {
 
   @Test
   public void setsBitmapOnRemoteViewsWithViewIdWhenCreatedWithComponentName() {
-    ComponentName componentName = mock(ComponentName.class);
+    ComponentName componentName = new ComponentName("com.bumptech.glide.test", "TestWidget");
     AppWidgetTarget target =
         new AppWidgetTarget(
             ApplicationProvider.getApplicationContext(), viewId, views, componentName);
-
     Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+
     target.onResourceReady(bitmap, null /*glideAnimation*/);
 
     verify(views).setImageViewBitmap(eq(viewId), eq(bitmap));
@@ -53,7 +53,7 @@ public class AppWidgetTargetTest {
 
   @Test
   public void updatesAppWidgetWhenCreatedWithComponentName() {
-    ComponentName componentName = mock(ComponentName.class);
+    ComponentName componentName = new ComponentName("com.bumptech.glide.test", "TestWidget");
     AppWidgetTarget target =
         new AppWidgetTarget(
             ApplicationProvider.getApplicationContext(), viewId, views, componentName);
@@ -101,7 +101,8 @@ public class AppWidgetTargetTest {
 
   @Test
   public void throwsWhenGivenNullContextWithComponentName() {
-    ComponentName componentName = mock(ComponentName.class);
+    ComponentName componentName = new ComponentName("com.bumptech.glide.test", "TestWidget");
+
     assertThrows(
         NullPointerException.class,
         () -> new AppWidgetTarget(null /*context*/, 1234 /*viewId*/, views, componentName));
@@ -121,7 +122,8 @@ public class AppWidgetTargetTest {
 
   @Test
   public void throwsWhenGivenNullRemoteViewsWithComponentName() {
-    ComponentName componentName = mock(ComponentName.class);
+    ComponentName componentName = new ComponentName("com.bumptech.glide.test", "TestWidget");
+
     assertThrows(
         NullPointerException.class,
         () ->

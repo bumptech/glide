@@ -1,8 +1,8 @@
 package com.bumptech.glide.request.transition;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -55,11 +55,12 @@ public class ViewTransitionAnimationFactoryTest {
     when(viewTransitionAnimationFactory.build(anyContextOrNull())).thenReturn(animation);
 
     Transition.ViewAdapter adapter = mock(Transition.ViewAdapter.class);
-    View view = mock(View.class);
+    View view = new View(ApplicationProvider.getApplicationContext());
     when(adapter.getView()).thenReturn(view);
+
     transition.transition(new Object(), adapter);
 
-    verify(view).startAnimation(eq(animation));
+    assertThat(view.getAnimation()).isSameInstanceAs(animation);
   }
 
   private static Context anyContextOrNull() {
