@@ -4,6 +4,7 @@ import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
@@ -13,10 +14,11 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.robolectric.annotation.LooperMode.Mode.LEGACY;
+import static org.robolectric.Shadows.shadowOf;
 
 import android.graphics.Bitmap;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import androidx.annotation.NonNull;
 import androidx.test.core.app.ApplicationProvider;
@@ -43,9 +45,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
-import org.robolectric.annotation.LooperMode;
 
-@LooperMode(LEGACY)
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = ROBOLECTRIC_SDK)
 public class GifFrameLoaderTest {
@@ -106,9 +106,9 @@ public class GifFrameLoaderTest {
     verify(requestBuilder, times(3)).apply(isA(RequestOptions.class));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void setFrameTransformationThrowsIfGivenNullTransformation() {
-    loader.setFrameTransformation(null, null);
+    assertThrows(NullPointerException.class, () -> loader.setFrameTransformation(null, null));
   }
 
   @Test
@@ -202,6 +202,7 @@ public class GifFrameLoaderTest {
     when(current.getResource()).thenReturn(Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565));
     loader.onFrameReady(previous);
     loader.onFrameReady(current);
+    shadowOf(Looper.getMainLooper()).idle();
 
     verify(requestManager).clear(eq(previous));
   }
@@ -220,6 +221,7 @@ public class GifFrameLoaderTest {
     when(current.getResource()).thenReturn(null);
     loader.onFrameReady(previous);
     loader.onFrameReady(current);
+    shadowOf(Looper.getMainLooper()).idle();
 
     verify(previousRequest, never()).clear();
   }
@@ -253,6 +255,7 @@ public class GifFrameLoaderTest {
     delayTarget.setRequest(request);
 
     loader.onFrameReady(delayTarget);
+    shadowOf(Looper.getMainLooper()).idle();
 
     verify(requestManager).clear(eq(delayTarget));
   }
@@ -281,6 +284,7 @@ public class GifFrameLoaderTest {
     when(nextFrame.getResource())
         .thenReturn(Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888));
     loader.onFrameReady(nextFrame);
+    shadowOf(Looper.getMainLooper()).idle();
     verify(requestManager, never()).clear(loaded);
   }
 
@@ -316,6 +320,7 @@ public class GifFrameLoaderTest {
     loader.onFrameReady(nextFrame);
 
     loader.subscribe(callback);
+    shadowOf(Looper.getMainLooper()).idle();
     verify(requestManager).clear(loaded);
   }
 
@@ -347,6 +352,7 @@ public class GifFrameLoaderTest {
     DelayTarget loaded = mock(DelayTarget.class);
     when(loaded.getResource()).thenReturn(Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888));
     loader.onFrameReady(loaded);
+    shadowOf(Looper.getMainLooper()).idle();
     loader.subscribe(callback);
   }
 

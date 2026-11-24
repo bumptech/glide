@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.robolectric.Shadows.shadowOf;
-import static org.robolectric.annotation.LooperMode.Mode.LEGACY;
 
 import android.app.Application;
 import android.content.Context;
@@ -16,6 +15,7 @@ import android.net.ConnectivityManager.NetworkCallback;
 import android.net.Network;
 import android.net.NetworkInfo;
 import android.os.Build;
+import android.os.Looper;
 import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.manager.DefaultConnectivityMonitorTest.PermissionConnectivityManager;
 import org.junit.After;
@@ -28,13 +28,11 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
-import org.robolectric.annotation.LooperMode;
 import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowConnectivityManager;
 import org.robolectric.shadows.ShadowNetwork;
 import org.robolectric.shadows.ShadowNetworkInfo;
 
-@LooperMode(LEGACY)
 @RunWith(RobolectricTestRunner.class)
 @Config(
     sdk = {24},
@@ -215,6 +213,7 @@ public class DefaultConnectivityMonitorTest {
           callback.onLost(null);
         }
       }
+      shadowOf(Looper.getMainLooper()).idle();
     }
 
     @Override
@@ -255,6 +254,7 @@ public class DefaultConnectivityMonitorTest {
     public void broadcast() {
       Intent connected = new Intent(ConnectivityManager.CONNECTIVITY_ACTION);
       ApplicationProvider.getApplicationContext().sendBroadcast(connected);
+      shadowOf(Looper.getMainLooper()).idle();
     }
 
     @Override

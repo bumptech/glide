@@ -7,6 +7,7 @@ import static com.bumptech.glide.request.RequestOptions.placeholderOf;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -17,7 +18,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.robolectric.annotation.LooperMode.Mode.LEGACY;
+import static org.robolectric.Shadows.shadowOf;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -28,6 +29,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -85,12 +87,10 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
-import org.robolectric.annotation.LooperMode;
 import org.robolectric.annotation.Resetter;
 import org.robolectric.shadow.api.Shadow;
 
 /** Tests for the {@link Glide} interface and singleton. */
-@LooperMode(LEGACY)
 @RunWith(RobolectricTestRunner.class)
 @Config(
     sdk = ROBOLECTRIC_SDK,
@@ -254,6 +254,7 @@ public class GlideTest {
 
     requestManager.load(file).into(target);
     requestManager.load(file).into(imageView);
+    shadowOf(Looper.getMainLooper()).idle();
 
     verify(target).onResourceReady(isA(BitmapDrawable.class), isA(Transition.class));
     verify(target).setRequest((Request) notNull());
@@ -268,6 +269,7 @@ public class GlideTest {
 
     requestManager.load(url).into(target);
     requestManager.load(url).into(imageView);
+    shadowOf(Looper.getMainLooper()).idle();
 
     verify(target).onResourceReady(isA(BitmapDrawable.class), isA(Transition.class));
     verify(target).setRequest((Request) notNull());
@@ -281,6 +283,7 @@ public class GlideTest {
     mockUri(uri);
 
     requestManager.asBitmap().load(uri).into(target);
+    shadowOf(Looper.getMainLooper()).idle();
 
     verify(target).onResourceReady(isA(Bitmap.class), isA(Transition.class));
   }
@@ -291,6 +294,7 @@ public class GlideTest {
     mockUri(uri);
 
     requestManager.as(byte[].class).apply(decodeTypeOf(Bitmap.class)).load(uri).into(target);
+    shadowOf(Looper.getMainLooper()).idle();
 
     verify(target).onResourceReady(isA(byte[].class), isA(Transition.class));
   }
@@ -302,6 +306,7 @@ public class GlideTest {
         .load(colorDrawable)
         .apply(new RequestOptions().override(100, 100).centerCrop())
         .into(target);
+    shadowOf(Looper.getMainLooper()).idle();
 
     ArgumentCaptor<Object> argumentCaptor = ArgumentCaptor.forClass(Object.class);
     verify(target).onResourceReady(argumentCaptor.capture(), isA(Transition.class));
@@ -319,6 +324,7 @@ public class GlideTest {
         .load(colorDrawable)
         .apply(new RequestOptions().override(100, 100).circleCrop())
         .into(target);
+    shadowOf(Looper.getMainLooper()).idle();
 
     ArgumentCaptor<Object> argumentCaptor = ArgumentCaptor.forClass(Object.class);
     verify(target).onResourceReady(argumentCaptor.capture(), isA(Transition.class));
@@ -354,6 +360,7 @@ public class GlideTest {
 
     requestManager.load(uri).into(target);
     requestManager.load(uri).into(imageView);
+    shadowOf(Looper.getMainLooper()).idle();
 
     verify(target).onResourceReady(notNull(), isA(Transition.class));
     verify(target).setRequest((Request) notNull());
@@ -438,6 +445,7 @@ public class GlideTest {
             })
         .into(target);
     requestManager.load(string).into(imageView);
+    shadowOf(Looper.getMainLooper()).idle();
 
     verify(target).onResourceReady(isA(BitmapDrawable.class), isA(Transition.class));
     verify(target).setRequest((Request) notNull());
@@ -468,6 +476,7 @@ public class GlideTest {
 
     requestManager.load(integer).into(target);
     requestManager.load(integer).into(imageView);
+    shadowOf(Looper.getMainLooper()).idle();
 
     verify(target).onResourceReady(isA(BitmapDrawable.class), isA(Transition.class));
     verify(target).setRequest((Request) notNull());
@@ -480,6 +489,7 @@ public class GlideTest {
     byte[] bytes = new byte[10];
     requestManager.load(bytes).into(target);
     requestManager.load(bytes).into(imageView);
+    shadowOf(Looper.getMainLooper()).idle();
 
     verify(target).onResourceReady(isA(BitmapDrawable.class), isA(Transition.class));
     verify(target).setRequest((Request) notNull());
@@ -487,10 +497,10 @@ public class GlideTest {
     assertNotNull(imageView.getDrawable());
   }
 
-  @Test(expected = Exception.class)
+  @Test
   public void unregisteredModelThrowsException() {
     Float unregistered = 0.5f;
-    requestManager.load(unregistered).into(target);
+    assertThrows(Exception.class, () -> requestManager.load(unregistered).into(target));
   }
 
   @Test
@@ -498,6 +508,7 @@ public class GlideTest {
     registerMockStreamModelLoader(Float.class);
 
     requestManager.load(0.5f).into(target);
+    shadowOf(Looper.getMainLooper()).idle();
   }
 
   @Test
@@ -507,6 +518,7 @@ public class GlideTest {
     mockUri(Uri.parse(fakeUri), testGifData);
 
     requestManager.asGif().load(fakeUri).into(target);
+    shadowOf(Looper.getMainLooper()).idle();
 
     verify(target).onResourceReady(isA(GifDrawable.class), isA(Transition.class));
   }
@@ -522,6 +534,7 @@ public class GlideTest {
         .apply(decodeTypeOf(GifDrawable.class))
         .load(fakeUri)
         .into(target);
+    shadowOf(Looper.getMainLooper()).idle();
 
     verify(target).onResourceReady(isA(byte[].class), isA(Transition.class));
   }
@@ -531,6 +544,7 @@ public class GlideTest {
     String fakeUri = "content://fake";
     mockUri(fakeUri);
     requestManager.as(byte[].class).apply(decodeTypeOf(Bitmap.class)).load(fakeUri).into(target);
+    shadowOf(Looper.getMainLooper()).idle();
 
     verify(target).onResourceReady(isA(byte[].class), isA(Transition.class));
   }
@@ -540,6 +554,7 @@ public class GlideTest {
     String full = mockUri("content://full");
     String thumb = mockUri("content://thumb");
     requestManager.load(full).thumbnail(requestManager.load(thumb)).into(target);
+    shadowOf(Looper.getMainLooper()).idle();
 
     verify(target, times(2)).onResourceReady(isA(Drawable.class), isA(Transition.class));
   }
@@ -556,6 +571,7 @@ public class GlideTest {
                         .load(mockUri("content://third"))
                         .thumbnail(requestManager.load(mockUri("content://fourth")))))
         .into(target);
+    shadowOf(Looper.getMainLooper()).idle();
     verify(target, times(4)).onResourceReady(isA(Drawable.class), isA(Transition.class));
   }
 
@@ -565,6 +581,7 @@ public class GlideTest {
         .load(mockUri("content://first"))
         .thumbnail(requestManager.load(mockUri("content://second")).thumbnail(0.5f))
         .into(target);
+    shadowOf(Looper.getMainLooper()).idle();
     verify(target, times(3)).onResourceReady(isA(Drawable.class), isA(Transition.class));
   }
 
@@ -605,6 +622,7 @@ public class GlideTest {
   public void loadBitmap_asBitmap() {
     Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     requestManager.asBitmap().load(bitmap).into(target);
+    shadowOf(Looper.getMainLooper()).idle();
 
     verify(target).onResourceReady(eq(bitmap), any(Transition.class));
   }
@@ -613,6 +631,7 @@ public class GlideTest {
   public void loadBitmap_asDrawable() {
     Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     requestManager.load(bitmap).into(target);
+    shadowOf(Looper.getMainLooper()).idle();
 
     ArgumentCaptor<Object> captor = ArgumentCaptor.forClass(Object.class);
     verify(target).onResourceReady(captor.capture(), any(Transition.class));
@@ -624,6 +643,7 @@ public class GlideTest {
   public void loadDrawable() {
     Drawable drawable = new ColorDrawable(Color.RED);
     requestManager.load(drawable).into(target);
+    shadowOf(Looper.getMainLooper()).idle();
 
     ArgumentCaptor<Drawable> drawableCaptor = ArgumentCaptor.forClass(Drawable.class);
     verify(target).onResourceReady(drawableCaptor.capture(), any(Transition.class));
@@ -657,6 +677,7 @@ public class GlideTest {
   public void byteData() {
     byte[] data = new byte[] {1, 2, 3, 4, 5, 6};
     requestManager.load(data).into(target);
+    shadowOf(Looper.getMainLooper()).idle();
   }
 
   @Test
@@ -678,6 +699,7 @@ public class GlideTest {
                     // Do nothing, we don't retain a reference to our resource.
                   }
                 });
+    shadowOf(Looper.getMainLooper()).idle();
 
     requestManager.onDestroy();
     requestManager.clear(target);
@@ -694,8 +716,10 @@ public class GlideTest {
     RequestBuilder<Drawable> firstRequest = requestManager.load(mockUri("content://first"));
 
     firstRequest.into(firstTarget);
+    shadowOf(Looper.getMainLooper()).idle();
 
     firstRequest.clone().apply(placeholderOf(new ColorDrawable(Color.RED))).into(secondTarget);
+    shadowOf(Looper.getMainLooper()).idle();
 
     verify(firstTarget).onResourceReady(isA(Drawable.class), isA(Transition.class));
     verify(secondTarget)
