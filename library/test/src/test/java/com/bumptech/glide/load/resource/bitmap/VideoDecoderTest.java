@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.resource.bitmap;
 
+import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
@@ -66,7 +67,7 @@ public class VideoDecoderTest {
   }
 
   @Test
-  @Config(sdk = VERSION_CODES.M)
+  @Config(sdk = ROBOLECTRIC_SDK)
   public void returnsRetrievedFrameForResource() throws IOException {
     Bitmap expected = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     when(retriever.getFrameAtTime(VideoDecoder.DEFAULT_FRAME, VideoDecoder.DEFAULT_FRAME_OPTION))
@@ -80,7 +81,7 @@ public class VideoDecoderTest {
   }
 
   @Test
-  @Config(sdk = VERSION_CODES.M)
+  @Config(sdk = ROBOLECTRIC_SDK)
   public void releasesMediaMetadataRetriever() {
     assertThrows(
         RuntimeException.class,
@@ -98,7 +99,7 @@ public class VideoDecoderTest {
   }
 
   @Test
-  @Config(sdk = VERSION_CODES.M)
+  @Config(sdk = ROBOLECTRIC_SDK)
   public void throwsExceptionIfCalledWithInvalidFrame() {
     options.set(VideoDecoder.TARGET_FRAME, -5L);
     VideoDecoder<ParcelFileDescriptor> videoDecoder =
@@ -108,7 +109,7 @@ public class VideoDecoderTest {
   }
 
   @Test
-  @Config(sdk = VERSION_CODES.M)
+  @Config(sdk = ROBOLECTRIC_SDK)
   public void specifiesThumbnailFrameIfICalledWithFrameNumber() {
     long frame = 5;
     options.set(VideoDecoder.TARGET_FRAME, frame);
@@ -127,7 +128,7 @@ public class VideoDecoderTest {
   }
 
   @Test
-  @Config(sdk = VERSION_CODES.M)
+  @Config(sdk = ROBOLECTRIC_SDK)
   public void doesNotSpecifyThumbnailFrameIfCalledWithoutFrameNumber() {
     decoder = new VideoDecoder<>(bitmapPool, initializer, factory);
     assertThrows(
@@ -235,8 +236,8 @@ public class VideoDecoderTest {
   }
 
   @Test
-  @Config(sdk = VERSION_CODES.M)
-  public void isHdr180RotationFixRequired_androidM_returnsFalse() {
+  @Config(sdk = ROBOLECTRIC_SDK)
+  public void isHdr180RotationFixRequired_robolectricSdk_returnsFalse() {
     assertThat(VideoDecoder.isHdr180RotationFixRequired()).isFalse();
   }
 
