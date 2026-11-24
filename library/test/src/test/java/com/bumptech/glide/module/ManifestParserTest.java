@@ -2,6 +2,7 @@ package com.bumptech.glide.module;
 
 import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -97,18 +98,18 @@ public class ManifestParserTest {
     assertThat(parser.parse()).isEmpty();
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test
   public void throws_whenModuleNameNotFound() {
     addToManifest("fakeClassName");
 
-    parser.parse();
+    assertThrows(RuntimeException.class, () -> parser.parse());
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test
   public void throws_whenClassInManifestIsNotAModule() {
     addModuleToManifest(InvalidClass.class);
 
-    parser.parse();
+    assertThrows(RuntimeException.class, () -> parser.parse());
   }
 
   @Test

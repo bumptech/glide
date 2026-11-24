@@ -2,6 +2,7 @@ package com.bumptech.glide.request.target;
 
 import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -79,43 +80,58 @@ public class NotificationTargetTest {
     assertEquals(notification, shadowManager.updatedNotification);
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void throwsIfContextIsNull() {
-    new NotificationTarget(
-        null /*context*/,
-        100 /*width*/,
-        100 /*height*/,
-        123 /*viewId*/,
-        mock(RemoteViews.class),
-        mock(Notification.class),
-        456 /*notificationId*/,
-        "tag" /*notificationTag*/);
+    RemoteViews remoteViews = mock(RemoteViews.class);
+    Notification notification = mock(Notification.class);
+    assertThrows(
+        NullPointerException.class,
+        () ->
+            new NotificationTarget(
+                null /*context*/,
+                100 /*width*/,
+                100 /*height*/,
+                123 /*viewId*/,
+                remoteViews,
+                notification,
+                456 /*notificationId*/,
+                "tag" /*notificationTag*/));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void throwsIfNotificationIsNull() {
-    new NotificationTarget(
-        ApplicationProvider.getApplicationContext(),
-        100 /*width*/,
-        100 /*height*/,
-        123 /*viewId*/,
-        mock(RemoteViews.class),
-        null /*notification*/,
-        456 /*notificationId*/,
-        "tag" /*notificationTag*/);
+    Context context = ApplicationProvider.getApplicationContext();
+    RemoteViews remoteViews = mock(RemoteViews.class);
+    assertThrows(
+        NullPointerException.class,
+        () ->
+            new NotificationTarget(
+                context,
+                100 /*width*/,
+                100 /*height*/,
+                123 /*viewId*/,
+                remoteViews,
+                null /*notification*/,
+                456 /*notificationId*/,
+                "tag" /*notificationTag*/));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void throwsIfRemoteViewsIsNull() {
-    new NotificationTarget(
-        ApplicationProvider.getApplicationContext(),
-        100 /*width*/,
-        100 /*height*/,
-        123 /*viewId*/,
-        null /*remoteViews*/,
-        mock(Notification.class),
-        456 /*notificationId*/,
-        "tag" /*notificationTag*/);
+    Context context = ApplicationProvider.getApplicationContext();
+    Notification notification = mock(Notification.class);
+    assertThrows(
+        NullPointerException.class,
+        () ->
+            new NotificationTarget(
+                context,
+                100 /*width*/,
+                100 /*height*/,
+                123 /*viewId*/,
+                null /*remoteViews*/,
+                notification,
+                456 /*notificationId*/,
+                "tag" /*notificationTag*/));
   }
 
   @Implements(NotificationManager.class)

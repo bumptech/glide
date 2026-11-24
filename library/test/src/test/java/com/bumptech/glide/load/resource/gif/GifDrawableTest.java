@@ -5,6 +5,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
@@ -467,9 +468,9 @@ public class GifDrawableTest {
     assertFalse("drawable should be stopped after loop is completed", drawable.isRunning());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void throwsIfGivenLoopCountLessThanZeroAndNotInfinite() {
-    drawable.setLoopCount(-2);
+    assertThrows(IllegalArgumentException.class, () -> drawable.setLoopCount(-2));
   }
 
   @Test
@@ -525,15 +526,12 @@ public class GifDrawableTest {
     verify(frameLoader).setFrameTransformation(eq(transformation), eq(bitmap));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void throwsIfConstructedWithNullFirstFrame() {
-    new GifDrawable(
-        ApplicationProvider.getApplicationContext(),
-        mock(GifDecoder.class),
-        transformation,
-        100,
-        100,
-        null);
+    GifDecoder gifDecoder = mock(GifDecoder.class);
+    assertThrows(
+        NullPointerException.class,
+        () -> new GifDrawable(context, gifDecoder, transformation, 100, 100, null));
   }
 
   @Test
@@ -576,9 +574,9 @@ public class GifDrawableTest {
     verify(frameLoader).setFrameTransformation(eq(newTransformation), eq(bitmap));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void throwsIfCreatedWithNullState() {
-    new GifDrawable(null);
+    assertThrows(NullPointerException.class, () -> new GifDrawable(null));
   }
 
   @Test

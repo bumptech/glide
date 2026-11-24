@@ -1,6 +1,7 @@
 package com.bumptech.glide.integration.sqljournaldiskcache;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static org.robolectric.Shadows.shadowOf;
@@ -219,9 +220,12 @@ public class JournaledLruDiskCacheTest {
     }
   }
 
-  @Test(expected = IllegalMonitorStateException.class)
+  @Test
   public void abortPutIfNotCommitted_withoutBeginPut_throws() {
-    cache.abortPutIfNotCommitted("fakeKey", new File(cacheDir, "fakeFile"));
+    File fakeFile = new File(cacheDir, "fakeFile");
+    assertThrows(
+        IllegalMonitorStateException.class,
+        () -> cache.abortPutIfNotCommitted("fakeKey", fakeFile));
   }
 
   @Test

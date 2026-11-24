@@ -3,6 +3,7 @@ package com.bumptech.glide.request;
 import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -177,52 +178,45 @@ public class RequestFutureTargetTest {
     assertEquals(expected, future.get(1, TimeUnit.MILLISECONDS));
   }
 
-  @Test(expected = CancellationException.class)
-  public void throwsCancellationExceptionIfCancelledBeforeGet()
-      throws ExecutionException, InterruptedException {
+  @Test
+  public void throwsCancellationExceptionIfCancelledBeforeGet() {
     future.cancel(true);
-    future.get();
+    assertThrows(CancellationException.class, () -> future.get());
   }
 
-  @Test(expected = CancellationException.class)
-  public void throwsCancellationExceptionIfCancelledBeforeGetWithTimeout()
-      throws InterruptedException, ExecutionException, TimeoutException {
+  @Test
+  public void throwsCancellationExceptionIfCancelledBeforeGetWithTimeout() {
     future.cancel(true);
-    future.get(100, TimeUnit.MILLISECONDS);
+    assertThrows(CancellationException.class, () -> future.get(100, TimeUnit.MILLISECONDS));
   }
 
-  @Test(expected = ExecutionException.class)
-  public void throwsExecutionExceptionOnGetIfExceptionBeforeGet()
-      throws ExecutionException, InterruptedException {
+  @Test
+  public void throwsExecutionExceptionOnGetIfExceptionBeforeGet() {
     future.onLoadFailed(/* e= */ null, /* model= */ null, future, /* isFirstResource= */ true);
-    future.get();
+    assertThrows(ExecutionException.class, () -> future.get());
   }
 
-  @Test(expected = ExecutionException.class)
-  public void throwsExecutionExceptionOnGetIfExceptionWithNullValueBeforeGet()
-      throws ExecutionException, InterruptedException, TimeoutException {
+  @Test
+  public void throwsExecutionExceptionOnGetIfExceptionWithNullValueBeforeGet() {
     future.onLoadFailed(/* e= */ null, /* model= */ null, future, /* isFirstResource= */ true);
-    future.get(100, TimeUnit.MILLISECONDS);
+    assertThrows(ExecutionException.class, () -> future.get(100, TimeUnit.MILLISECONDS));
   }
 
-  @Test(expected = ExecutionException.class)
-  public void throwsExecutionExceptionOnGetIfExceptionBeforeGetWithTimeout()
-      throws ExecutionException, InterruptedException, TimeoutException {
+  @Test
+  public void throwsExecutionExceptionOnGetIfExceptionBeforeGetWithTimeout() {
     future.onLoadFailed(/* e= */ null, /* model= */ null, future, /* isFirstResource= */ true);
-    future.get(100, TimeUnit.MILLISECONDS);
+    assertThrows(ExecutionException.class, () -> future.get(100, TimeUnit.MILLISECONDS));
   }
 
-  @Test(expected = TimeoutException.class)
-  public void throwsTimeoutExceptionOnGetIfFailedToReceiveResourceInTime()
-      throws InterruptedException, ExecutionException, TimeoutException {
-    future.get(1, TimeUnit.MILLISECONDS);
+  @Test
+  public void throwsTimeoutExceptionOnGetIfFailedToReceiveResourceInTime() {
+    assertThrows(TimeoutException.class, () -> future.get(1, TimeUnit.MILLISECONDS));
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void throwsExceptionIfGetCalledOnMainThread()
-      throws ExecutionException, InterruptedException {
+  @Test
+  public void throwsExceptionIfGetCalledOnMainThread() {
     future = new RequestFutureTarget<>(width, height, true, waiter);
-    future.get();
+    assertThrows(IllegalArgumentException.class, () -> future.get());
   }
 
   @Test
@@ -237,9 +231,9 @@ public class RequestFutureTargetTest {
     future.get();
   }
 
-  @Test(expected = InterruptedException.class)
+  @Test
   public void throwsInterruptedExceptionIfThreadInterruptedWhenDoneWaiting()
-      throws InterruptedException, ExecutionException {
+      throws InterruptedException {
     doAnswer(
             new Answer<Void>() {
               @Override
@@ -251,12 +245,11 @@ public class RequestFutureTargetTest {
         .when(waiter)
         .waitForTimeout(eq(future), anyLong());
 
-    future.get();
+    assertThrows(InterruptedException.class, () -> future.get());
   }
 
-  @Test(expected = ExecutionException.class)
-  public void throwsExecutionExceptionIfLoadFailsWhileWaiting()
-      throws ExecutionException, InterruptedException {
+  @Test
+  public void throwsExecutionExceptionIfLoadFailsWhileWaiting() throws InterruptedException {
     doAnswer(
             new Answer<Void>() {
               @Override
@@ -268,12 +261,11 @@ public class RequestFutureTargetTest {
             })
         .when(waiter)
         .waitForTimeout(eq(future), anyLong());
-    future.get();
+    assertThrows(ExecutionException.class, () -> future.get());
   }
 
-  @Test(expected = CancellationException.class)
-  public void throwsCancellationExceptionIfCancelledWhileWaiting()
-      throws ExecutionException, InterruptedException {
+  @Test
+  public void throwsCancellationExceptionIfCancelledWhileWaiting() throws InterruptedException {
     doAnswer(
             new Answer<Void>() {
               @Override
@@ -284,19 +276,17 @@ public class RequestFutureTargetTest {
             })
         .when(waiter)
         .waitForTimeout(eq(future), anyLong());
-    future.get();
+    assertThrows(CancellationException.class, () -> future.get());
   }
 
-  @Test(expected = TimeoutException.class)
-  public void throwsTimeoutExceptionIfFinishesWaitingWithTimeoutAndDoesNotReceiveResult()
-      throws ExecutionException, InterruptedException, TimeoutException {
-    future.get(1, TimeUnit.MILLISECONDS);
+  @Test
+  public void throwsTimeoutExceptionIfFinishesWaitingWithTimeoutAndDoesNotReceiveResult() {
+    assertThrows(TimeoutException.class, () -> future.get(1, TimeUnit.MILLISECONDS));
   }
 
-  @Test(expected = AssertionError.class)
-  public void throwsAssertionErrorIfFinishesWaitingWithoutTimeoutAndDoesNotReceiveResult()
-      throws ExecutionException, InterruptedException {
-    future.get();
+  @Test
+  public void throwsAssertionErrorIfFinishesWaitingWithoutTimeoutAndDoesNotReceiveResult() {
+    assertThrows(AssertionError.class, () -> future.get());
   }
 
   @Test

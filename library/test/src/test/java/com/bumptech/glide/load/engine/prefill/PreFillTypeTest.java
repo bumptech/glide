@@ -2,6 +2,7 @@ package com.bumptech.glide.load.engine.prefill;
 
 import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 
 import android.graphics.Bitmap;
 import com.google.common.testing.EqualsTester;
@@ -14,29 +15,30 @@ import org.robolectric.annotation.Config;
 @Config(sdk = ROBOLECTRIC_SDK)
 public class PreFillTypeTest {
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void throwsIfSizeIsZero() {
-    new PreFillType.Builder(0);
+    assertThrows(IllegalArgumentException.class, () -> new PreFillType.Builder(0));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void throwsIfWidthIsZero() {
-    new PreFillType.Builder(0, 100);
+    assertThrows(IllegalArgumentException.class, () -> new PreFillType.Builder(0, 100));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void throwsIfHeightIsZero() {
-    new PreFillType.Builder(100, 0);
+    assertThrows(IllegalArgumentException.class, () -> new PreFillType.Builder(100, 0));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void throwsIfWeightIsZero() {
-    new PreFillType.Builder(100).setWeight(0);
+    PreFillType.Builder builder = new PreFillType.Builder(100);
+    assertThrows(IllegalArgumentException.class, () -> builder.setWeight(0));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void constructorThrowsIfConfigIsNull() {
-    new PreFillType(100, 100, null, 1);
+    assertThrows(NullPointerException.class, () -> new PreFillType(100, 100, null, 1));
   }
 
   @Test

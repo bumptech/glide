@@ -1,6 +1,7 @@
 package com.bumptech.glide;
 
 import static com.bumptech.glide.tests.BackgroundUtil.testInBackground;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
@@ -62,15 +63,18 @@ public class RequestBuilderTest {
     context = ApplicationProvider.getApplicationContext();
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void throwsIfContextIsNull() {
-    new RequestBuilder<>(null /*context*/, requestManager, Object.class, context);
+    assertThrows(
+        NullPointerException.class,
+        () -> new RequestBuilder<>(null /*context*/, requestManager, Object.class, context));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void throwsWhenTransitionsOptionsIsNull() {
+    RequestBuilder<Object> requestBuilder = getNullModelRequest();
     //noinspection ConstantConditions testing if @NonNull is enforced
-    getNullModelRequest().transition(null);
+    assertThrows(NullPointerException.class, () -> requestBuilder.transition(null));
   }
 
   @Test
@@ -125,50 +129,63 @@ public class RequestBuilderTest {
     verify(requestManager).clear(eq(target));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void throwsIfGivenNullTarget() {
+    RequestBuilder<Object> requestBuilder = getNullModelRequest();
     //noinspection ConstantConditions testing if @NonNull is enforced
-    getNullModelRequest().into((Target<Object>) null);
+    assertThrows(NullPointerException.class, () -> requestBuilder.into((Target<Object>) null));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void throwsIfGivenNullTargetFront() {
+    RequestBuilder<Object> requestBuilder = getNullModelRequest();
     //noinspection ConstantConditions testing if @NonNull is enforced
-    getNullModelRequest().experimentalIntoFront((Target<Object>) null);
+    assertThrows(
+        NullPointerException.class,
+        () -> requestBuilder.experimentalIntoFront((Target<Object>) null));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void throwsIfGivenNullView() {
-    getNullModelRequest().into((ImageView) null);
+    RequestBuilder<Object> requestBuilder = getNullModelRequest();
+    assertThrows(NullPointerException.class, () -> requestBuilder.into((ImageView) null));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void throwsIfGivenNullViewFront() {
-    getNullModelRequest().experimentalIntoFront((ImageView) null);
+    RequestBuilder<Object> requestBuilder = getNullModelRequest();
+    assertThrows(
+        NullPointerException.class, () -> requestBuilder.experimentalIntoFront((ImageView) null));
   }
 
-  @Test(expected = RuntimeException.class)
-  public void throwsIfIntoViewCalledOnBackgroundThread() throws InterruptedException {
+  @Test
+  public void throwsIfIntoViewCalledOnBackgroundThread() {
     final ImageView imageView = new ImageView(ApplicationProvider.getApplicationContext());
-    testInBackground(
-        new BackgroundTester() {
-          @Override
-          public void runTest() {
-            getNullModelRequest().into(imageView);
-          }
-        });
+    assertThrows(
+        RuntimeException.class,
+        () ->
+            testInBackground(
+                new BackgroundTester() {
+                  @Override
+                  public void runTest() {
+                    getNullModelRequest().into(imageView);
+                  }
+                }));
   }
 
-  @Test(expected = RuntimeException.class)
-  public void throwsIfIntoViewCalledOnBackgroundThreadFront() throws InterruptedException {
+  @Test
+  public void throwsIfIntoViewCalledOnBackgroundThreadFront() {
     final ImageView imageView = new ImageView(ApplicationProvider.getApplicationContext());
-    testInBackground(
-        new BackgroundTester() {
-          @Override
-          public void runTest() {
-            getNullModelRequest().experimentalIntoFront(imageView);
-          }
-        });
+    assertThrows(
+        RuntimeException.class,
+        () ->
+            testInBackground(
+                new BackgroundTester() {
+                  @Override
+                  public void runTest() {
+                    getNullModelRequest().experimentalIntoFront(imageView);
+                  }
+                }));
   }
 
   @Test

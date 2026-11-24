@@ -4,6 +4,7 @@ import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.bumptech.glide.tests.Util.mockResource;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -76,27 +77,27 @@ public class EngineResourceTest {
     verify(resource).recycle();
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test
   public void throwsIfRecycledTwice() {
     engineResource.recycle();
-    engineResource.recycle();
+    assertThrows(IllegalStateException.class, () -> engineResource.recycle());
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test
   public void throwsIfReleasedBeforeAcquired() {
-    engineResource.release();
+    assertThrows(IllegalStateException.class, () -> engineResource.release());
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test
   public void throwsIfRecycledWhileAcquired() {
     engineResource.acquire();
-    engineResource.recycle();
+    assertThrows(IllegalStateException.class, () -> engineResource.recycle());
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test
   public void throwsIfAcquiredAfterRecycled() {
     engineResource.recycle();
-    engineResource.acquire();
+    assertThrows(IllegalStateException.class, () -> engineResource.acquire());
   }
 
   @Test
@@ -138,21 +139,24 @@ public class EngineResourceTest {
     otherThread.join();
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test
   public void throwsIfReleasedMoreThanAcquired() {
     engineResource.acquire();
     engineResource.release();
-    engineResource.release();
+    assertThrows(IllegalStateException.class, () -> engineResource.release());
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void throwsIfWrappedResourceIsNull() {
-    new EngineResource<>(
-        /* toWrap= */ null,
-        /* isMemoryCacheable= */ false,
-        /* isRecyclable= */ true,
-        cacheKey,
-        listener);
+    assertThrows(
+        NullPointerException.class,
+        () ->
+            new EngineResource<>(
+                /* toWrap= */ null,
+                /* isMemoryCacheable= */ false,
+                /* isRecyclable= */ true,
+                cacheKey,
+                listener));
   }
 
   @Test

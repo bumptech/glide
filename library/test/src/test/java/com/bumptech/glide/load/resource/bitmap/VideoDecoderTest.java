@@ -97,11 +97,14 @@ public class VideoDecoderTest {
     }
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   @Config(sdk = VERSION_CODES.M)
-  public void throwsExceptionIfCalledWithInvalidFrame() throws IOException {
+  public void throwsExceptionIfCalledWithInvalidFrame() {
     options.set(VideoDecoder.TARGET_FRAME, -5L);
-    new VideoDecoder<>(bitmapPool, initializer, factory).decode(resource, 100, 100, options);
+    VideoDecoder<ParcelFileDescriptor> videoDecoder =
+        new VideoDecoder<>(bitmapPool, initializer, factory);
+    assertThrows(
+        IllegalArgumentException.class, () -> videoDecoder.decode(resource, 100, 100, options));
   }
 
   @Test

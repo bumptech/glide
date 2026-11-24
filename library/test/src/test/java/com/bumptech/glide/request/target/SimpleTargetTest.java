@@ -1,5 +1,6 @@
 package com.bumptech.glide.request.target;
 
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.mock;
 
 import androidx.annotation.NonNull;
@@ -12,24 +13,32 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class SimpleTargetTest {
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void throwsOnGetSizeIfGivenWidthIsLessThanZero() {
-    getTarget(-1, 1).getSize(mock(SizeReadyCallback.class));
+    SimpleTarget<Object> target = getTarget(-1, 1);
+    SizeReadyCallback cb = mock(SizeReadyCallback.class);
+    assertThrows(IllegalArgumentException.class, () -> target.getSize(cb));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void throwsOnGetSizeIfGivenWidthIsEqualToZero() {
-    getTarget(0, 1).getSize(mock(SizeReadyCallback.class));
+    SimpleTarget<Object> target = getTarget(0, 1);
+    SizeReadyCallback cb = mock(SizeReadyCallback.class);
+    assertThrows(IllegalArgumentException.class, () -> target.getSize(cb));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void throwsOnGetSizeIfGivenHeightIsLessThanZero() {
-    getTarget(1, -1).getSize(mock(SizeReadyCallback.class));
+    SimpleTarget<Object> target = getTarget(1, -1);
+    SizeReadyCallback cb = mock(SizeReadyCallback.class);
+    assertThrows(IllegalArgumentException.class, () -> target.getSize(cb));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void throwsOnGetSizeIfGivenHeightIsEqualToZero() {
-    getTarget(1, 0).getSize(mock(SizeReadyCallback.class));
+    SimpleTarget<Object> target = getTarget(1, 0);
+    SizeReadyCallback cb = mock(SizeReadyCallback.class);
+    assertThrows(IllegalArgumentException.class, () -> target.getSize(cb));
   }
 
   @Test

@@ -4,6 +4,7 @@ import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.when;
 
 import android.app.Application;
@@ -107,7 +108,7 @@ public class BitmapTransformationTest {
     transformation.transform(context, resource, expectedWidth, expectedHeight);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void throwsIfGivenInvalidWidth() {
     BitmapTransformation transformation =
         new BitmapTransformation() {
@@ -124,10 +125,12 @@ public class BitmapTransformationTest {
             return null;
           }
         };
-    transformation.transform(context, mockResource(1, 1), -1, 100);
+    Resource<Bitmap> resource = mockResource(1, 1);
+    assertThrows(
+        IllegalArgumentException.class, () -> transformation.transform(context, resource, -1, 100));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void throwsIfGivenInvalidHeight() {
     BitmapTransformation transformation =
         new BitmapTransformation() {
@@ -144,7 +147,9 @@ public class BitmapTransformationTest {
             return null;
           }
         };
-    transformation.transform(context, mockResource(1, 1), 100, -1);
+    Resource<Bitmap> resource = mockResource(1, 1);
+    assertThrows(
+        IllegalArgumentException.class, () -> transformation.transform(context, resource, 100, -1));
   }
 
   @Test

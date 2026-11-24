@@ -3,6 +3,7 @@ package com.bumptech.glide.load.model;
 import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.mock;
 
 import com.google.common.testing.EqualsTester;
@@ -17,19 +18,19 @@ import org.robolectric.annotation.Config;
 @Config(sdk = ROBOLECTRIC_SDK)
 public class GlideUrlTest {
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void throwsIfGivenURLIsNull() {
-    new GlideUrl((URL) null);
+    assertThrows(NullPointerException.class, () -> new GlideUrl((URL) null));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void throwsIfGivenStringUrlIsNull() {
-    new GlideUrl((String) null);
+    assertThrows(IllegalArgumentException.class, () -> new GlideUrl((String) null));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void throwsIfGivenStringURLIsEmpty() {
-    new GlideUrl("");
+    assertThrows(IllegalArgumentException.class, () -> new GlideUrl(""));
   }
 
   @Test
