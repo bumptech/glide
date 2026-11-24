@@ -29,6 +29,16 @@ final class LifecycleRequestManagerRetriever {
     return lifecycleToRequestManager.get(lifecycle);
   }
 
+  boolean hasStartedLifecycle() {
+    Util.assertMainThread();
+    for (Lifecycle lifecycle : lifecycleToRequestManager.keySet()) {
+      if (lifecycle.getCurrentState().isAtLeast(Lifecycle.State.STARTED)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   RequestManager getOrCreate(
       Context context,
       Glide glide,
