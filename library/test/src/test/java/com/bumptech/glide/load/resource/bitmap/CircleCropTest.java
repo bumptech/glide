@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.resource.bitmap;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -104,7 +105,14 @@ public class CircleCropTest {
     assertEquals(expected.getConfig(), actual.getConfig());
     for (int y = 0; y < expected.getHeight(); y++) {
       for (int x = 0; x < expected.getWidth(); x++) {
-        assertEquals(expected.getPixel(x, y), actual.getPixel(x, y));
+        int expectedPixel = expected.getPixel(x, y);
+        int actualPixel = actual.getPixel(x, y);
+        // CircleCrop uses a two-pass anti-aliased SRC_IN mask, which can differ from a direct
+        // drawCircle call by ±1 in edge alpha rounding under native Skia graphics.
+        assertThat(Color.red(actualPixel)).isEqualTo(Color.red(expectedPixel));
+        assertThat(Color.green(actualPixel)).isEqualTo(Color.green(expectedPixel));
+        assertThat(Color.blue(actualPixel)).isEqualTo(Color.blue(expectedPixel));
+        assertThat((double) Color.alpha(actualPixel)).isWithin(1).of(Color.alpha(expectedPixel));
       }
     }
   }
