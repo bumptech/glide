@@ -12,18 +12,21 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.testing.junit.testparameterinjector.TestParameter;
+import com.google.testing.junit.testparameterinjector.TestParameterInjector;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-@RunWith(JUnit4.class)
+@RunWith(TestParameterInjector.class)
 public class ThumbnailRequestCoordinatorTest {
+  @TestParameter private boolean clearAndPauseFullBeforeThumb;
+
   @Mock private Request full;
   @Mock private Request thumb;
   @Mock private RequestCoordinator parent;
@@ -131,18 +134,30 @@ public class ThumbnailRequestCoordinatorTest {
   @Test
   public void callsClearOnRequestsWhenCleared() {
     coordinator.clear();
-    InOrder order = inOrder(thumb, full);
-    order.verify(thumb).clear();
-    order.verify(full).clear();
+    if (clearAndPauseFullBeforeThumb) {
+      InOrder order = inOrder(full, thumb);
+      order.verify(full).clear();
+      order.verify(thumb).clear();
+    } else {
+      InOrder order = inOrder(thumb, full);
+      order.verify(thumb).clear();
+      order.verify(full).clear();
+    }
   }
 
   @Test
   public void pause_pausesThumbAndFullInOrder() {
     coordinator.begin();
     coordinator.pause();
-    InOrder order = inOrder(thumb, full);
-    order.verify(thumb).pause();
-    order.verify(full).pause();
+    if (clearAndPauseFullBeforeThumb) {
+      InOrder order = inOrder(full, thumb);
+      order.verify(full).pause();
+      order.verify(thumb).pause();
+    } else {
+      InOrder order = inOrder(thumb, full);
+      order.verify(thumb).pause();
+      order.verify(full).pause();
+    }
   }
 
   @Test
@@ -401,11 +416,12 @@ public class ThumbnailRequestCoordinatorTest {
     assertFalse(first.isEquivalentTo(third));
   }
 
-  private static ThumbnailRequestCoordinator newCoordinator() {
+  private ThumbnailRequestCoordinator newCoordinator() {
     return newCoordinator(/* parent= */ null);
   }
 
-  private static ThumbnailRequestCoordinator newCoordinator(RequestCoordinator parent) {
-    return new ThumbnailRequestCoordinator(/* requestLock= */ new Object(), parent);
+  private ThumbnailRequestCoordinator newCoordinator(RequestCoordinator parent) {
+    return new ThumbnailRequestCoordinator(
+        /* requestLock= */ new Object(), parent, clearAndPauseFullBeforeThumb);
   }
 }

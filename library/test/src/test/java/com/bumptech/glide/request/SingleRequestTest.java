@@ -25,8 +25,10 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.test.core.app.ApplicationProvider;
+import com.bumptech.glide.GlideBuilder.EnableThumbnailClearAfterPauseFix;
 import com.bumptech.glide.GlideContext;
 import com.bumptech.glide.GlideExperiments;
+import com.bumptech.glide.GlideExperimentsTestUtil;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.Registry;
 import com.bumptech.glide.load.DataSource;
@@ -48,6 +50,7 @@ import com.bumptech.glide.signature.ObjectKey;
 import com.bumptech.glide.util.Executors;
 import com.google.common.base.Equivalence;
 import com.google.common.testing.EquivalenceTester;
+import com.google.testing.junit.testparameterinjector.TestParameter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -62,10 +65,10 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RobolectricTestParameterInjector;
 import org.robolectric.annotation.Config;
 
-@RunWith(RobolectricTestRunner.class)
+@RunWith(RobolectricTestParameterInjector.class)
 @Config(sdk = ROBOLECTRIC_SDK)
 @SuppressWarnings("rawtypes")
 public class SingleRequestTest {
@@ -176,6 +179,29 @@ public class SingleRequestTest {
     request.clear();
 
     verify(builder.target, never()).onLoadCleared(any(Drawable.class));
+  }
+
+  @Test
+  public void clear_afterSuppressedClear(@TestParameter boolean enableFix) {
+    when(builder.requestCoordinator.canNotifyCleared(any(Request.class)))
+        .thenReturn(false)
+        .thenReturn(true);
+    if (enableFix) {
+      builder.setExperiments(
+          GlideExperimentsTestUtil.withExperiment(new EnableThumbnailClearAfterPauseFix()));
+    }
+    SingleRequest<List> request = builder.build();
+
+    request.clear();
+    assertThat(request.isCleared()).isTrue();
+    verify(builder.target, never()).onLoadCleared(anyDrawableOrNull());
+
+    int expectedCalls = enableFix ? 1 : 0;
+    request.clear();
+    verify(builder.target, times(expectedCalls)).onLoadCleared(anyDrawableOrNull());
+
+    request.clear();
+    verify(builder.target, times(expectedCalls)).onLoadCleared(anyDrawableOrNull());
   }
 
   @Test
@@ -1064,18 +1090,7 @@ public class SingleRequestTest {
     private int overrideWidth = -1;
     private int overrideHeight = -1;
     private List<?> result = new ArrayList<>();
-    private final GlideContext glideContext =
-        new GlideContext(
-            /* context= */ ApplicationProvider.getApplicationContext(),
-            /* arrayPool= */ new LruArrayPool(),
-            /* registry= */ Registry::new,
-            /* imageViewTargetFactory= */ new ImageViewTargetFactory(),
-            /* defaultRequestOptionsFactory= */ RequestOptions::new,
-            /* defaultTransitionOptions= */ Collections.emptyMap(),
-            /* defaultRequestListeners= */ Collections.emptyList(),
-            /* engine= */ engine,
-            /* experiments= */ mock(GlideExperiments.class),
-            /* logLevel= */ Log.DEBUG);
+    private GlideContext glideContext = newGlideContext(GlideExperimentsTestUtil.empty());
     private final Key signature = new ObjectKey(12345);
     private Priority priority = Priority.HIGH;
     private boolean useUnlimitedSourceGeneratorsPool = false;
@@ -1159,6 +1174,25 @@ public class SingleRequestTest {
         boolean useUnlimitedSourceGeneratorsPool) {
       this.useUnlimitedSourceGeneratorsPool = useUnlimitedSourceGeneratorsPool;
       return this;
+    }
+
+    SingleRequestBuilder setExperiments(GlideExperiments experiments) {
+      this.glideContext = newGlideContext(experiments);
+      return this;
+    }
+
+    private GlideContext newGlideContext(GlideExperiments experiments) {
+      return new GlideContext(
+          /* context= */ ApplicationProvider.getApplicationContext(),
+          /* arrayPool= */ new LruArrayPool(),
+          /* registry= */ Registry::new,
+          /* imageViewTargetFactory= */ new ImageViewTargetFactory(),
+          /* defaultRequestOptionsFactory= */ RequestOptions::new,
+          /* defaultTransitionOptions= */ Collections.emptyMap(),
+          /* defaultRequestListeners= */ Collections.emptyList(),
+          /* engine= */ engine,
+          /* experiments= */ experiments,
+          /* logLevel= */ Log.DEBUG);
     }
 
     SingleRequest<List> build() {

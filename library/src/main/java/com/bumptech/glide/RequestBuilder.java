@@ -111,6 +111,12 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
     return glideContext.getExperiments().isEnabled(GlideBuilder.ClearGlidePainterOnStop.class);
   }
 
+  private boolean isThumbnailClearAfterPauseFixEnabled() {
+    return glideContext
+        .getExperiments()
+        .isEnabled(GlideBuilder.EnableThumbnailClearAfterPauseFix.class);
+  }
+
   @SuppressLint("CheckResult")
   @SuppressWarnings({"PMD.ConstructorCallsOverridableMethod", "this-escape"})
   protected RequestBuilder(Class<TranscodeType> transcodeClass, RequestBuilder<?> other) {
@@ -1292,7 +1298,8 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
       }
 
       ThumbnailRequestCoordinator coordinator =
-          new ThumbnailRequestCoordinator(requestLock, parentCoordinator);
+          new ThumbnailRequestCoordinator(
+              requestLock, parentCoordinator, isThumbnailClearAfterPauseFixEnabled());
       Request fullRequest =
           obtainRequest(
               requestLock,
@@ -1325,7 +1332,8 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
     } else if (thumbSizeMultiplier != null) {
       // Base case: thumbnail multiplier generates a thumbnail request, but cannot recurse.
       ThumbnailRequestCoordinator coordinator =
-          new ThumbnailRequestCoordinator(requestLock, parentCoordinator);
+          new ThumbnailRequestCoordinator(
+              requestLock, parentCoordinator, isThumbnailClearAfterPauseFixEnabled());
       Request fullRequest =
           obtainRequest(
               requestLock,

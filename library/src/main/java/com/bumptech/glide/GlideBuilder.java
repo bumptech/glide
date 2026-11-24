@@ -729,6 +729,25 @@ public final class GlideBuilder {
   }
 
   /**
+   * Set to {@code true} to clear and pause the full request before the thumbnail request in {@link
+   * com.bumptech.glide.request.ThumbnailRequestCoordinator} and deliver any deferred {@link
+   * com.bumptech.glide.request.target.Target#onLoadCleared(android.graphics.drawable.Drawable)}
+   * notification when {@code clear()} is called after {@code pause()}.
+   *
+   * <p>This prevents {@code ThumbnailRequestCoordinator} from releasing or recycling a displayed
+   * thumbnail resource before notifying the target.
+   *
+   * <p>Defaults to {@code false}.
+   *
+   * <p>This is an experimental API that may be removed in the future.
+   */
+  @CanIgnoreReturnValue
+  public GlideBuilder experimentalSetEnableThumbnailClearAfterPauseFix(boolean isEnabled) {
+    glideExperimentsBuilder.update(new EnableThumbnailClearAfterPauseFix(), isEnabled);
+    return this;
+  }
+
+  /**
    * Enables clearing active requests and releasing Bitmaps in Compose {@code GlidePainter} when the
    * host {@code LifecycleOwner} transitions below {@code Lifecycle.State.STARTED} (i.e. {@code
    * ON_STOP}).
@@ -939,6 +958,9 @@ public final class GlideBuilder {
 
   /** See {@link #experimentalSetEnableActiveResourceReleaseRaceFix(boolean)}. */
   public static final class EnableActiveResourceReleaseRaceFix implements Experiment {}
+
+  /** See {@link #experimentalSetEnableThumbnailClearAfterPauseFix(boolean)}. */
+  public static final class EnableThumbnailClearAfterPauseFix implements Experiment {}
 
   /** See {@link #experimentalSetClearGlidePainterOnStop(boolean)}. */
   public static final class ClearGlidePainterOnStop implements Experiment {}

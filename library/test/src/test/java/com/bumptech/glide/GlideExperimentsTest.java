@@ -14,16 +14,17 @@ import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.engine.executor.GlideExecutor;
 import com.bumptech.glide.load.engine.executor.MockGlideExecutor;
 import com.bumptech.glide.tests.TearDownGlide;
+import com.google.testing.junit.testparameterinjector.TestParameter;
 import java.util.Collections;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RobolectricTestParameterInjector;
 import org.robolectric.annotation.Config;
 
 /** Integration tests for Glide Experiments. */
-@RunWith(RobolectricTestRunner.class)
+@RunWith(RobolectricTestParameterInjector.class)
 @Config(sdk = ROBOLECTRIC_SDK)
 public final class GlideExperimentsTest {
 
@@ -205,5 +206,45 @@ public final class GlideExperimentsTest {
                 .getExperiments()
                 .isEnabled(GlideBuilder.StripSensitiveHeadersOnCrossOriginRedirects.class))
         .isFalse();
+  }
+
+  @Test
+  public void enableThumbnailClearAfterPauseFix_disabledByDefault() {
+    Glide.tearDown();
+    GlideExecutor executor = MockGlideExecutor.newMainThreadExecutor();
+    GlideBuilder builder =
+        new GlideBuilder()
+            .setSourceExecutor(executor)
+            .setDiskCacheExecutor(executor)
+            .setAnimationExecutor(executor);
+    Glide.init(context, builder);
+
+    assertThat(
+            Glide.get(context)
+                .getGlideContext()
+                .getExperiments()
+                .isEnabled(GlideBuilder.EnableThumbnailClearAfterPauseFix.class))
+        .isFalse();
+  }
+
+  @Test
+  public void enableThumbnailClearAfterPauseFix_isRecorded(@TestParameter boolean isEnabled) {
+    Glide.tearDown();
+    GlideExecutor executor = MockGlideExecutor.newMainThreadExecutor();
+    GlideBuilder builder =
+        new GlideBuilder()
+            .setSourceExecutor(executor)
+            .setDiskCacheExecutor(executor)
+            .setAnimationExecutor(executor)
+            .experimentalSetEnableThumbnailClearAfterPauseFix(true)
+            .experimentalSetEnableThumbnailClearAfterPauseFix(isEnabled);
+    Glide.init(context, builder);
+
+    assertThat(
+            Glide.get(context)
+                .getGlideContext()
+                .getExperiments()
+                .isEnabled(GlideBuilder.EnableThumbnailClearAfterPauseFix.class))
+        .isEqualTo(isEnabled);
   }
 }

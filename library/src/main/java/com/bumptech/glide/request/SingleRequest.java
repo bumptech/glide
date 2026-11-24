@@ -8,6 +8,7 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import com.bumptech.glide.GlideBuilder.EnableThumbnailClearAfterPauseFix;
 import com.bumptech.glide.GlideBuilder.LogRequestOrigins;
 import com.bumptech.glide.GlideContext;
 import com.bumptech.glide.Priority;
@@ -56,6 +57,11 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
     FAILED,
     /** Cleared by the user with a placeholder set, may be restarted. */
     CLEARED,
+    /**
+     * Cleared while the {@link RequestCoordinator} suppressed {@code target.onLoadCleared()} (e.g.
+     * {@link ThumbnailRequestCoordinator#pause()}), may be restarted.
+     */
+    CLEARED_WITHOUT_NOTIFICATION,
   }
 
   @Nullable
@@ -329,18 +335,31 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
       if (status == Status.CLEARED) {
         return;
       }
+      if (status == Status.CLEARED_WITHOUT_NOTIFICATION) {
+        // An earlier pause()/clear() suppressed target notification (e.g.
+        // ThumbnailRequestCoordinator holding a completed thumbnail while the full request is
+        // paused). When enabled, deliver the deferred onLoadCleared() once the coordinator allows
+        // it.
+        if (glideContext.getExperiments().isEnabled(EnableThumbnailClearAfterPauseFix.class)
+            && canNotifyCleared()) {
+          status = Status.CLEARED;
+          target.onLoadCleared(getPlaceholderDrawable());
+        }
+        return;
+      }
       cancel();
       // Resource must be released before canNotifyStatusChanged is called.
       if (resource != null) {
         toRelease = resource;
         resource = null;
       }
-      if (canNotifyCleared()) {
+      boolean shouldNotifyCleared = canNotifyCleared();
+      if (shouldNotifyCleared) {
         target.onLoadCleared(getPlaceholderDrawable());
       }
 
       GlideTrace.endSectionAsync(TAG, cookie);
-      status = Status.CLEARED;
+      status = shouldNotifyCleared ? Status.CLEARED : Status.CLEARED_WITHOUT_NOTIFICATION;
     }
 
     if (toRelease != null) {
@@ -374,7 +393,7 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
   @Override
   public boolean isCleared() {
     synchronized (requestLock) {
-      return status == Status.CLEARED;
+      return status == Status.CLEARED || status == Status.CLEARED_WITHOUT_NOTIFICATION;
     }
   }
 

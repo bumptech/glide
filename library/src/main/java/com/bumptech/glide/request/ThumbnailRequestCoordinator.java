@@ -10,6 +10,7 @@ import androidx.annotation.Nullable;
 public class ThumbnailRequestCoordinator implements RequestCoordinator, Request {
   @Nullable private final RequestCoordinator parent;
   private final Object requestLock;
+  private final boolean clearAndPauseFullBeforeThumb;
 
   private volatile Request full;
   private volatile Request thumb;
@@ -25,8 +26,16 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator, Request 
   private boolean isRunningDuringBegin;
 
   public ThumbnailRequestCoordinator(Object requestLock, @Nullable RequestCoordinator parent) {
+    this(requestLock, parent, /* clearAndPauseFullBeforeThumb= */ false);
+  }
+
+  public ThumbnailRequestCoordinator(
+      Object requestLock,
+      @Nullable RequestCoordinator parent,
+      boolean clearAndPauseFullBeforeThumb) {
     this.requestLock = requestLock;
     this.parent = parent;
+    this.clearAndPauseFullBeforeThumb = clearAndPauseFullBeforeThumb;
   }
 
   public void setRequests(Request full, Request thumb) {
@@ -159,22 +168,46 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator, Request 
       isRunningDuringBegin = false;
       fullState = RequestState.CLEARED;
       thumbState = RequestState.CLEARED;
-      thumb.clear();
-      full.clear();
+      if (clearAndPauseFullBeforeThumb) {
+        // Clear full before thumb so target.onLoadCleared() runs before thumb releases its
+        // resource (matching ErrorRequestCoordinator#clear()).
+        full.clear();
+        thumb.clear();
+      } else {
+        thumb.clear();
+        full.clear();
+      }
     }
   }
 
   @Override
   public void pause() {
     synchronized (requestLock) {
-      if (!thumbState.isComplete()) {
-        thumbState = RequestState.PAUSED;
-        thumb.pause();
+      if (clearAndPauseFullBeforeThumb) {
+        // Pause order does not affect resource release or onLoadCleared(); swapped purely for
+        // symmetry with clear() (and ErrorRequestCoordinator#pause()).
+        pauseFull();
+        pauseThumb();
+      } else {
+        pauseThumb();
+        pauseFull();
       }
-      if (!fullState.isComplete()) {
-        fullState = RequestState.PAUSED;
-        full.pause();
-      }
+    }
+  }
+
+  @GuardedBy("requestLock")
+  private void pauseThumb() {
+    if (!thumbState.isComplete()) {
+      thumbState = RequestState.PAUSED;
+      thumb.pause();
+    }
+  }
+
+  @GuardedBy("requestLock")
+  private void pauseFull() {
+    if (!fullState.isComplete()) {
+      fullState = RequestState.PAUSED;
+      full.pause();
     }
   }
 
