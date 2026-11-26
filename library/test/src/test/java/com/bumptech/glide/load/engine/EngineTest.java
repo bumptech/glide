@@ -20,8 +20,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.bumptech.glide.GlideBuilder.AllowWeakReferencesInCacheKeys;
 import com.bumptech.glide.GlideBuilder.EnableActiveResourceReleaseRaceFix;
 import com.bumptech.glide.GlideContext;
+import com.bumptech.glide.GlideExperiments;
 import com.bumptech.glide.GlideExperimentsTestUtil;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
@@ -416,7 +418,29 @@ public class EngineTest {
             eq(Object.class),
             eq(Object.class),
             eq(harness.transformations),
-            eq(harness.options));
+            eq(harness.options),
+            /* allowWeakReferences= */ eq(false));
+  }
+
+  @Test
+  public void load_withAllowWeakReferencesInCacheKeys_passesAllowWeakReferencesToKeyFactory() {
+    GlideExperiments experiments = mock(GlideExperiments.class);
+    when(experiments.isEnabled(AllowWeakReferencesInCacheKeys.class)).thenReturn(true);
+    when(harness.glideContext.getExperiments()).thenReturn(experiments);
+
+    harness.doLoad();
+
+    verify(harness.keyFactory)
+        .buildKey(
+            eq(harness.model),
+            eq(harness.signature),
+            eq(harness.width),
+            eq(harness.height),
+            eq(Object.class),
+            eq(Object.class),
+            eq(harness.transformations),
+            eq(harness.options),
+            /* allowWeakReferences= */ eq(true));
   }
 
   @Test
@@ -708,7 +732,8 @@ public class EngineTest {
               eq(Object.class),
               eq(Object.class),
               eq(transformations),
-              eq(options)))
+              eq(options),
+              anyBoolean()))
           .thenReturn(cacheKey);
       when(resource.getResource()).thenReturn(mock(Resource.class));
       when(glideContext.getExperiments()).thenReturn(GlideExperimentsTestUtil.empty());

@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.core.util.Pools;
+import com.bumptech.glide.GlideBuilder.AllowWeakReferencesInCacheKeys;
 import com.bumptech.glide.GlideBuilder.EnableActiveResourceReleaseRaceFix;
 import com.bumptech.glide.GlideContext;
 import com.bumptech.glide.Priority;
@@ -203,7 +204,8 @@ public class Engine
             resourceClass,
             transcodeClass,
             transformations,
-            options);
+            options,
+            glideContext.getExperiments().isEnabled(AllowWeakReferencesInCacheKeys.class));
 
     boolean isReleaseRaceFixEnabled =
         glideContext.getExperiments().isEnabled(EnableActiveResourceReleaseRaceFix.class);
