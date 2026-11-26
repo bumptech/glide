@@ -9,6 +9,7 @@ import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.MultiModelLoaderFactory;
 import com.bumptech.glide.util.ByteBufferUtil;
 import com.google.common.base.Preconditions;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
@@ -32,9 +33,11 @@ public final class ChromiumUrlLoader<T> implements ModelLoader<GlideUrl, T> {
     static final Options DEFAULT = builder().build();
 
     private final boolean guardActiveJobEviction;
+    private final boolean discardBuffersOnCancel;
 
     private Options(Builder builder) {
       this.guardActiveJobEviction = builder.guardActiveJobEviction;
+      this.discardBuffersOnCancel = builder.discardBuffersOnCancel;
     }
 
     /** Creates a new {@link Builder} with all opt-in options disabled by default. */
@@ -46,9 +49,14 @@ public final class ChromiumUrlLoader<T> implements ModelLoader<GlideUrl, T> {
       return guardActiveJobEviction;
     }
 
+    boolean discardBuffersOnCancel() {
+      return discardBuffersOnCancel;
+    }
+
     /** Builder for {@link Options}. */
     public static final class Builder {
       private boolean guardActiveJobEviction;
+      private boolean discardBuffersOnCancel;
 
       private Builder() {}
 
@@ -59,6 +67,13 @@ public final class ChromiumUrlLoader<T> implements ModelLoader<GlideUrl, T> {
        */
       public Builder setGuardActiveJobEviction(boolean enabled) {
         this.guardActiveJobEviction = enabled;
+        return this;
+      }
+
+      /** When enabled, cancelling a request eagerly discards queued response chunks. */
+      @CanIgnoreReturnValue
+      public Builder setDiscardBuffersOnCancel(boolean enabled) {
+        this.discardBuffersOnCancel = enabled;
         return this;
       }
 
