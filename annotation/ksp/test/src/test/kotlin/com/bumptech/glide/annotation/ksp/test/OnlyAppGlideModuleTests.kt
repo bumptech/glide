@@ -321,11 +321,17 @@ class OnlyAppGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
 @Language("kotlin")
 const val appGlideModuleWithContext =
   """
+@file:Suppress(
+  "REDUNDANT_VISIBILITY_MODIFIER",
+  "REDUNDANT_RETURN_UNIT_TYPE",
+)
+
 package com.bumptech.glide
 
 import AppModule
 import android.content.Context
 import kotlin.Boolean
+import kotlin.Suppress
 import kotlin.Unit
 
 internal class GeneratedAppGlideModuleImpl(
