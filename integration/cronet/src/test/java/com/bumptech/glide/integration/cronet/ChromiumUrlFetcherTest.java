@@ -11,8 +11,10 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -21,6 +23,8 @@ import static org.mockito.Mockito.when;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.bumptech.glide.Priority;
+import com.bumptech.glide.Registry;
+import com.bumptech.glide.integration.cronet.ChromiumUrlLoader.ConcurrencyLimiter;
 import com.bumptech.glide.integration.cronet.ChromiumUrlLoader.Options;
 import com.bumptech.glide.load.HttpException;
 import com.bumptech.glide.load.data.DataFetcher;
@@ -35,6 +39,8 @@ import com.bumptech.glide.load.model.MultiModelLoaderFactory;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.Uninterruptibles;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.nio.ByteBuffer;
@@ -648,6 +654,523 @@ public class ChromiumUrlFetcherTest {
     builder.discard();
     release.countDown();
     assertThat(nextBufferTask.get(2, TimeUnit.SECONDS)).isNotNull();
+  }
+
+  @Test
+  public void cancelWithDiscardEnabled_discardsLateReadsAndPreservesNewerJob() throws Exception {
+    DataLogger logger = mock(DataLogger.class);
+    Options opts = Options.builder().setDiscardBuffersOnCancel(true).build();
+    ChromiumRequestSerializer ser =
+        new ChromiumRequestSerializer(cronetRequestFactory, logger, null, opts);
+    DataFetcher<ByteBuffer> first = new ChromiumUrlFetcher<>(ser, parser, glideUrl);
+    first.loadData(Priority.HIGH, callback);
+    Callback cb = urlRequestListenerCaptor.getValue();
+    cb.onResponseStarted(request, getInfo(8, 200));
+    first.cancel();
+    cb.onReadCompleted(request, getInfo(8, 200), ByteBuffer.allocate(8));
+    verify(request).read(any(ByteBuffer.class));
+    first.loadData(Priority.HIGH, secondCallback);
+    cb.onCanceled(request, getInfo(8, 200));
+    verify(logger, timeout(1000)).logNetworkData(any(), anyLong(), anyLong(), anyLong());
+    first.cancel();
+    verify(request, times(3)).cancel();
+  }
+
+  private static GlideExecutor singleThreadExecutor() {
+    return GlideExecutor.newSourceBuilder()
+        .setThreadCount(1)
+        .setUncaughtThrowableStrategy(UncaughtThrowableStrategy.THROW)
+        .build();
+  }
+
+  private static ByteBuffer directBufferAtPosition(int capacity, int position) {
+    ByteBuffer buffer = ByteBuffer.allocateDirect(capacity);
+    buffer.position(position);
+    return buffer;
+  }
+
+  private int limitAfterQueuedCancel(Options opts) throws Exception {
+    CountDownLatch gate = new CountDownLatch(1);
+    GlideExecutor exec = singleThreadExecutor();
+    exec.execute(() -> Uninterruptibles.awaitUninterruptibly(gate));
+    ByteBuffer chunk2 = directBufferAtPosition(15, 10);
+    try {
+      ChromiumRequestSerializer ser =
+          new ChromiumRequestSerializer(cronetRequestFactory, null, exec, opts);
+      ChromiumUrlFetcher<ByteBuffer> lowFetcher = new ChromiumUrlFetcher<>(ser, parser, glideUrl);
+      lowFetcher.loadData(Priority.LOW, callback);
+      Callback cb = urlRequestListenerCaptor.getValue();
+      UrlResponseInfo info = getInfo(20, 200);
+      cb.onResponseStarted(request, info);
+      cb.onReadCompleted(request, info, directBufferAtPosition(20, 20));
+      cb.onReadCompleted(request, info, chunk2);
+      cb.onSucceeded(request, info);
+      lowFetcher.cancel();
+      gate.countDown();
+      exec.shutdown();
+      assertThat(exec.awaitTermination(2, TimeUnit.SECONDS)).isTrue();
+      return chunk2.limit();
+    } finally {
+      gate.countDown();
+      exec.shutdownNow();
+    }
+  }
+
+  @Test
+  public void onSucceeded_whenCancelledBeforeSerializerRuns_skipsCoalesceOnlyWhenEnabled()
+      throws Exception {
+    assertThat(limitAfterQueuedCancel(Options.builder().setDiscardBuffersOnCancel(true).build()))
+        .isEqualTo(15);
+    assertThat(limitAfterQueuedCancel(Options.builder().build())).isEqualTo(10);
+  }
+
+  @Test
+  public void onFailed_afterCancel_withDiscardEnabled_treatsAsCancelled() throws Exception {
+    UrlResponseInfo normalInfo = getInfo(8, 200);
+    for (boolean enabled : new boolean[] {true, false}) {
+      CountDownLatch started = new CountDownLatch(1);
+      CountDownLatch gate = new CountDownLatch(1);
+      GlideExecutor exec = singleThreadExecutor();
+      exec.execute(() -> {
+        started.countDown();
+        Uninterruptibles.awaitUninterruptibly(gate);
+      });
+      AtomicReference<UrlResponseInfo> firstLogged = new AtomicReference<>();
+      DataLogger logger = (info, start, resp, end) -> firstLogged.compareAndSet(null, info);
+      Options opts = Options.builder().setDiscardBuffersOnCancel(enabled).build();
+      ChromiumRequestSerializer ser =
+          new ChromiumRequestSerializer(cronetRequestFactory, logger, exec, opts);
+      UrlResponseInfo failedInfo = spy(getInfo(20, HttpURLConnection.HTTP_INTERNAL_ERROR));
+      try {
+        assertThat(started.await(2, TimeUnit.SECONDS)).isTrue();
+        int base = urlRequestListenerCaptor.getAllValues().size();
+        new ChromiumUrlFetcher<>(ser, parser, new GlideUrl("http://a"))
+            .loadData(Priority.NORMAL, firstCallback);
+        succeed(
+            normalInfo, urlRequestListenerCaptor.getAllValues().get(base), ByteBuffer.allocate(8));
+        ChromiumUrlFetcher<ByteBuffer> lowFetcher =
+            new ChromiumUrlFetcher<>(ser, parser, new GlideUrl("http://b"));
+        lowFetcher.loadData(Priority.LOW, callback);
+        Callback lowCb = urlRequestListenerCaptor.getAllValues().get(base + 1);
+        lowCb.onResponseStarted(request, failedInfo);
+        lowFetcher.cancel();
+        lowCb.onFailed(request, failedInfo, /* error= */ null);
+        gate.countDown();
+        exec.shutdown();
+        assertThat(exec.awaitTermination(2, TimeUnit.SECONDS)).isTrue();
+      } finally {
+        gate.countDown();
+        exec.shutdownNow();
+      }
+      assertThat(firstLogged.get()).isSameInstanceAs(enabled ? failedInfo : normalInfo);
+      verify(failedInfo, times(enabled ? 0 : 2)).getHttpStatusCode();
+    }
+    verify(callback, never()).onLoadFailed(any(Exception.class));
+  }
+
+  @Test
+  public void onSucceeded_whenCoalesceThrowsOom_guardsOnlyWhenCatchEnabled() throws Exception {
+    BufferQueue.BufferAllocator fail30 = mock(BufferQueue.BufferAllocator.class);
+    when(fail30.allocate(anyInt())).thenAnswer(i -> ByteBuffer.allocateDirect(i.getArgument(0)));
+    when(fail30.allocate(30)).thenThrow(new OutOfMemoryError("boom"));
+    AtomicReference<Throwable> uncaught = new AtomicReference<>();
+    CountDownLatch latch = new CountDownLatch(1);
+    UncaughtThrowableStrategy trap =
+        err -> {
+          uncaught.set(err);
+          latch.countDown();
+        };
+    GlideExecutor offExec =
+        GlideExecutor.newSourceBuilder()
+            .setThreadCount(1)
+            .setUncaughtThrowableStrategy(trap)
+            .build();
+    UrlResponseInfo info = getInfo(20, 200);
+    Options onOpts = Options.builder().setCatchBufferOutOfMemoryError(true).build();
+    ChromiumRequestSerializer offSer =
+        new ChromiumRequestSerializer(cronetRequestFactory, null, offExec, Options.DEFAULT, fail30);
+    ChromiumRequestSerializer onSer =
+        new ChromiumRequestSerializer(cronetRequestFactory, null, null, onOpts, fail30);
+    ChromiumUrlFetcher<ByteBuffer> offFirst = new ChromiumUrlFetcher<>(offSer, parser, glideUrl);
+    try {
+      for (int idx = 0; idx < 2; idx++) {
+        ChromiumUrlFetcher<ByteBuffer> f =
+            idx == 0 ? offFirst : new ChromiumUrlFetcher<>(onSer, parser, glideUrl);
+        f.loadData(Priority.HIGH, idx == 0 ? firstCallback : callback);
+        Callback cb = urlRequestListenerCaptor.getAllValues().get(idx);
+        cb.onResponseStarted(request, info);
+        cb.onReadCompleted(request, info, directBufferAtPosition(20, 20));
+        cb.onReadCompleted(request, info, directBufferAtPosition(10, 10));
+        cb.onSucceeded(request, info);
+      }
+      assertThat(latch.await(2, TimeUnit.SECONDS)).isTrue();
+      assertThat(uncaught.get()).isInstanceOf(OutOfMemoryError.class);
+      ChromiumRequestSerializer.Job offJob =
+          (ChromiumRequestSerializer.Job) urlRequestListenerCaptor.getAllValues().get(0);
+      assertThat(offJob.pendingHandle).isNull();
+      assertThat(offJob.occupiesSlot).isNull();
+      ChromiumUrlFetcher<ByteBuffer> offSecond = new ChromiumUrlFetcher<>(offSer, parser, glideUrl);
+      offSecond.loadData(Priority.HIGH, secondCallback);
+      verify(request, times(2)).start();
+      offFirst.cancel();
+      offSecond.cancel();
+      verify(request).cancel();
+    } finally {
+      offExec.shutdownNow();
+    }
+    verify(callback, timeout(1000)).onLoadFailed(isA(IOException.class));
+    new ChromiumUrlFetcher<>(onSer, parser, glideUrl).loadData(Priority.HIGH, secondCallback);
+    verify(request, times(3)).start();
+  }
+
+  @Test
+  @SuppressWarnings("unchecked") // Raw DataCallback mock.
+  public void startResponseAndRead_whenOomThrown_guardsOnlyWhenEnabledAndCleansJobs()
+      throws Exception {
+    OutOfMemoryError oom = new OutOfMemoryError("simulated OOM");
+    UrlResponseInfo info = getInfo(20, 200);
+    when(builder.build()).thenThrow(oom).thenReturn(request);
+    assertThrows(OutOfMemoryError.class, () -> fetcher.loadData(Priority.HIGH, firstCallback));
+    new ChromiumUrlFetcher<>(serializer, parser, glideUrl).loadData(Priority.HIGH, secondCallback);
+    verify(cronetRequestFactory).newRequest(any(), anyInt(), any(), any());
+    verify(request, never()).start();
+    succeed(info, urlRequestListenerCaptor.getAllValues().get(0), ByteBuffer.allocateDirect(20));
+    verify(firstCallback, timeout(1000)).onDataReady(any());
+    verify(secondCallback, timeout(1000)).onDataReady(any());
+
+    BufferQueue.BufferAllocator alloc = mock(BufferQueue.BufferAllocator.class);
+    ByteBuffer buf20 = ByteBuffer.allocateDirect(20);
+    when(alloc.allocate(anyInt()))
+        .thenThrow(oom)
+        .thenReturn(buf20)
+        .thenThrow(oom)
+        .thenReturn(buf20);
+    ByteBuffer chunk = directBufferAtPosition(20, 20);
+    ChromiumRequestSerializer defaultSer =
+        new ChromiumRequestSerializer(cronetRequestFactory, null, null, Options.DEFAULT, alloc);
+    new ChromiumUrlFetcher<>(defaultSer, parser, glideUrl)
+        .loadData(Priority.HIGH, mock(DataCallback.class));
+    Callback defaultCb = urlRequestListenerCaptor.getAllValues().get(1);
+    assertThrows(OutOfMemoryError.class, () -> defaultCb.onResponseStarted(request, info));
+    defaultCb.onResponseStarted(request, info);
+    assertThrows(OutOfMemoryError.class, () -> defaultCb.onReadCompleted(request, info, chunk));
+    new ChromiumUrlFetcher<>(defaultSer, parser, glideUrl)
+        .loadData(Priority.HIGH, mock(DataCallback.class));
+    verify(request).start();
+
+    Options onOpts = Options.builder().setCatchBufferOutOfMemoryError(true).build();
+    assertThat(limitAfterQueuedCancel(onOpts)).isEqualTo(10);
+    when(builder.build()).thenThrow(oom).thenReturn(request);
+    when(alloc.allocate(anyInt())).thenThrow(oom).thenReturn(buf20).thenThrow(oom);
+    ChromiumRequestSerializer guarded =
+        new ChromiumRequestSerializer(cronetRequestFactory, null, null, onOpts, alloc);
+    for (int step : new int[] {0, 1, 2}) {
+      DataCallback<ByteBuffer> loadCb = mock(DataCallback.class);
+      new ChromiumUrlFetcher<>(guarded, parser, glideUrl).loadData(Priority.HIGH, loadCb);
+      if (step > 0) {
+        Callback cronetCb = urlRequestListenerCaptor.getAllValues().get(step + 3);
+        cronetCb.onResponseStarted(request, info);
+        if (step == 2) {
+          chunk.position(20);
+          cronetCb.onReadCompleted(request, info, chunk);
+        }
+        verify(request, times(step + 1)).cancel();
+        cronetCb.onCanceled(request, info);
+      }
+      ArgumentCaptor<Exception> err = ArgumentCaptor.forClass(Exception.class);
+      verify(loadCb, timeout(1000)).onLoadFailed(err.capture());
+      assertThat((IOException) err.getValue()).hasCauseThat().isEqualTo(oom);
+    }
+    verify(request, times(4)).start();
+  }
+
+  @Test
+  @SuppressWarnings("unchecked") // Raw DataCallback mock.
+  public void catchOomAloneAndWithDiscard_preservesJobIdentityAndGuardsDiscardableBuilder()
+      throws Exception {
+    OutOfMemoryError oom = new OutOfMemoryError("simulated OOM");
+    UrlResponseInfo info = getInfo(20, 200);
+    BufferQueue.BufferAllocator alloc = mock(BufferQueue.BufferAllocator.class);
+    when(alloc.allocate(anyInt()))
+        .thenThrow(oom)
+        .thenReturn(ByteBuffer.allocateDirect(20), ByteBuffer.allocateDirect(20));
+    UrlRequest req1 = mock(UrlRequest.class);
+    UrlRequest req2 = mock(UrlRequest.class);
+    UrlRequest req3 = mock(UrlRequest.class);
+    when(builder.build()).thenReturn(req1, req2, req3, request);
+
+    DataLogger logger = mock(DataLogger.class);
+    Options catchOnly = Options.builder().setCatchBufferOutOfMemoryError(true).build();
+    ChromiumRequestSerializer catchSer =
+        new ChromiumRequestSerializer(cronetRequestFactory, logger, null, catchOnly, alloc);
+    DataFetcher<ByteBuffer> first = new ChromiumUrlFetcher<>(catchSer, parser, glideUrl);
+    first.loadData(Priority.HIGH, mock(DataCallback.class));
+    Callback cronetCb1 = urlRequestListenerCaptor.getAllValues().get(0);
+    cronetCb1.onResponseStarted(req1, info);
+    verify(req1).cancel();
+    first.cancel();
+
+    DataFetcher<ByteBuffer> second = new ChromiumUrlFetcher<>(catchSer, parser, glideUrl);
+    second.loadData(Priority.HIGH, mock(DataCallback.class));
+    Callback cronetCb2 = urlRequestListenerCaptor.getAllValues().get(1);
+    cronetCb1.onCanceled(req1, info);
+    verify(logger, timeout(1000)).logNetworkData(any(), anyLong(), anyLong(), anyLong());
+    first.cancel();
+    second.cancel();
+    verify(req2).cancel();
+    cronetCb2.onCanceled(req2, info);
+    verify(logger, timeout(1000).times(2)).logNetworkData(any(), anyLong(), anyLong(), anyLong());
+    new ChromiumUrlFetcher<>(catchSer, parser, new GlideUrl("http://reused"))
+        .loadData(Priority.HIGH, mock(DataCallback.class));
+    verify(req3).start();
+    verify(req3, never()).cancel();
+
+    Options bothOpts =
+        Options.builder()
+            .setDiscardBuffersOnCancel(true)
+            .setCatchBufferOutOfMemoryError(true)
+            .build();
+    String[] expectedMessages = {
+      "Initial buffer alloc failed", "Chunk buffer alloc failed", "Coalesce failed",
+    };
+    when(alloc.allocate(anyInt()))
+        .thenThrow(oom)
+        .thenReturn(ByteBuffer.allocateDirect(20))
+        .thenThrow(oom)
+        .thenReturn(ByteBuffer.allocateDirect(20), ByteBuffer.allocateDirect(15))
+        .thenThrow(oom);
+    ChromiumRequestSerializer bothSer =
+        new ChromiumRequestSerializer(cronetRequestFactory, null, null, bothOpts, alloc);
+    for (int step : new int[] {0, 1, 2}) {
+      DataCallback<ByteBuffer> loadCb = mock(DataCallback.class);
+      new ChromiumUrlFetcher<>(bothSer, parser, new GlideUrl("http://both/" + step))
+          .loadData(Priority.HIGH, loadCb);
+      Callback cb = urlRequestListenerCaptor.getAllValues().get(step + 3);
+      cb.onResponseStarted(request, info);
+      if (step == 0) {
+        cb.onCanceled(request, info);
+      } else if (step == 1) {
+        cb.onReadCompleted(request, info, directBufferAtPosition(20, 20));
+        cb.onCanceled(request, info);
+      } else {
+        cb.onReadCompleted(request, info, directBufferAtPosition(20, 20));
+        cb.onReadCompleted(request, info, directBufferAtPosition(15, 10));
+        cb.onSucceeded(request, info);
+      }
+      ArgumentCaptor<Exception> err = ArgumentCaptor.forClass(Exception.class);
+      verify(loadCb, timeout(1000)).onLoadFailed(err.capture());
+      assertThat(err.getValue()).hasMessageThat().isEqualTo(expectedMessages[step]);
+      assertThat((IOException) err.getValue()).hasCauseThat().isEqualTo(oom);
+    }
+  }
+
+  @Test
+  public void concurrencyLimiter_validatesCapAndOrdersPendingJobsByPriorityAndFifo() {
+    Options.Builder opts = Options.builder();
+    assertThrows(IllegalArgumentException.class, () -> opts.setMaxConcurrentRequests(0));
+    ConcurrencyLimiter lim = ConcurrencyLimiter.create(1);
+    assertThat(opts.setMaxConcurrentRequests(2).build().concurrencyLimiter()).isNotNull();
+    assertThat(opts.setConcurrencyLimiter(lim).build().concurrencyLimiter()).isSameInstanceAs(lim);
+    assertThat(opts.setConcurrencyLimiter(null).build().concurrencyLimiter()).isNull();
+    class TestPendingJob extends ConcurrencyLimiter.PendingJob {
+      boolean cancelled;
+
+      TestPendingJob(@Nullable Priority initialPriority) {
+        if (initialPriority != null) {
+          assertThat(lim.tryAcquireOrEnqueue(this, initialPriority)).isFalse();
+        }
+      }
+
+      @Override
+      boolean isCancelled() {
+        return cancelled;
+      }
+
+      @Override
+      ConcurrencyLimiter.PendingJob onDequeuedWithSlot() {
+        return null;
+      }
+    }
+    TestPendingJob active = new TestPendingJob(null);
+    assertThat(lim.tryAcquireOrEnqueue(active, Priority.NORMAL)).isTrue();
+    assertThat(lim.removePending(active)).isFalse();
+    TestPendingJob promotedLow = new TestPendingJob(Priority.LOW);
+    TestPendingJob firstNormal = new TestPendingJob(Priority.NORMAL);
+    TestPendingJob secondNormal = new TestPendingJob(Priority.NORMAL);
+    TestPendingJob queuedHigh = new TestPendingJob(Priority.HIGH);
+    TestPendingJob removedJob = new TestPendingJob(Priority.IMMEDIATE);
+    assertThat(lim.removePending(removedJob)).isTrue();
+    removedJob.cancelled = true;
+    assertThat(lim.tryAcquireOrEnqueue(removedJob, Priority.IMMEDIATE)).isFalse();
+    lim.maybePromote(promotedLow, Priority.IMMEDIATE);
+    assertThat(lim.releaseAndPollNext()).isSameInstanceAs(promotedLow);
+    assertThat(lim.releaseAndPollNext()).isSameInstanceAs(queuedHigh);
+    assertThat(lim.releaseAndPollNext()).isSameInstanceAs(firstNormal);
+    assertThat(lim.releaseAndPollNext()).isSameInstanceAs(secondNormal);
+    assertThat(lim.releaseAndPollNext()).isNull();
+  }
+
+  @Test
+  public void maxConcurrentRequests_promotesHandlesErrorsAndReleasesSlots() throws Exception {
+    OutOfMemoryError oom = new OutOfMemoryError("simulated OOM");
+    UrlResponseInfo info = getInfo(4, 200);
+    int med = UrlRequest.Builder.REQUEST_PRIORITY_MEDIUM;
+    BufferQueue.BufferAllocator alloc = mock(BufferQueue.BufferAllocator.class);
+    when(alloc.allocate(anyInt())).thenReturn(ByteBuffer.allocateDirect(4)).thenThrow(oom);
+    Options.Builder ob = Options.builder().setMaxConcurrentRequests(1);
+    Options rawOpts = ob.build();
+    Options onOpts = ob.setMaxConcurrentRequests(1).setCatchBufferOutOfMemoryError(true).build();
+    serializer = new ChromiumRequestSerializer(cronetRequestFactory, null, null, onOpts);
+    when(builder.build()).thenThrow(oom).thenReturn(request).thenThrow(oom).thenReturn(request);
+    doAnswer(
+            inv -> {
+              load("http://sync", Priority.NORMAL);
+              return null;
+            })
+        .when(callback)
+        .onLoadFailed(any());
+    load("http://sync-fail", Priority.NORMAL);
+    load("http://skip", Priority.IMMEDIATE).cancel();
+    load("http://low", Priority.LOW);
+    DataFetcher<ByteBuffer> promLow = load("http://p", Priority.LOW);
+    DataFetcher<ByteBuffer> prom = load("http://p", Priority.HIGH);
+    doThrow(new IllegalStateException("boom")).when(callback).onLoadFailed(any());
+    load("http://throw-fail", Priority.IMMEDIATE);
+    succeed(info, urlRequestListenerCaptor.getAllValues().get(1), ByteBuffer.allocateDirect(4));
+    verify(cronetRequestFactory, timeout(1000)).newRequest(eq("http://p"), eq(med), any(), any());
+    verify(request, timeout(1000).times(2)).start();
+    promLow.cancel();
+    prom.cancel();
+    verify(request, timeout(1000)).cancel();
+    urlRequestListenerCaptor.getAllValues().get(3).onCanceled(request, info);
+    verify(request, timeout(1000).times(3)).start();
+    serializer = new ChromiumRequestSerializer(cronetRequestFactory, null, null, rawOpts, alloc);
+    load("http://coal-oom", Priority.NORMAL);
+    load("http://after-oom", Priority.NORMAL);
+    urlRequestListenerCaptor.getValue().onResponseStarted(request, info);
+    urlRequestListenerCaptor.getValue().onSucceeded(request, info);
+    verify(request, timeout(1000).times(5)).start();
+  }
+
+  private DataFetcher<ByteBuffer> load(String url, Priority prio) {
+    DataFetcher<ByteBuffer> res = new ChromiumUrlFetcher<>(serializer, parser, new GlideUrl(url));
+    res.loadData(prio, callback);
+    return res;
+  }
+
+  @Test
+  @SuppressWarnings("unchecked") // Raw DataCallback mock.
+  public void applyOptions_replacesExistingLoadersAndSharesLimiter() throws Exception {
+    Options options =
+        Options.builder()
+            .setConcurrencyLimiter(ChromiumUrlLoader.ConcurrencyLimiter.create(1))
+            .build();
+    assertThat(ChromiumUrlLoader.applyOptions(new Registry(), options)).isFalse();
+
+    DataLogger dataLogger = mock(DataLogger.class);
+    AtomicReference<Thread> execThread = new AtomicReference<>();
+    GlideExecutor customExec =
+        GlideExecutor.newSourceBuilder()
+            .setThreadCount(1)
+            .setName("apply-opts")
+            .setUncaughtThrowableStrategy(UncaughtThrowableStrategy.THROW)
+            .build();
+    try {
+      Registry registry = new Registry();
+      registry.replace(
+          GlideUrl.class,
+          InputStream.class,
+          new ChromiumUrlLoader.StreamFactory(cronetRequestFactory, dataLogger, customExec));
+      registry.prepend(
+          GlideUrl.class,
+          ByteBuffer.class,
+          new ChromiumUrlLoader.ByteBufferFactory(cronetRequestFactory, dataLogger, customExec));
+      assertThat(ChromiumUrlLoader.applyOptions(registry, options)).isTrue();
+
+      UrlRequest firstRequest = mock(UrlRequest.class);
+      UrlRequest secondRequest = mock(UrlRequest.class);
+      when(builder.build()).thenReturn(firstRequest, secondRequest);
+      GlideUrl byteBufferUrl = new GlideUrl("http://www.google.com/registry_bytebuffer");
+      GlideUrl streamUrl = new GlideUrl("http://www.google.com/registry_stream");
+      List<ModelLoader<GlideUrl, ?>> loaders = registry.getModelLoaders(byteBufferUrl);
+      com.bumptech.glide.load.Options loadOpts = new com.bumptech.glide.load.Options();
+      DataFetcher<?> firstLoad =
+          loaders.get(0).buildLoadData(byteBufferUrl, 100, 100, loadOpts).fetcher;
+      DataFetcher<?> secondLoad =
+          loaders.get(1).buildLoadData(streamUrl, 100, 100, loadOpts).fetcher;
+      assertThat(firstLoad.getDataClass()).isEqualTo(ByteBuffer.class);
+      assertThat(secondLoad.getDataClass()).isEqualTo(InputStream.class);
+
+      doAnswer(
+              inv -> {
+                execThread.set(Thread.currentThread());
+                return null;
+              })
+          .when(dataLogger)
+          .logNetworkData(any(), anyLong(), anyLong(), anyLong());
+      ((DataFetcher<Object>) firstLoad).loadData(Priority.NORMAL, mock(DataCallback.class));
+      ((DataFetcher<Object>) secondLoad).loadData(Priority.NORMAL, mock(DataCallback.class));
+      verify(firstRequest).start();
+      verify(secondRequest, never()).start();
+
+      Callback firstCb = urlRequestListenerCaptor.getAllValues().get(0);
+      UrlResponseInfo info = getInfo(4, 200);
+      firstCb.onResponseStarted(firstRequest, info);
+      firstCb.onReadCompleted(firstRequest, info, directBufferAtPosition(4, 4));
+      firstCb.onSucceeded(firstRequest, info);
+      verify(dataLogger, timeout(1000)).logNetworkData(eq(info), anyLong(), anyLong(), anyLong());
+      verify(secondRequest, timeout(1000)).start();
+      assertThat(execThread.get().getName()).contains("apply-opts");
+    } finally {
+      customExec.shutdownNow();
+    }
+  }
+
+  @Test
+  public void cancelThenReRequestSameUrl_withLimiterOnly_preservesReplacementInJobs()
+      throws Exception {
+    Options limiterOnly = Options.builder().setMaxConcurrentRequests(1).build();
+    GlideExecutor exec = singleThreadExecutor();
+    try {
+      serializer = new ChromiumRequestSerializer(cronetRequestFactory, null, exec, limiterOnly);
+      UrlRequest firstReq = mock(UrlRequest.class);
+      UrlRequest blockerReq = mock(UrlRequest.class);
+      UrlRequest secondReq = mock(UrlRequest.class);
+      UrlRequest fillerReq = mock(UrlRequest.class);
+      UrlRequest fourthReq = mock(UrlRequest.class);
+      UrlRequest fifthReq = mock(UrlRequest.class);
+      when(builder.build())
+          .thenReturn(firstReq, blockerReq, secondReq, fillerReq, fourthReq, fifthReq);
+
+      load("http://race", Priority.LOW).cancel();
+      verify(firstReq).start();
+      verify(firstReq).cancel();
+      DataFetcher<ByteBuffer> second = load("http://race", Priority.LOW);
+      load("http://blocker", Priority.HIGH);
+      load("http://filler", Priority.NORMAL);
+      urlRequestListenerCaptor.getAllValues().get(0).onCanceled(firstReq, null);
+      verify(blockerReq, timeout(1000)).start();
+
+      DataFetcher<ByteBuffer> promoted = load("http://race", Priority.IMMEDIATE);
+      urlRequestListenerCaptor.getAllValues().get(1).onCanceled(blockerReq, null);
+      verify(secondReq, timeout(1000)).start();
+      verify(fillerReq, never()).start();
+
+      second.cancel();
+      promoted.cancel();
+      verify(secondReq).cancel();
+      DataFetcher<ByteBuffer> queuedReplacement = load("http://race", Priority.LOW);
+      load("http://after", Priority.LOW);
+      urlRequestListenerCaptor.getAllValues().get(2).onCanceled(secondReq, null);
+      verify(fillerReq, timeout(1000)).start();
+      queuedReplacement.cancel();
+      urlRequestListenerCaptor.getAllValues().get(3).onCanceled(fillerReq, null);
+      verify(fourthReq, timeout(1000)).start();
+      verify(fifthReq, never()).start();
+      verify(cronetRequestFactory, times(2)).newRequest(eq("http://race"), anyInt(), any(), any());
+    } finally {
+      exec.shutdownNow();
+    }
   }
 
   private static Map<String, String> anyHeaders() {
