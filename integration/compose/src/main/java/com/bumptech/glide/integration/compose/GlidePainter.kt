@@ -51,6 +51,7 @@ constructor(
     private val size: ResolvableGlideSize,
     scope: CoroutineScope,
     private val lifecycleOwner: LifecycleOwner,
+    private val clearOnStopLifecycleOwner: LifecycleOwner = lifecycleOwner,
 ) : Painter(), RememberObserver {
     private val clearOnStop: Boolean = requestBuilder.isClearGlidePainterOnStopEnabled
     @OptIn(ExperimentGlideFlows::class)
@@ -65,7 +66,7 @@ constructor(
 
     init {
         scope.launch {
-            if (clearOnStop) {
+            if (clearOnStop && clearOnStopLifecycleOwner === lifecycleOwner) {
                 return@launch
             }
             // If the Lifecycle state is at least STARTED, start the animation. Otherwise, stop the
@@ -119,7 +120,7 @@ constructor(
         if (clearOnStop) {
             if (currentJob?.isActive != true) {
                 currentJob = scope.launch {
-                    lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    clearOnStopLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                         try {
                             collectRequest()
                         } finally {
@@ -128,8 +129,12 @@ constructor(
                     }
                 }
             }
-            if (!lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
-                clearDrawableAndDelegate()
+            when {
+                !clearOnStopLifecycleOwner.lifecycle.currentState.isAtLeast(
+                    Lifecycle.State.STARTED
+                ) -> clearDrawableAndDelegate()
+                !lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED) ->
+                    (currentDrawable.value as? Animatable)?.stop()
             }
             return
         }
@@ -194,6 +199,9 @@ constructor(
             (newDelegate as? RememberObserver)?.onRemembered()
             currentDrawable.value = drawable
             delegate = newDelegate
+            if (!lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+                (drawable as? Animatable)?.stop()
+            }
         }
     }
 

@@ -2,7 +2,13 @@
 
 package com.bumptech.glide.integration.compose
 
+import android.app.Activity
 import android.content.Context
+import android.content.ContextWrapper
+import android.graphics.Canvas
+import android.graphics.ColorFilter
+import android.graphics.PixelFormat
+import android.graphics.drawable.Animatable
 import android.graphics.drawable.Drawable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +20,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -22,6 +29,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
@@ -33,6 +41,7 @@ import com.bumptech.glide.integration.compose.test.dpToPixels
 import com.bumptech.glide.integration.compose.test.expectDisplayedDrawable
 import com.bumptech.glide.integration.compose.test.expectDisplayedDrawableSize
 import com.bumptech.glide.integration.compose.test.expectNoDrawable
+import com.bumptech.glide.integration.compose.test.expectSameInstance
 import com.bumptech.glide.integration.ktx.InternalGlideApi
 import com.bumptech.glide.integration.ktx.Size
 import com.bumptech.glide.load.DataSource
@@ -360,6 +369,129 @@ class GlideImageTest {
         assertThat(onResourceReadyCounter.get()).isEqualTo(1)
     }
 
+    @Test
+    fun glideImage_childLifecycleStoppedWhileActivityStarted_experimentEnabled_retainsDrawable() {
+        val resourceId = android.R.drawable.star_big_on
+        val description = "test"
+        initGlideWithClearOnStop(enabled = true)
+        val childLifecycleOwner =
+            setGlideImageWithLifecycle(
+                resourceId = resourceId,
+                description = description,
+                localContext = null,
+            )
+
+        childLifecycleOwner.handleLifecycleEventAndWaitForIdle(Lifecycle.Event.ON_STOP)
+
+        assertDisplaysResource(description, resourceId)
+    }
+
+    @Test
+    fun glideImage_childLifecycleStoppedWhileActivityStarted_experimentEnabled_stopsAnimatableDrawable() {
+        val description = "test"
+        val animatableDrawable = TestAnimatableDrawable()
+        initGlideWithClearOnStop(enabled = true)
+        val childLifecycleOwner =
+            setGlideImageWithModelAndLifecycle(
+                model = animatableDrawable,
+                description = description,
+                modifier = Modifier.size(100.dp),
+                localContext = null,
+            )
+
+        glideComposeRule
+            .onNodeWithContentDescription(description)
+            .assert(expectSameInstance(animatableDrawable))
+        assertThat(animatableDrawable.isRunning).isTrue()
+
+        childLifecycleOwner.handleLifecycleEventAndWaitForIdle(Lifecycle.Event.ON_STOP)
+
+        glideComposeRule
+            .onNodeWithContentDescription(description)
+            .assert(expectSameInstance(animatableDrawable))
+        assertThat(animatableDrawable.isRunning).isFalse()
+
+        childLifecycleOwner.handleLifecycleEventAndWaitForIdle(Lifecycle.Event.ON_START)
+
+        assertThat(animatableDrawable.isRunning).isTrue()
+    }
+
+    @Test
+    fun glideImage_childLifecycleCreatedWhileActivityStarted_experimentEnabled_loadsPausedAnimatable() {
+        val description = "test"
+        val animatableDrawable = TestAnimatableDrawable()
+        initGlideWithClearOnStop(enabled = true)
+        val childLifecycleOwner =
+            setGlideImageWithModelAndLifecycle(
+                model = animatableDrawable,
+                description = description,
+                modifier = Modifier.size(100.dp),
+                initialState = Lifecycle.State.CREATED,
+                localContext = null,
+            )
+
+        glideComposeRule
+            .onNodeWithContentDescription(description)
+            .assert(expectSameInstance(animatableDrawable))
+        assertThat(animatableDrawable.isRunning).isFalse()
+
+        childLifecycleOwner.handleLifecycleEventAndWaitForIdle(Lifecycle.Event.ON_START)
+
+        assertThat(animatableDrawable.isRunning).isTrue()
+    }
+
+    @Test
+    fun glideImage_activityStoppedInWrappedContext_experimentEnabled_clearsAndReloadsOnStart() {
+        val resourceId = android.R.drawable.star_big_on
+        val description = "test"
+        val activityLifecycleOwner = TestLifecycleOwner(Lifecycle.State.RESUMED)
+        val wrappedContext: Context =
+            glideComposeRule.runOnIdle {
+                ContextWrapper(LifecycleOwnerActivity(context, activityLifecycleOwner))
+            }
+        val onResourceReadyCounter = AtomicInteger()
+        initGlideWithClearOnStop(enabled = true)
+        val childLifecycleOwner =
+            setGlideImageWithLifecycle(
+                resourceId = resourceId,
+                description = description,
+                localContext = wrappedContext,
+                onResourceReadyCounter = onResourceReadyCounter,
+            )
+
+        childLifecycleOwner.handleLifecycleEventAndWaitForIdle(Lifecycle.Event.ON_STOP)
+
+        assertDisplaysResource(description, resourceId)
+
+        activityLifecycleOwner.handleLifecycleEventAndWaitForIdle(Lifecycle.Event.ON_STOP)
+
+        glideComposeRule.onNodeWithContentDescription(description).assert(expectNoDrawable())
+
+        activityLifecycleOwner.handleLifecycleEventAndWaitForIdle(Lifecycle.Event.ON_START)
+
+        assertDisplaysResource(description, resourceId)
+        assertThat(onResourceReadyCounter.get()).isEqualTo(2)
+    }
+
+    @Test
+    fun glideImage_selfReferentialContextWrapper_experimentEnabled_fallsBackToLocalLifecycleOwner() {
+        val resourceId = android.R.drawable.star_big_on
+        val description = "test"
+        initGlideWithClearOnStop(enabled = true)
+        Glide.with(context)
+        val selfReferentialContext = SelfReferentialContextWrapper(context)
+        val lifecycleOwner =
+            setGlideImageWithLifecycle(
+                resourceId = resourceId,
+                description = description,
+                localContext = selfReferentialContext,
+            )
+
+        lifecycleOwner.handleLifecycleEventAndWaitForIdle(Lifecycle.Event.ON_STOP)
+
+        glideComposeRule.onNodeWithContentDescription(description).assert(expectNoDrawable())
+    }
+
     private fun initGlideWithClearOnStop(enabled: Boolean) {
         Glide.tearDown()
         GlideIdlingResourceInit.initGlide(glideComposeRule) {
@@ -371,12 +503,34 @@ class GlideImageTest {
         resourceId: Int,
         description: String,
         initialState: Lifecycle.State = Lifecycle.State.RESUMED,
+        localContext: Context? = context,
+        onResourceReadyCounter: AtomicInteger? = null,
+    ): TestLifecycleOwner =
+        setGlideImageWithModelAndLifecycle(
+            model = resourceId,
+            description = description,
+            initialState = initialState,
+            localContext = localContext,
+            onResourceReadyCounter = onResourceReadyCounter,
+        )
+
+    private fun setGlideImageWithModelAndLifecycle(
+        model: Any?,
+        description: String,
+        modifier: Modifier = Modifier,
+        initialState: Lifecycle.State = Lifecycle.State.RESUMED,
+        localContext: Context? = context,
         onResourceReadyCounter: AtomicInteger? = null,
     ): TestLifecycleOwner {
         val lifecycleOwner = TestLifecycleOwner(initialState)
         glideComposeRule.setContent {
-            CompositionLocalProvider(LocalLifecycleOwner provides lifecycleOwner) {
-                GlideImage(model = resourceId, contentDescription = description) { builder ->
+            val effectiveContext = localContext ?: LocalContext.current
+            CompositionLocalProvider(
+                LocalContext provides effectiveContext,
+                LocalLifecycleOwner provides lifecycleOwner,
+            ) {
+                GlideImage(model = model, contentDescription = description, modifier = modifier) {
+                    builder ->
                     if (onResourceReadyCounter != null) {
                         builder.listener(countingRequestListener(onResourceReadyCounter))
                     } else {
@@ -429,4 +583,40 @@ class GlideImageTest {
                 return false
             }
         }
+
+    private class SelfReferentialContextWrapper(base: Context) : ContextWrapper(base) {
+        override fun getBaseContext(): Context = this
+
+        override fun getApplicationContext(): Context? = null
+    }
+
+    private class LifecycleOwnerActivity(base: Context, private val delegate: LifecycleOwner) :
+        Activity(), LifecycleOwner by delegate {
+        init {
+            attachBaseContext(base)
+        }
+    }
+
+    private class TestAnimatableDrawable : Drawable(), Animatable {
+        private var animating = false
+
+        override fun draw(canvas: Canvas) {}
+
+        override fun setAlpha(alpha: Int) {}
+
+        override fun setColorFilter(colorFilter: ColorFilter?) {}
+
+        @Deprecated("Deprecated in Java")
+        override fun getOpacity(): Int = PixelFormat.TRANSPARENT
+
+        override fun start() {
+            animating = true
+        }
+
+        override fun stop() {
+            animating = false
+        }
+
+        override fun isRunning(): Boolean = animating
+    }
 }
