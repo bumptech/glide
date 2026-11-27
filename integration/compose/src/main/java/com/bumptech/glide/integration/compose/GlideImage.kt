@@ -13,12 +13,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.DefaultAlpha
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.layout
+import androidx.compose.ui.layout.IntrinsicMeasurable
+import androidx.compose.ui.layout.IntrinsicMeasureScope
+import androidx.compose.ui.layout.LayoutModifier
+import androidx.compose.ui.layout.Measurable
+import androidx.compose.ui.layout.MeasureResult
+import androidx.compose.ui.layout.MeasureScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.semantics.SemanticsPropertyKey
 import androidx.compose.ui.semantics.SemanticsPropertyReceiver
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Constraints
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
@@ -358,15 +364,43 @@ private fun rememberGlidePainter(
 }
 
 @OptIn(InternalGlideApi::class)
-private fun Modifier.sizeObservingModifier(sizeObserver: SizeObserver): Modifier =
-    this.layout { measurable, constraints ->
+internal fun Modifier.sizeObservingModifier(sizeObserver: SizeObserver): Modifier =
+    this.then(SizeObservingModifier(sizeObserver))
+
+@OptIn(InternalGlideApi::class)
+private class SizeObservingModifier(private val sizeObserver: SizeObserver) : LayoutModifier {
+    override fun MeasureScope.measure(
+        measurable: Measurable,
+        constraints: Constraints,
+    ): MeasureResult {
         val inferredSize = constraints.inferredGlideSize()
         if (inferredSize != null) {
             sizeObserver.setSize(inferredSize)
         }
         val placeable = measurable.measure(constraints)
-        layout(placeable.width, placeable.height) { placeable.place(0, 0) }
+        return layout(placeable.width, placeable.height) { placeable.place(0, 0) }
     }
+
+    override fun IntrinsicMeasureScope.minIntrinsicWidth(
+        measurable: IntrinsicMeasurable,
+        height: Int,
+    ): Int = measurable.minIntrinsicWidth(height)
+
+    override fun IntrinsicMeasureScope.maxIntrinsicWidth(
+        measurable: IntrinsicMeasurable,
+        height: Int,
+    ): Int = measurable.maxIntrinsicWidth(height)
+
+    override fun IntrinsicMeasureScope.minIntrinsicHeight(
+        measurable: IntrinsicMeasurable,
+        width: Int,
+    ): Int = measurable.minIntrinsicHeight(width)
+
+    override fun IntrinsicMeasureScope.maxIntrinsicHeight(
+        measurable: IntrinsicMeasurable,
+        width: Int,
+    ): Int = measurable.maxIntrinsicHeight(width)
+}
 
 internal val DisplayedDrawableKey =
     SemanticsPropertyKey<MutableState<Drawable?>>("DisplayedDrawable")
